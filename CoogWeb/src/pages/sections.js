@@ -61,87 +61,90 @@ export const SongList = ({accountType, userId, setCurrentSong}) => {
     );
 };
 
-export const SongCard = ({ song, accountType, userId , setCurrentSong}) => {
+export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
     const [isLiked, setIsLiked] = useState(false); // State to track if the heart is "liked"
     const [imageBase64, setImageBase64] = useState(null); // State to hold the base64 image
     const [error, setError] = useState(null);
 
+    // Set the base64 image if available
     useEffect(() => {
         if (song.image) {
             setImageBase64(song.image); // Directly set the base64 string
         }
     }, [song.image]);
 
-    if (accountType == 'user') {
+    // Only call fetchInitialLike if accountType is 'user'
     useEffect(() => {
-        const fetchInitialLike = async () => {
-            try {
-                const response = await fetch('http://localhost:5000/initiallike', {
-                    method: 'POST',
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({ userId:userId, song_id:song.song_id }), 
-                });
-                const data = await response.json();
+        if (accountType === 'user') {
+            const fetchInitialLike = async () => {
+                try {
+                    const response = await fetch('http://localhost:5000/initiallike', {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ userId: userId, song_id: song.song_id }),
+                    });
+                    const data = await response.json();
 
-                if (data.success) {
-                    setIsLiked(data.isLiked);  // Assuming the backend returns an array of artists
-                } else {
-                    setError('Failed to fetch like status');
+                    if (data.success) {
+                        setIsLiked(data.isLiked);  // Assuming the backend returns an array of artists
+                    } else {
+                        setError('Failed to fetch like status');
+                    }
+                } catch (err) {
+                    setError('Error fetching like status');
                 }
-            } catch (err) {
-                setError('Error fetching like status');
-            } 
-        };
+            };
 
-        fetchInitialLike();
-    }, [userId]);  
-}
-const handleHeartClick = async () => {
-    if (isLiked) {
-        // Unlike the song
-        try {
-            const response = await fetch(`http://localhost:5000/unlikesong`, {
-                method: 'POST',
-                headers: {
-                "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ userId:userId, song_id:song.song_id }), 
-            });
-            if (response.ok) {
-                setIsLiked(false);
-            }
-        } catch (error) {
-            console.error("Error unliking the song:", error);
+            fetchInitialLike();
         }
-    } else {
-        // Like the song
-        try {
-            const response = await fetch("http://localhost:5000/likesong", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    userId: userId,
-                    song_id: song.song_id,
-                }),
-            });
-            if (response.ok) {
-                setIsLiked(true);
+    }, [userId, accountType, song.song_id]);  // Re-run when these change
+
+    const handleHeartClick = async () => {
+        if (isLiked) {
+            // Unlike the song
+            try {
+                const response = await fetch(`http://localhost:5000/unlikesong`, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ userId: userId, song_id: song.song_id }),
+                });
+                if (response.ok) {
+                    setIsLiked(false);
+                }
+            } catch (error) {
+                console.error("Error unliking the song:", error);
             }
-        } catch (error) {
-            console.error("Error liking the song:", error);
+        } else {
+            // Like the song
+            try {
+                const response = await fetch("http://localhost:5000/likesong", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        userId: userId,
+                        song_id: song.song_id,
+                    }),
+                });
+                if (response.ok) {
+                    setIsLiked(true);
+                }
+            } catch (error) {
+                console.error("Error liking the song:", error);
+            }
         }
-    }
-};
+    };
 
     return (
         <div className="song-card">
             {/* Render Base64 Image */}
             {imageBase64 && (
                 <img
-                    src={`data:image/png;base64,${imageBase64}`} 
-                    alt={song.name} 
+                    src={`data:image/png;base64,${imageBase64}`}
+                    alt={song.name}
                     className="song-image"
                 />
             )}
@@ -167,7 +170,7 @@ const handleHeartClick = async () => {
                     />
                 )}
                 <button onClick={() => setCurrentSong(song)} className="play-button">
-                <img src={play_button} alt="Play" className="play"/>
+                    <img src={play_button} alt="Play" className="play" />
                 </button>
             </div>
         </div>
@@ -267,36 +270,38 @@ export const ArtistCard = ({ artist, onArtistClick }) => {
 };
 
 
-export const AlbumCard = ({ album, onAlbumClick, accountType,userId }) => {
+export const AlbumCard = ({ album, onAlbumClick, accountType, userId }) => {
     const [isLiked, setIsLiked] = useState(false); // State to track if the heart is "liked"
     const [error, setError] = useState(null);
   
-    if (accountType == 'user') {
-        useEffect(() => {
-            const fetchInitialLike = async () => {
-                try {
-                    const response = await fetch('http://localhost:5000/albuminitiallike', {
-                        method: 'POST',
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({ userId:userId, album_id:album.album_id }), 
-                    });
-                    const data = await response.json();
+    useEffect(() => {
+        const fetchInitialLike = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/albuminitiallike', {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ userId: userId, album_id: album.album_id }), 
+                });
+                const data = await response.json();
     
-                    if (data.success) {
-                        setIsLiked(data.isLiked);  // Assuming the backend returns an array of artists
-                    } else {
-                        setError('Failed to fetch like status');
-                    }
-                } catch (err) {
-                    setError('Error fetching like status');
-                } 
-            };
+                if (data.success) {
+                    setIsLiked(data.isLiked);  // Assuming the backend returns an array of artists
+                } else {
+                    setError('Failed to fetch like status');
+                }
+            } catch (err) {
+                setError('Error fetching like status');
+            }
+        };
     
+        // Call fetchInitialLike only if accountType is 'user'
+        if (accountType === 'user') {
             fetchInitialLike();
-        }, [userId]);  
-    }
+        }
+    }, [userId, accountType]); // The effect will run when either userId or accountType changes
+  
     const handleHeartClick = async () => {
         if (isLiked) {
             // Unlike the song
@@ -304,9 +309,9 @@ export const AlbumCard = ({ album, onAlbumClick, accountType,userId }) => {
                 const response = await fetch(`http://localhost:5000/albumunlikesong`, {
                     method: 'POST',
                     headers: {
-                    "Content-Type": "application/json",
+                        "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ userId:userId, album_id:album.album_id }), 
+                    body: JSON.stringify({ userId: userId, album_id: album.album_id }), 
                 });
                 if (response.ok) {
                     setIsLiked(false);
@@ -335,25 +340,26 @@ export const AlbumCard = ({ album, onAlbumClick, accountType,userId }) => {
     };
   
     return (
-      <div className="album-card">
-        <img src={album.photo} alt={album.album_name} className="album-image" />
-        <h3 className="album-name">{album.album_name}</h3>
-        <h3 className="album-artist">{album.artist_username}</h3>
-        <div className="bottom-section">
-        {accountType !== 'artist' && accountType !== 'admin'  && (
-          <img
-            src={heart} // Use the same heart image
-            alt="heart"
-            className={`heart-image ${isLiked ? "liked" : ""}`} // Add class if liked
-            onClick={handleHeartClick} // Handle click event
-          />)}
-          <button onClick={() => onAlbumClick('album-view-page',album)} className="forward-button">
-            <img src={forward} alt="forward" className="forward-icon" />
-          </button>
+        <div className="album-card">
+            <img src={album.photo} alt={album.album_name} className="album-image" />
+            <h3 className="album-name">{album.album_name}</h3>
+            <h3 className="album-artist">{album.artist_username}</h3>
+            <div className="bottom-section">
+                {accountType !== 'artist' && accountType !== 'admin'  && (
+                    <img
+                        src={heart} // Use the same heart image
+                        alt="heart"
+                        className={`heart-image ${isLiked ? "liked" : ""}`} // Add class if liked
+                        onClick={handleHeartClick} // Handle click event
+                    />
+                )}
+                <button onClick={() => onAlbumClick('album-view-page', album)} className="forward-button">
+                    <img src={forward} alt="forward" className="forward-icon" />
+                </button>
+            </div>
         </div>
-      </div>
     );
-  };
+};
 
 export const UserList = () => {
     const [users, setUsers] = useState([]);
