@@ -64,6 +64,7 @@ export const SongList = ({accountType, userId, setCurrentSong}) => {
 export const SongCard = ({ song, accountType, userId , setCurrentSong}) => {
     const [isLiked, setIsLiked] = useState(false); // State to track if the heart is "liked"
     const [imageBase64, setImageBase64] = useState(null); // State to hold the base64 image
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (song.image) {
@@ -268,6 +269,7 @@ export const ArtistCard = ({ artist, onArtistClick }) => {
 
 export const AlbumCard = ({ album, onAlbumClick, accountType,userId }) => {
     const [isLiked, setIsLiked] = useState(false); // State to track if the heart is "liked"
+    const [error, setError] = useState(null);
   
     if (accountType == 'user') {
         useEffect(() => {

@@ -523,7 +523,7 @@ export const PlaylistList = ({ onPlaylistClick, userName }) => {
     return (
         <div className="playlist-list">
             {playlists.map((playlist) => (
-                <PlaylistCard key={playlist.playlist_id} playlist={playlist} onPlaylistClick={onPlaylistClick} />
+                <SongPlaylistlistCard key={playlist.playlist_id} playlist={playlist} onPlaylistClick={onPlaylistClick} />
             ))}
         </div>
     );
