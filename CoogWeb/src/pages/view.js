@@ -12,7 +12,7 @@ export const AlbumViewList = ({artist = {}}) => {
         useEffect(() => {
             const fetchArtistAlbums = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/artistalbum', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/artistalbum', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -66,7 +66,7 @@ export const SongViewList = ({artist = {}}) => {
         useEffect(() => {
             const fetchArtistSong = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/artistsong', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/artistsong', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -121,7 +121,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
         setError(null); // Reset error state
 
         try {
-            const response = await fetch(`http://localhost:5000/checkfollowstatus`, {
+            const response = await fetch(`https://cosc3380-coog-music-2.onrender.com/checkfollowstatus`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -150,7 +150,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
         setError(null); // Reset error state
 
         try {
-            const response = await fetch("http://localhost:5000/follow", {
+            const response = await fetch("https://cosc3380-coog-music-2.onrender.com/follow", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -178,7 +178,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
         setError(null); // Reset error state
 
         try {
-            const response = await fetch("http://localhost:5000/unfollow", {
+            const response = await fetch("https://cosc3380-coog-music-2.onrender.com/unfollow", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -217,7 +217,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
         useEffect(() => {
             const fetchArtistInfo = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/artistview', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/artistview', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -300,7 +300,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
         if (accountType === 'user' && album.album_id) {
             const fetchInitialLike = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/albuminitiallike', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/albuminitiallike', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -325,7 +325,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
 
     // Handle like/unlike actions for the album
     const handleHeartClick = async () => {
-        const url = isLiked ? 'http://localhost:5000/albumunlikesong' : 'http://localhost:5000/albumlikesong';
+        const url = isLiked ? 'https://cosc3380-coog-music-2.onrender.com/albumunlikesong' : 'https://cosc3380-coog-music-2.onrender.com/albumlikesong';
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -355,7 +355,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
             }
 
             try {
-                const response = await fetch('http://localhost:5000/albumview', {
+                const response = await fetch('https://cosc3380-coog-music-2.onrender.com/albumview', {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json",
@@ -426,7 +426,7 @@ export const SongAlbumList = ({album = {}}) => {
         useEffect(() => {
             const fetchAlbumSongs = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/albumsong', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/albumsong', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -482,7 +482,7 @@ export const PlaylistList = ({ onPlaylistClick, userName }) => {
         console.log("useEffect triggered");  // This will log every time useEffect runs
         const fetchProfilePlaylist = async () => {
             try {
-                const response = await fetch('http://localhost:5000/profileplaylist', {
+                const response = await fetch('https://cosc3380-coog-music-2.onrender.com/profileplaylist', {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json",
@@ -539,7 +539,7 @@ export const SongViewPlaylistList = ({playlist = {}}) => {
         useEffect(() => {
             const fetchPlaylistSong = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/playlistsongs', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/playlistsongs', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -597,7 +597,7 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage}) => {
             console.log("Playlist object:", playlist);
             const fetchPlaylistInfo = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/playlistviewinfo', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/playlistviewinfo', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",

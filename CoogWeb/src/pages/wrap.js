@@ -10,7 +10,7 @@ export const TopArtist = () => {
         useEffect(() => {
             const fetchTopArtists = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/topartists', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/topartists', {
                         method: 'GET',
                     });
                     const data = await response.json();
@@ -59,7 +59,7 @@ export const TopSongList = () => {
         useEffect(() => {
             const fetchTopSongs = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/topsongs', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/topsongs', {
                         method: 'GET',
                     });
                     const data = await response.json();
@@ -110,7 +110,7 @@ export const TopAlbum = () => {
         useEffect(() => {
             const fetchTopAlbums = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/topalbums', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/topalbums', {
                         method: 'GET',
                     });
                     const data = await response.json();
@@ -160,7 +160,7 @@ export const TopGenre = () => {
         useEffect(() => {
             const fetchTopGenres = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/topgenres', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/topgenres', {
                         method: 'GET',
                     });
                     const data = await response.json();
@@ -208,7 +208,7 @@ export const Other = () => {
         useEffect(() => {
             const fetchTopOthers = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/topothers', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/topothers', {
                         method: 'GET',
                     });
                     const data = await response.json();

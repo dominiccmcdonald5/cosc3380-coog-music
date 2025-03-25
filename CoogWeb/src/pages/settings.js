@@ -16,7 +16,7 @@ const SettingsPage = () => {
     const handleSaveChanges = async () => {
         console.log(accountType, username, newPassword, image);
         try {
-            const response = await fetch('http://localhost:5000/editinfo', {
+            const response = await fetch('https://cosc3380-coog-music-2.onrender.com/editinfo', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ accountType, username, newPassword, image }),
@@ -40,7 +40,7 @@ const SettingsPage = () => {
         if (!confirmDelete) return;
 
         try {
-            const response = await fetch('http://localhost:5000/deleteaccount', {
+            const response = await fetch('https://cosc3380-coog-music-2.onrender.com/deleteaccount', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ accountType, username }),

@@ -60,7 +60,7 @@ export const SongForm = ({userName, userId}) => {
         console.log("Song submitted:", song);
         
         try {
-          const response = await fetch('http://localhost:5000/createsong', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/createsong', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(song),
@@ -128,7 +128,7 @@ export const SongFormEdit = ({userName,userId}) => {
         console.log("Song submitted:", song);
         
         try {
-          const response = await fetch('http://localhost:5000/editsong', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/editsong', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(song),
@@ -190,7 +190,7 @@ export const SongFormDelete = ({userName,userId}) => {
             console.log("Song submitted:", song);
             
             try {
-              const response = await fetch('http://localhost:5000/deletesong', {
+              const response = await fetch('https://cosc3380-coog-music-2.onrender.com//deletesong', {
                 method: 'POST',
               headers: {'Content-Type': 'application/json'},
               body: JSON.stringify({name: song.name,
@@ -247,7 +247,7 @@ export const AlbumForm = ({userId, userName}) => {
         console.log("Album submitted:", album);
         
         try {
-          const response = await fetch('http://localhost:5000/addalbum', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/addalbum', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(album),
@@ -307,7 +307,7 @@ export const AlbumFormAdd = ({userName, userId}) => {
         console.log("Album submitted:", album);
         
         try {
-          const response = await fetch('http://localhost:5000/addingsongtoalbum', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/addingsongtoalbum', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(album),
@@ -365,7 +365,7 @@ export const AlbumFormEdit = ({userName,userId}) => {
         e.preventDefault();
         
         try {
-          const response = await fetch('http://localhost:5000/editalbum', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/editalbum', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(album),
@@ -425,7 +425,7 @@ export const AlbumFormDelete = ({userName, userId}) => {
             e.preventDefault();
             
             try {
-              const response = await fetch('http://localhost:5000/deletealbum', {
+              const response = await fetch('https://cosc3380-coog-music-2.onrender.com/deletealbum', {
                 method: 'POST',
               headers: {'Content-Type': 'application/json'},
               body: JSON.stringify(album),
@@ -479,7 +479,7 @@ export const AlbumFormRemove = ({userName, userId}) => {
         console.log("Album submitted:", album);
         
         try {
-          const response = await fetch('http://localhost:5000/removesongfromalbum', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/removesongfromalbum', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(album),
@@ -536,7 +536,7 @@ export const PlaylistForm = ({userName, userId}) => {
         console.log("Playlist submitted:", playlist);
         
         try {
-          const response = await fetch('http://localhost:5000/createplaylist', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/createplaylist', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(playlist),
@@ -593,7 +593,7 @@ export const PlaylistFormAdd = ({userName, userId}) => {
         console.log("Playlist submitted:", playlist);
         
         try {
-          const response = await fetch('http://localhost:5000/addsongtoplaylist', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/addsongtoplaylist', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(playlist),
@@ -650,7 +650,7 @@ export const PlaylistFormEdit = ({userName, userId}) => {
         e.preventDefault();
         
         try {
-          const response = await fetch('http://localhost:5000/editplaylist', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/editplaylist', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(playlist),
@@ -708,7 +708,7 @@ export const PlaylistFormDelete = ({userName, userId}) => {
         e.preventDefault();
         
         try {
-          const response = await fetch('http://localhost:5000/deleteplaylist', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/deleteplaylist', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(playlist),
@@ -762,7 +762,7 @@ export const PlaylistFormRemove = ({userName, userId}) => {
         console.log("Playlist submitted:", playlist);
         
         try {
-          const response = await fetch('http://localhost:5000/removeplaylistsong', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/removeplaylistsong', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(playlist),

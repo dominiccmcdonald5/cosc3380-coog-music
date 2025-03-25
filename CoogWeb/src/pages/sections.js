@@ -29,7 +29,7 @@ export const SongList = ({accountType, userId, setCurrentSong}) => {
     useEffect(() => {
         const fetchSongs = async () => {
             try {
-                const response = await fetch('http://localhost:5000/songlist', {
+                const response = await fetch('https://cosc3380-coog-music-2.onrender.com/songlist', {
                     method: 'GET',
                 });
                 const data = await response.json();
@@ -78,7 +78,7 @@ export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
         if (accountType === 'user') {
             const fetchInitialLike = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/initiallike', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/initiallike', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -105,7 +105,7 @@ export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
         if (isLiked) {
             // Unlike the song
             try {
-                const response = await fetch(`http://localhost:5000/unlikesong`, {
+                const response = await fetch(`https://cosc3380-coog-music-2.onrender.com/unlikesong`, {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json",
@@ -121,7 +121,7 @@ export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
         } else {
             // Like the song
             try {
-                const response = await fetch("http://localhost:5000/likesong", {
+                const response = await fetch("https://cosc3380-coog-music-2.onrender.com/likesong", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -185,7 +185,7 @@ export const ArtistList = ({onArtistClick}) => {
     useEffect(() => {
         const fetchArtists = async () => {
             try {
-                const response = await fetch('http://localhost:5000/artistlist', {
+                const response = await fetch('https://cosc3380-coog-music-2.onrender.com/artistlist', {
                     method: 'GET',
                 });
                 const data = await response.json();
@@ -237,7 +237,7 @@ export const ArtistCard = ({ artist, onArtistClick }) => {
     useEffect(() => {
         const fetchAlbums = async () => {
             try {
-                const response = await fetch('http://localhost:5000/albumlist', {
+                const response = await fetch('https://cosc3380-coog-music-2.onrender.com/albumlist', {
                     method: 'GET',
                 });
                 const data = await response.json();
@@ -277,7 +277,7 @@ export const AlbumCard = ({ album, onAlbumClick, accountType, userId }) => {
     useEffect(() => {
         const fetchInitialLike = async () => {
             try {
-                const response = await fetch('http://localhost:5000/albuminitiallike', {
+                const response = await fetch('https://cosc3380-coog-music-2.onrender.com/albuminitiallike', {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json",
@@ -306,7 +306,7 @@ export const AlbumCard = ({ album, onAlbumClick, accountType, userId }) => {
         if (isLiked) {
             // Unlike the song
             try {
-                const response = await fetch(`http://localhost:5000/albumunlikesong`, {
+                const response = await fetch(`https://cosc3380-coog-music-2.onrender.com/albumunlikesong`, {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json",
@@ -322,7 +322,7 @@ export const AlbumCard = ({ album, onAlbumClick, accountType, userId }) => {
         } else {
             // Like the song
             try {
-                const response = await fetch("http://localhost:5000/albumlikesong", {
+                const response = await fetch("https://cosc3380-coog-music-2.onrender.com/albumlikesong", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -369,7 +369,7 @@ export const UserList = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://localhost:5000/userlist', {
+                const response = await fetch('https://cosc3380-coog-music-2.onrender.com/userlist', {
                     method: 'GET',
                 });
                 const data = await response.json();
