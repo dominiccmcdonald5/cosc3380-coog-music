@@ -154,7 +154,6 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
                 </div>
                 <PlaylistList onPlaylistClick={onPlaylistClick} userName={userName} userId={userId}/>
             </div>
-            <div className="albumProfile-header"></div>
         </section>
     );
 };
