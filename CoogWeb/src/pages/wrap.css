@@ -221,6 +221,7 @@
 .top-songs-section {
     display: flex; /* Keep within viewport */
     overflow-y: auto; /* Enable scrolling */
+    max-height: 400px; 
     scrollbar-color: #B200FF #2D1E33;
     width: 100%;
 }

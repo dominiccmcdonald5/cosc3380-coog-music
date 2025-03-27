@@ -1,7 +1,3 @@
-@font-face {
-  font-family: 'Montserrat';
-  src: url('fonts/Montserrat-Regular.ttf') format('truetype');
-}
 
 
 .Home {
@@ -107,6 +103,7 @@
   display: flex;
   flex: 1; /* Take up remaining space between TopBar and BottomBar */
   overflow: hidden;
+  min-height: 100vh;
 }
 
 .side-bar {
