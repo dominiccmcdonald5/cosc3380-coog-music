@@ -1,5 +1,5 @@
 .song-list {
-    max-height: 400px; 
+    display: flex;
     overflow-y: auto; 
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     display: grid;
