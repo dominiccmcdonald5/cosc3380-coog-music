@@ -3,6 +3,7 @@
     overflow-y: auto; /* Enable scrolling */
     scrollbar-color: #B200FF #2D1E33;
     width: 100%;
+    flex-direction: column;
 }
 
 .Trending-Page::-webkit-scrollbar {
