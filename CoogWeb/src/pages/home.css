@@ -99,7 +99,8 @@
 
 .content {
   display: flex;
-  flex: 1;
+  align-items: flex-start; /* Align sidebar and main content at the top */
+  min-height: 100vh; 
 }
 
 .side-bar {
@@ -135,9 +136,9 @@
 }
 
 .main-content {
-  flex: 1;
   padding: 10px;
   background-color: #180F1C;
+  flex: none; /* Prevents it from growing */
 }
 
 .bottom-bar {
