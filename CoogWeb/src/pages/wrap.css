@@ -73,7 +73,7 @@
 }
 
 .top-artist-list {
-    max-height: 400px; 
+    display: flex;
     overflow-y: auto; 
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     display: grid;
@@ -214,7 +214,7 @@
 }
 
 .top-songs-section {
-    max-height: 400px; /* Keep within viewport */
+    display: flex; /* Keep within viewport */
     overflow-y: auto; /* Enable scrolling */
     scrollbar-color: #B200FF #2D1E33;
 }
@@ -266,7 +266,7 @@
 }
 
 .top-album-list {
-    max-height: 400px; 
+    display: flex;
     overflow-y: auto; 
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     display: grid;
@@ -422,7 +422,7 @@
 }
 
 .Other-Sections {
-    max-height: 400px; /* Keep within viewport */
+    display: flex; /* Keep within viewport */
     overflow-y: auto; /* Enable scrolling */
     scrollbar-color: #B200FF #2D1E33;
 }

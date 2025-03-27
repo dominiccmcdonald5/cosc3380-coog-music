@@ -98,7 +98,7 @@
 }
 
 .playlist-list {
-    max-height: 400px; 
+  display: flex; 
     overflow-y: auto; 
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     display: grid;
@@ -216,7 +216,7 @@
 }
 
 .albumProfile-list {
-  max-height: 400px; 
+  display: flex;
   overflow-y: auto; 
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   display: grid;
@@ -341,7 +341,7 @@
 }
 
 .songProfile-list {
-  max-height: 400px; 
+  display: flex; 
   overflow-y: auto; 
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   display: grid;
@@ -472,7 +472,7 @@ box-shadow: 0 0 15px #B200FF;
 
 .report-table-container {
   margin-top: 10px;
-  max-height: 400px; /* Adjust the height as per your preference */
+  display: flex;/* Adjust the height as per your preference */
     overflow-y: auto; 
 }
 
