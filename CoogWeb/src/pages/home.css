@@ -155,6 +155,8 @@
   left: 0;
   width: 100%;
   overflow-y: auto;
+  justify-content: center; /* Centers child elements horizontally */
+  align-items: center;
 }
 
 .now-playing {
