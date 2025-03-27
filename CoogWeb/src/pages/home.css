@@ -99,8 +99,8 @@
 
 .content {
   display: flex;
-  align-items: flex-start; /* Align sidebar and main content at the top */
-  min-height: 100vh; 
+  flex: 1; /* Take up remaining space between TopBar and BottomBar */
+  overflow: hidden;
 }
 
 .side-bar {
@@ -136,9 +136,9 @@
 }
 
 .main-content {
+  flex: 1;
   padding: 10px;
   background-color: #180F1C;
-  flex: none; /* Prevents it from growing */
 }
 
 .bottom-bar {
@@ -149,10 +149,11 @@
   justify-content: space-between;
   display: flex;
   align-items : center;
-  position: fixed;
+   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
+  overflow-y: auto;
 }
 
 .now-playing {
