@@ -563,7 +563,7 @@ export const DataReport = () => {
                         </tbody>
                     </table>
                     </div>
-                    <div></div>
+                    <div className="albumProfile-header"></div>
                 </div>
             )}
         </section>
