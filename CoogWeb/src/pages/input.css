@@ -2,6 +2,7 @@
     padding: 20px;
     background: linear-gradient(to bottom, #6a4a7d, #2D1E33); /* Light gray to lavender gradient */
     border-radius: 10px;
+    width: 100%;
     
   }
 
@@ -72,6 +73,7 @@
 
 .playlist-section {
     flex: 1;
+    width: 100%;
     background-color: #000000;
     padding: 0; /* Remove padding to allow full-width header */
     border-radius: 10px;
@@ -191,6 +193,7 @@
 
 .albumProfile-section {
   flex: 1;
+  width: 100%;
   background-color: #000000;
   padding: 0; /* Remove padding to allow full-width header */
   border-radius: 10px;
@@ -313,6 +316,7 @@
 
 .songProfile-section {
   flex: 1;
+  width: 100%;
   background-color: #000000;
   padding: 0; /* Remove padding to allow full-width header */
   border-radius: 10px;
@@ -458,6 +462,7 @@ box-shadow: 0 0 15px #B200FF;
   padding: 20px;
   background-color: #acacac;
   color: white;
+  width: 100%;
 }
 
 .report-header {
