@@ -103,7 +103,6 @@
   display: flex;
   flex: 1; /* Take up remaining space between TopBar and BottomBar */
   overflow: hidden;
-  min-height: 100vh;
 }
 
 .side-bar {
