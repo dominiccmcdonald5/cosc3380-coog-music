@@ -53,7 +53,6 @@
   display: flex; /* Keep within viewport */
     overflow-y: auto; /* Enable scrolling */
     scrollbar-color: #B200FF #2D1E33;
-    width: 100%;
 }
 
 .everything::-webkit-scrollbar {

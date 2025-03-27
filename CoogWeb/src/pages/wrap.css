@@ -23,6 +23,7 @@
     background: linear-gradient(to bottom, #6a4a7d, #2D1E33); /* Light gray to lavender gradient */
     border-radius: 10px;
     height: 100px;
+    width: 100%;
     
   }
 
@@ -51,6 +52,7 @@
     overflow: hidden; /* Prevents the header from being affected by padding */
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .top-artists-header {
@@ -130,6 +132,7 @@
     overflow: hidden; /* Prevents the header from being affected by padding */
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .top-songs-header {
@@ -211,12 +214,14 @@
     color: #ffffff;
     font-family: 'Montserrat';
     font-weight: bold;
+
 }
 
 .top-songs-section {
     display: flex; /* Keep within viewport */
     overflow-y: auto; /* Enable scrolling */
     scrollbar-color: #B200FF #2D1E33;
+    width: 100%;
 }
 
 .top-songs-section::-webkit-scrollbar {
@@ -244,6 +249,7 @@
     overflow: hidden; /* Prevents the header from being affected by padding */
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .top-albums-header {
@@ -328,6 +334,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .top-genres-header {
@@ -425,6 +432,7 @@
     display: flex; /* Keep within viewport */
     overflow-y: auto; /* Enable scrolling */
     scrollbar-color: #B200FF #2D1E33;
+    width: 100%;
 }
 
 .Other-Sections::-webkit-scrollbar {
