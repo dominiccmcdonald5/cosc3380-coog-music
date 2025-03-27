@@ -237,6 +237,28 @@ side-bar::-webkit-scrollbar {
   background: #B200FF; 
 }
 
-.side-bar {
+.main-content{
+  scrollbar-color: #B200FF #2D1E33; 
+}
+
+main-content::-webkit-scrollbar {
+  width: 8px; 
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: #2D1E33; 
+  border-radius: 5px;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #B200FF; 
+  border-radius: 5px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: #B200FF; 
+}
+
+.main-content {
   scrollbar-color: #B200FF #2D1E33; 
 }
