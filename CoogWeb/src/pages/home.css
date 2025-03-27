@@ -1,3 +1,9 @@
+@font-face {
+  font-family: 'Montserrat';
+  src: url('fonts/Montserrat-Regular.ttf') format('truetype');
+}
+
+
 .Home {
   display: flex;
   flex-direction: column;
