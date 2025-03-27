@@ -80,7 +80,6 @@
     margin-top: 20px;
     height: 400px;
     overflow: hidden; /* Prevents the header from being affected by padding */
-    display: flex;
     flex-direction: column;
 }
 
@@ -200,7 +199,6 @@
   margin-top: 20px;
   height: 400px;
   overflow: hidden; /* Prevents the header from being affected by padding */
-  display: flex;
   flex-direction: column;
 }
 
@@ -323,7 +321,6 @@
   margin-top: 20px;
   height: 400px;
   overflow: hidden; /* Prevents the header from being affected by padding */
-  display: flex;
   flex-direction: column;
 }
 
@@ -481,7 +478,6 @@ box-shadow: 0 0 15px #B200FF;
 
 .report-table-container {
   margin-top: 10px;
-  display: flex;/* Adjust the height as per your preference */
     overflow-y: auto; 
 }
 

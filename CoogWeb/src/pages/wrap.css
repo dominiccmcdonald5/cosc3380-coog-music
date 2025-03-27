@@ -132,7 +132,6 @@
     margin-top: 20px;
     height: 310px;
     overflow: hidden; /* Prevents the header from being affected by padding */
-    display: flex;
     flex-direction: column;
     width: 100%;
 }
