@@ -110,7 +110,7 @@
   flex-direction: column;
   gap: 10px; /* Space between buttons */
   overflow-y: auto; /* Enable vertical scrolling */
-  max-height: 437px;
+  display: flex;
 }
 
 .side-bar-button {
