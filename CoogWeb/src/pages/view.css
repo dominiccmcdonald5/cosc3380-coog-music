@@ -49,7 +49,7 @@
   }
 
 .everything {
-    max-height: 400px; /* Keep within viewport */
+    display: flex; /* Keep within viewport */
     overflow-y: auto; /* Enable scrolling */
     scrollbar-color: #B200FF #2D1E33;
 }
