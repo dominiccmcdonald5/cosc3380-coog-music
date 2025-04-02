@@ -142,7 +142,7 @@ const handleLogin = async (req, res) => {
 
 const getArtistList = async (req, res) => {
     try {
-        const [artists] = await pool.promise().query(`SELECT artist_id, email, image_url FROM artist`);
+        const [artists] = await pool.promise().query(`SELECT artist_id, username, image_url FROM artist`);
         
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, artists}));  // Ensure response is sent
