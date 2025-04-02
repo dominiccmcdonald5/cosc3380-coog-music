@@ -13,7 +13,7 @@ export const PlaylistList = ({ onPlaylistClick, userName, userId }) => {
             useEffect(() => {
                 const fetchProfilePlaylist = async () => {
                     try {
-                        const response = await fetch('http://localhost:5000/profileplaylist', {
+                        const response = await fetch('https://cosc3380-coog-music-2.onrender.com/profileplaylist', {
                             method: 'POST',
                             headers: {
                                 "Content-Type": "application/json",
@@ -80,7 +80,7 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
             useEffect(() => {
                 const fetchUserInfo = async () => {
                     try {
-                        const response = await fetch('http://localhost:5000/infoforprofile', {
+                        const response = await fetch('https://cosc3380-coog-music-2.onrender.com/infoforprofile', {
                             method: 'POST',
                             headers: {
                                 "Content-Type": "application/json",
@@ -166,7 +166,7 @@ export const AlbumProfileList = ({userName}) => {
             useEffect(() => {
                 const fetchArtistProfileAlbum = async () => {
                     try {
-                        const response = await fetch('http://localhost:5000/artistprofilealbum', {
+                        const response = await fetch('https://cosc3380-coog-music-2.onrender.com/artistprofilealbum', {
                             method: 'POST',
                             headers: {
                                 "Content-Type": "application/json",
@@ -220,7 +220,7 @@ export const SongProfileList = ({userName}) => {
             useEffect(() => {
                 const fetchArtistProfileSong = async () => {
                     try {
-                        const response = await fetch('http://localhost:5000/artistprofilesong', {
+                        const response = await fetch('https://cosc3380-coog-music-2.onrender.com/artistprofilesong', {
                             method: 'POST',
                             headers: {
                                 "Content-Type": "application/json",
@@ -281,7 +281,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
             useEffect(() => {
                 const fetchArtistProfileInfo = async () => {
                     try {
-                        const response = await fetch('http://localhost:5000/artistprofileinfo', {
+                        const response = await fetch('https://cosc3380-coog-music-2.onrender.com/artistprofileinfo', {
                             method: 'POST',
                             headers: {
                                 "Content-Type": "application/json",
@@ -379,7 +379,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
                 </div>
             <SongProfileList userName={userName}/>
             </div>
-        
+            <div className="albumProfile-header"></div>
         </section>
     );
 };
@@ -395,7 +395,7 @@ export const DataReport = () => {
         // Fetch Song Report
         const fetchSongReport = async () => {
             try {
-                const response = await fetch("http://localhost:5000/songreport");
+                const response = await fetch("https://cosc3380-coog-music-2.onrender.com/songreport");
                 const data = await response.json();
                 if (data.success) {
                     setSongReport(data.songs);
@@ -410,7 +410,7 @@ export const DataReport = () => {
         // Fetch Artist Report
         const fetchArtistReport = async () => {
             try {
-                const response = await fetch("http://localhost:5000/artistreport");
+                const response = await fetch("https://cosc3380-coog-music-2.onrender.com/artistreport");
                 const data = await response.json();
                 if (data.success) {
                     setArtistReport(data.artists);
@@ -425,7 +425,7 @@ export const DataReport = () => {
         // Fetch User Report
         const fetchUserReport = async () => {
             try {
-                const response = await fetch("http://localhost:5000/userreport");
+                const response = await fetch("https://cosc3380-coog-music-2.onrender.com/userreport");
                 const data = await response.json();
                 if (data.success) {
                     setUserReport(data.users);
@@ -563,6 +563,7 @@ export const DataReport = () => {
                         </tbody>
                     </table>
                     </div>
+                    <div className="albumProfile-header"></div>
                 </div>
             )}
         </section>

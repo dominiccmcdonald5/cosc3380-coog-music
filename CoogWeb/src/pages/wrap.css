@@ -1,7 +1,9 @@
 .Trending-Page {
-    max-height: 400px; /* Keep within viewport */
+    display: flex; /* Keep within viewport */
     overflow-y: auto; /* Enable scrolling */
     scrollbar-color: #B200FF #2D1E33;
+    width: 100%;
+    flex-direction: column;
 }
 
 .Trending-Page::-webkit-scrollbar {
@@ -23,6 +25,7 @@
     background: linear-gradient(to bottom, #6a4a7d, #2D1E33); /* Light gray to lavender gradient */
     border-radius: 10px;
     height: 100px;
+    width: 100%;
     
   }
 
@@ -51,6 +54,7 @@
     overflow: hidden; /* Prevents the header from being affected by padding */
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .top-artists-header {
@@ -73,7 +77,7 @@
 }
 
 .top-artist-list {
-    max-height: 400px; 
+    display: flex;
     overflow-y: auto; 
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     display: grid;
@@ -128,8 +132,8 @@
     margin-top: 20px;
     height: 310px;
     overflow: hidden; /* Prevents the header from being affected by padding */
-    display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .top-songs-header {
@@ -211,12 +215,15 @@
     color: #ffffff;
     font-family: 'Montserrat';
     font-weight: bold;
+
 }
 
 .top-songs-section {
-    max-height: 400px; /* Keep within viewport */
+    display: flex; /* Keep within viewport */
     overflow-y: auto; /* Enable scrolling */
+    max-height: 400px; 
     scrollbar-color: #B200FF #2D1E33;
+    width: 100%;
 }
 
 .top-songs-section::-webkit-scrollbar {
@@ -244,6 +251,7 @@
     overflow: hidden; /* Prevents the header from being affected by padding */
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .top-albums-header {
@@ -266,7 +274,7 @@
 }
 
 .top-album-list {
-    max-height: 400px; 
+    display: flex;
     overflow-y: auto; 
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     display: grid;
@@ -328,6 +336,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .top-genres-header {
@@ -422,9 +431,10 @@
 }
 
 .Other-Sections {
-    max-height: 400px; /* Keep within viewport */
+    display: flex; /* Keep within viewport */
     overflow-y: auto; /* Enable scrolling */
     scrollbar-color: #B200FF #2D1E33;
+    width: 100%;
 }
 
 .Other-Sections::-webkit-scrollbar {

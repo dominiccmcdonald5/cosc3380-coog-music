@@ -13,7 +13,7 @@ function Login () {
         event.preventDefault();
 
         try {
-            const response = await fetch("http://localhost:5000/loginsection", {  // Ensure the URL is correct
+            const response = await fetch("https://cosc3380-coog-music-2.onrender.com/loginsection", {  // Ensure the URL is correct
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

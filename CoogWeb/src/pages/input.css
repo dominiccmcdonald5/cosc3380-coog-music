@@ -2,6 +2,7 @@
     padding: 20px;
     background: linear-gradient(to bottom, #6a4a7d, #2D1E33); /* Light gray to lavender gradient */
     border-radius: 10px;
+    width: 100%;
     
   }
 
@@ -49,9 +50,10 @@
   }
 
 .everything {
-    max-height: 400px; /* Keep within viewport */
+  display: flex; /* Keep within viewport */
     overflow-y: auto; /* Enable scrolling */
     scrollbar-color: #B200FF #2D1E33;
+    flex-direction: column;
 }
 
 .everything::-webkit-scrollbar {
@@ -71,13 +73,13 @@
 
 .playlist-section {
     flex: 1;
+    width: 100%;
     background-color: #000000;
     padding: 0; /* Remove padding to allow full-width header */
     border-radius: 10px;
     margin-top: 20px;
     height: 400px;
     overflow: hidden; /* Prevents the header from being affected by padding */
-    display: flex;
     flex-direction: column;
 }
 
@@ -98,7 +100,8 @@
 }
 
 .playlist-list {
-    max-height: 400px; 
+  width: 100%;
+  display: flex; 
     overflow-y: auto; 
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     display: grid;
@@ -189,13 +192,13 @@
 
 .albumProfile-section {
   flex: 1;
+  width: 100%;
   background-color: #000000;
   padding: 0; /* Remove padding to allow full-width header */
   border-radius: 10px;
   margin-top: 20px;
   height: 400px;
   overflow: hidden; /* Prevents the header from being affected by padding */
-  display: flex;
   flex-direction: column;
 }
 
@@ -216,7 +219,8 @@
 }
 
 .albumProfile-list {
-  max-height: 400px; 
+  display: flex;
+  width: 100%;
   overflow-y: auto; 
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   display: grid;
@@ -310,13 +314,13 @@
 
 .songProfile-section {
   flex: 1;
+  width: 100%;
   background-color: #000000;
   padding: 0; /* Remove padding to allow full-width header */
   border-radius: 10px;
   margin-top: 20px;
   height: 400px;
   overflow: hidden; /* Prevents the header from being affected by padding */
-  display: flex;
   flex-direction: column;
 }
 
@@ -341,7 +345,8 @@
 }
 
 .songProfile-list {
-  max-height: 400px; 
+  display: flex; 
+  width: 100%;
   overflow-y: auto; 
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   display: grid;
@@ -454,6 +459,7 @@ box-shadow: 0 0 15px #B200FF;
   padding: 20px;
   background-color: #acacac;
   color: white;
+  width: 100%;
 }
 
 .report-header {
@@ -472,8 +478,8 @@ box-shadow: 0 0 15px #B200FF;
 
 .report-table-container {
   margin-top: 10px;
-  max-height: 400px; /* Adjust the height as per your preference */
     overflow-y: auto; 
+    max-height: 400px; 
 }
 
 .report-table-header {

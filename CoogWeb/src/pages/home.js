@@ -68,7 +68,7 @@ export const BottomBar = ({ currentSong }) => {
   const audioRef = useRef(null);
 
   // Ensure currentSong is never null
-  const song = currentSong || tempSong;
+  const song = currentSong || null;
 
   // Ensure audio src updates when the song changes
   useEffect(() => {

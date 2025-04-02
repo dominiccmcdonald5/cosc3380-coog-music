@@ -1,3 +1,5 @@
+
+
 .Home {
   display: flex;
   flex-direction: column;
@@ -99,7 +101,8 @@
 
 .content {
   display: flex;
-  flex: 1;
+  flex: 1; /* Take up remaining space between TopBar and BottomBar */
+  overflow: hidden;
 }
 
 .side-bar {
@@ -110,7 +113,7 @@
   flex-direction: column;
   gap: 10px; /* Space between buttons */
   overflow-y: auto; /* Enable vertical scrolling */
-  max-height: 437px;
+  display: flex;
 }
 
 .side-bar-button {
@@ -118,10 +121,10 @@
   color: white; /* Button text color */
   border: none;
   font-size: 20px;
-  height: 60px;
   font-family: 'Montserrat';
   font-weight: bold;
   padding: 10px;
+  height: 60px;
   text-align: left;
   cursor: pointer;
   border-radius: 5px; /* Rounded corners */
@@ -137,6 +140,7 @@
 .main-content {
   flex: 1;
   padding: 10px;
+  overflow-y: auto;
   background-color: #180F1C;
 }
 
@@ -148,6 +152,12 @@
   justify-content: space-between;
   display: flex;
   align-items : center;
+   position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow-y: auto;
+  
 }
 
 .now-playing {
@@ -159,8 +169,6 @@
   display: flex;
   align-items: center;
   position: relative;
-  top: 50%; /* Move down by 50% of the parent's height */
-  transform: translateY(-50%); /* Adjust to center vertically */
   padding: 0 10px; /* Add padding for content */
   border-radius: 20px;
 }
@@ -230,6 +238,28 @@ side-bar::-webkit-scrollbar {
   background: #B200FF; 
 }
 
-.side-bar {
+.main-content{
+  scrollbar-color: #B200FF #2D1E33; 
+}
+
+main-content::-webkit-scrollbar {
+  width: 8px; 
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: #2D1E33; 
+  border-radius: 5px;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #B200FF; 
+  border-radius: 5px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: #B200FF; 
+}
+
+.main-content {
   scrollbar-color: #B200FF #2D1E33; 
 }

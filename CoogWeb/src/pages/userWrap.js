@@ -10,7 +10,7 @@ export const TopUserArtist = ({userId}) => {
         useEffect(() => {
             const fetchTopArtists = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/topuserartists', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/topuserartists', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -63,7 +63,7 @@ export const TopUserSongList = ({userId}) => {
         useEffect(() => {
             const fetchTopUserSongs = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/topusersongs', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/topusersongs', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -118,7 +118,7 @@ export const TopUserAlbum = ({userId}) => {
         useEffect(() => {
             const fetchTopAlbums = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/topuseralbums', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/topuseralbums', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -172,7 +172,7 @@ export const TopUserGenre = ({userId}) => {
         useEffect(() => {
             const fetchTopGenres = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/topusergenres', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/topusergenres', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",
@@ -224,7 +224,7 @@ export const TopUserOther = ({userId}) => {
         useEffect(() => {
             const fetchTopOthers = async () => {
                 try {
-                    const response = await fetch('http://localhost:5000/topuserothers', {
+                    const response = await fetch('https://cosc3380-coog-music-2.onrender.com/topuserothers', {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",

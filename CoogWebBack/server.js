@@ -71,6 +71,7 @@ const map_route = {
     'DELETE': [],
 };
 
+
 const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*"); // Or specify your frontend URL
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
