@@ -3,7 +3,8 @@
 .Home {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100vh; /* Full viewport height */
+  overflow: hidden; /* Prevent scrolling on the main container */
 }
 
 .top-bar {
@@ -101,8 +102,9 @@
 
 .content {
   display: flex;
-  flex: 1; /* Take up remaining space between TopBar and BottomBar */
-  overflow: hidden;
+  flex: 1; /* Takes up remaining space */
+  overflow: hidden; /* Contain the sidebar and main content */
+  margin-bottom: 60px; 
 }
 
 .side-bar {

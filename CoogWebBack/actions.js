@@ -2475,6 +2475,109 @@ const unfollowArtist = async (req, res) => {
     });
 };
 
+const adminArtistReport = async (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+        try {
+            const parsedBody = JSON.parse(body);
+            const { username, date_from, date_to, streams, songs, albums, likes, followers, unique, verified } = parsedBody;
+            
+            let query = `SELECT a.username, a.created_at, a.isVerified,
+					(SELECT COUNT(*) FROM history s 
+                     JOIN song so ON s.song_id = so.song_id 
+                     WHERE so.artist_id = a.artist_id) AS total_streams,
+                    
+                    -- Count songs from songs table
+                    (SELECT COUNT(*) FROM song so WHERE so.artist_id = a.artist_id) AS total_songs,
+
+                    -- Count albums from albums table
+                    (SELECT COUNT(*) FROM album al WHERE al.artist_id = a.artist_id) AS total_albums,
+
+                    -- Count likes from likes table
+                    (SELECT COUNT(*) FROM liked_song l JOIN song so ON l.song_id = so.song_id WHERE so.artist_id = a.artist_id) AS total_likes,
+
+                    -- Count followers from followers table
+                    (SELECT COUNT(*) FROM following f WHERE f.artist_id = a.artist_id) AS total_followers,
+
+                    (SELECT COUNT(DISTINCT s.user_id) FROM history s 
+                     JOIN song so ON s.song_id = so.song_id 
+                     WHERE so.artist_id = a.artist_id) AS unique_listeners
+            
+            FROM artist as a WHERE 1=1`; // Base query
+            let queryParams = [];
+            
+            if (username) {
+                query += ` AND username LIKE ?`;
+                queryParams.push(`%${username}%`);
+            }
+
+            if (date_from) {
+                query += ` AND created_at >= ?`;
+                queryParams.push(date_from);
+            }
+
+            if (date_to) {
+                query += ` AND created_at <= ?`;
+                queryParams.push(date_to);
+            }
+
+            if (verified) {
+                query += AND `isVerified = ?`;
+                queryParams.push(verified);
+            }
+
+            query += ` HAVING 1=1`;
+
+            if (streams) {
+                query += ` AND total_streams >= ?`;
+                queryParams.push(streams);
+            }
+
+            if (songs) {
+                query += ` AND total_songs >= ?`;
+                queryParams.push(songs);
+            }
+
+            if (albums) {
+                query += ` AND total_albums >= ?`;
+                queryParams.push(albums);
+            }
+
+
+            if (likes) {
+                query += ` AND total_likes >= ?`;
+                queryParams.push(likes);
+            }
+
+            if (followers) {
+                query += ` AND total_followers >= ?`;
+                queryParams.push(followers)
+            }
+
+            if (unique) {
+                query += ` AND unique_listeners >= ?`;
+                queryParams.push(unique);
+            }
+
+            const [rows] = await pool.promise().query(query, queryParams);
+
+            // Send response with the correct status
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ success: true, data: rows }));
+
+        } catch (err) {
+            console.error("Error fetching artist report:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ success: false, message: "No Artists Accessible" }));
+        }
+    });
+};
+
 module.exports = {
     getUsers,
     handleSignup,
@@ -2532,6 +2635,7 @@ module.exports = {
     albumUnlikeSong,
     checkFollowStatus,
     followArtist,
-    unfollowArtist
+    unfollowArtist,
+    adminArtistReport
 };
 

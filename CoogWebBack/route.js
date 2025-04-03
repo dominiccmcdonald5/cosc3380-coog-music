@@ -174,6 +174,9 @@ function routes(req, res) {
     if (URL.startsWith('/unfollow') && method === 'POST') {
         return actions.unfollowArtist(req, res);
     }
+    if (URL.startsWith('/adminartistreport') && method === 'POST') {
+        return actions.adminArtistReport(req, res);
+    }
 
 
     res.writeHead(404, { "Content-Type": "application/json" });

@@ -379,13 +379,13 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
                 </div>
             <SongProfileList userName={userName}/>
             </div>
-            <div className="albumProfile-header"></div>
+           
         </section>
     );
 };
 
 
-export const DataReport = () => {
+export const DataReports = () => {
     const [songReport, setSongReport] = useState(null);
     const [artistReport, setArtistReport] = useState(null);
     const [userReport, setUserReport] = useState(null);

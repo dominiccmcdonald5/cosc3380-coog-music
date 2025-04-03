@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, } from 'react';
 import purple_image from './purple_image.png';
 import './home.css';
 import { SongList, ArtistList, AlbumList, UserList } from './sections';
-import { Profile, ArtistProfile, DataReport } from './input';
+import { Profile, ArtistProfile } from './input';
 import { TopTrending } from './wrap';
 import { CougarWrapUp } from './userWrap';
 import { ArtistView, AlbumViewPage, PlaylistViewPage } from './view';
@@ -11,6 +11,7 @@ import pause_button from './pause_button.png';
 import play_button from './play_button.png';
 import { useLocation } from 'react-router-dom';
 import {useNavigate} from 'react-router-dom';
+import {DataReport} from './report';
 
 
 const TopBar = ({accountType, username, userId, userImage }) => {
@@ -57,7 +58,7 @@ const SideBar = ({ onButtonClick, accountType }) => {
       <button className="side-bar-button" onClick={() => onButtonClick('cougar-wrap-up')}>Cougar Wrap-Up</button>
       )}
       {accountType !== 'artist' && accountType !== 'user' && (
-      <button className="side-bar-button" onClick={() => onButtonClick('data-report')}>Data Report</button>
+      <button className="side-bar-button" onClick={() => onButtonClick('data-report')}>Artist Report</button>
       )}
     </div>
   );
@@ -171,6 +172,7 @@ const Home = () => {
     </div>
   );
 };
+
 
 // Separate function for rendering screens
 const renderScreen = (activeScreen, setActiveScreen, onArtistClick, onAlbumClick, onPlaylistClick, accountType, selectedArtist, selectedAlbum, userName, userImage, userId, selectedPlaylist, setCurrentSong) => {
