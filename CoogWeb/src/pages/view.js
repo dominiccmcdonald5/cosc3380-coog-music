@@ -106,7 +106,7 @@ export const SongViewList = ({artist = {}}) => {
 export const SongViewCard = ({ song }) => {
     return (
         <div className="songView-card">
-            <img src={song.image} alt={song.song_name} className="songView-image" />
+            <img src={song.song_image} alt={song.song_name} className="songView-image" />
             <h3 className="songView-name">{song.song_name}</h3>
             <h3 className="songView-album">{song.album_name}</h3>
         </div>
