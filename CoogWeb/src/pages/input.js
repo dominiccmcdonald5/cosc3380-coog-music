@@ -379,7 +379,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
                 </div>
             <SongProfileList userName={userName}/>
             </div>
-            <div className="albumProfile-header"></div>
+           
         </section>
     );
 };

@@ -173,6 +173,7 @@ const Home = () => {
   );
 };
 
+
 // Separate function for rendering screens
 const renderScreen = (activeScreen, setActiveScreen, onArtistClick, onAlbumClick, onPlaylistClick, accountType, selectedArtist, selectedAlbum, userName, userImage, userId, selectedPlaylist, setCurrentSong) => {
   switch (activeScreen) {
