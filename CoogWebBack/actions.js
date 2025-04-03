@@ -2588,7 +2588,7 @@ const adminUserReport = async (req, res) => {
     req.on("end", async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const { username, date_from, date_to, streams, playlists, likedsong, likedalbums, following, following_who, uniquesongs } = parsedBody;
+            const { username, date_from, date_to, streams, playlists, likedsong, likedalbums, following, uniquesongs } = parsedBody;
 
             let query = `
                 SELECT 
@@ -2596,7 +2596,7 @@ const adminUserReport = async (req, res) => {
                     u.created_at,
 
                     -- Total streams by user
-                    (SELECT COUNT(*) FROM history h WHERE h.user_id = u.user_id) AS total_streams,
+                    (SELECT COUNT(*) FROM history h WHERE h.user_id = u.user_i/d) AS total_streams,
 
                     -- Count of playlists created by user
                     (SELECT COUNT(*) FROM playlist p WHERE p.user_id = u.user_id) AS total_playlists,
@@ -2609,12 +2609,6 @@ const adminUserReport = async (req, res) => {
 
                     -- Total artists user is following
                     (SELECT COUNT(*) FROM following f WHERE f.user_id = u.user_id) AS total_following,
-
-                    -- Names of artists user is following (comma-separated)
-                    (SELECT GROUP_CONCAT(a.username SEPARATOR ', ') 
-                     FROM following f 
-                     JOIN artist a ON f.artist_id = a.artist_id 
-                     WHERE f.user_id = u.user_id) AS following_who,
 
                     -- Count of unique songs streamed
                     (SELECT COUNT(DISTINCT h.song_id) FROM history h WHERE h.user_id = u.user_id) AS total_unique_songs
@@ -2666,11 +2660,6 @@ const adminUserReport = async (req, res) => {
             if (following) {
                 query += ` AND total_following >= ?`;
                 queryParams.push(following);
-            }
-
-            if (following_who) {
-                query += ` AND FIND_IN_SET(?, following_who) > 0`;
-                queryParams.push(following_who);
             }
 
             if (uniquesongs) {
