@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import purple_image from './purple_image.png';
 import './input.css';
 import './report.css';
@@ -251,12 +251,11 @@ export const UserDataReport = () => {
     );
 };
 
-export const SongDataReport = ({userName}) => {
+export const SongDataReport = ({ userName }) => {
     const [songReport, setSongReport] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // State for filter inputs
     const [filters, setFilters] = useState({
         username: userName,
         song_name: "",
@@ -268,17 +267,14 @@ export const SongDataReport = ({userName}) => {
         unique_listeners: "",
     });
 
-    // Handle input changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        
         setFilters(prevFilters => ({
             ...prevFilters,
             [name]: value
         }));
     };
 
-    // Fetch artist report with filters
     const fetchFilteredSongReport = async () => {
         setLoading(true);
         setError(null);
@@ -293,7 +289,7 @@ export const SongDataReport = ({userName}) => {
 
             const data = await response.json();
             if (data.success) {
-                setSongReport(data.data); // Set filtered data
+                setSongReport(data.data);
             } else {
                 setError("No results found.");
             }
@@ -303,7 +299,12 @@ export const SongDataReport = ({userName}) => {
             setLoading(false);
         }
     };
-    
+
+    // Automatically fetch report on component mount
+    useEffect(() => {
+        fetchFilteredSongReport();
+    }, []); // Empty dependency array ensures it runs once when mounted
+
     return (
         <section className="everything">
             <div className="profile-section">
@@ -314,7 +315,6 @@ export const SongDataReport = ({userName}) => {
 
             {error && <p className="error-message">{error}</p>}
 
-            {/* Artist Report Filter Section */}
             <div className="filter-section">
                 <h3>Filter Song Report</h3>
                 <div className="filter-form">
@@ -329,7 +329,6 @@ export const SongDataReport = ({userName}) => {
                 </div>
             </div>
 
-            {/* Artist Report Output Section */}
             {loading ? <p>Loading...</p> : null}
             {songReport && (
                 <div className="report-section">
