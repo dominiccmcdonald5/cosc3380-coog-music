@@ -66,7 +66,8 @@ const map_route = {
     '/albumunlikesong',
     '/checkfollowstatus',
     '/follow',
-    '/unfollow'],
+    '/unfollow',
+    '/adminartistreport'],
     'PUT': [],
     'DELETE': [],
 };

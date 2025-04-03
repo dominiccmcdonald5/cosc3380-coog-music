@@ -385,7 +385,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
 };
 
 
-export const DataReport = () => {
+export const DataReports = () => {
     const [songReport, setSongReport] = useState(null);
     const [artistReport, setArtistReport] = useState(null);
     const [userReport, setUserReport] = useState(null);
