@@ -392,7 +392,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
         <section className="everything">
             <div className="profile-section">
                 <div className="profile-header">
-                    <img src={album.photo || purple_image} alt="Album Cover" className="profile-image" />
+                    <img src={album.album_image || purple_image} alt="Album Cover" className="profile-image" />
                     <h2 className="profile-username">{album.album_name}</h2>
                 </div>
                 <div className="basic-stats">
