@@ -518,7 +518,7 @@ const getArtistInfo = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Username is required' });
         }
 
-        const [image_url] = await pool.promise().query(`SELECT image_url FROM artist WHERE artist = ?;`,[userName])
+        const [image_url] = await pool.promise().query(`SELECT image_url FROM artist WHERE artist.username = ?;`,[userName])
         const [followersResult] = await pool.promise().query(`
             SELECT COUNT(*) AS follow FROM following, artist WHERE artist.artist_id = following.artist_id AND artist.username = ?;`, [userName]);
 
