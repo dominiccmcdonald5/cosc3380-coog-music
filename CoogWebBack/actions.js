@@ -2680,6 +2680,98 @@ const adminUserReport = async (req, res) => {
     });
 };
 
+const artistSongReport = async (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", async () => {
+        try {
+            const parsedBody = JSON.parse(body);
+            const { username, song_name, album_name, date_from, date_to, streams, likes, unique_listeners } = parsedBody;
+
+            if (!username) {
+                return res.writeHead(400, { "Content-Type": "application/json" }).end(JSON.stringify({ success: false, message: "Username is required" }));
+            }
+
+            let query = `
+                SELECT 
+                    s.name as song_name, 
+                    s.created_at, 
+                    a.name as album_name,
+                    
+                    -- Total streams of the song
+                    (SELECT COUNT(*) FROM history h WHERE h.song_id = s.song_id) AS total_streams,
+
+                    -- Total likes of the song
+                    (SELECT COUNT(*) FROM liked_song ls WHERE ls.song_id = s.song_id) AS total_likes,
+
+                    -- Total unique listeners of the song
+                    (SELECT COUNT(DISTINCT h.user_id) FROM history h WHERE h.song_id = s.song_id) AS total_unique_listeners
+
+                FROM song s
+                JOIN album a ON s.album_id = a.album_id
+                JOIN artist ar ON s.artist_id = ar.artist_id
+                WHERE ar.username = ?
+            `;
+
+            let queryParams = [username];
+
+            if (song_name) {
+                query += ` AND s.name LIKE ?`;
+                queryParams.push(`%${song_name}%`);
+            }
+
+            if (album_name) {
+                query += ` AND a.name LIKE ?`;
+                queryParams.push(`%${album_name}%`);
+            }
+
+            if (date_from) {
+                query += ` AND s.created_at >= ?`;
+                queryParams.push(date_from);
+            }
+
+            if (date_to) {
+                query += ` AND s.created_at <= ?`;
+                queryParams.push(date_to);
+            }
+
+            // Filtering by aggregates using HAVING
+            query += ` HAVING 1=1`;
+
+            if (streams) {
+                query += ` AND total_streams >= ?`;
+                queryParams.push(streams);
+            }
+
+            if (likes) {
+                query += ` AND total_likes >= ?`;
+                queryParams.push(likes);
+            }
+
+            if (unique_listeners) {
+                query += ` AND total_unique_listeners >= ?`;
+                queryParams.push(unique_listeners);
+            }
+
+            const [rows] = await pool.promise().query(query, queryParams);
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ success: true, data: rows }));
+
+        } catch (err) {
+            console.error("Error fetching song report:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ success: false, message: "No Songs Accessible" }));
+        }
+    });
+};
+
+
+
 module.exports = {
     getUsers,
     handleSignup,
@@ -2739,6 +2831,7 @@ module.exports = {
     followArtist,
     unfollowArtist,
     adminArtistReport,
-    adminUserReport
+    adminUserReport,
+    artistSongReport
 };
 

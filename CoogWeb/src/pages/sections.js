@@ -73,6 +73,8 @@ export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
         }
     }, [song.image]);
 
+    
+
     // Only call fetchInitialLike if accountType is 'user'
     useEffect(() => {
         if (accountType === 'user') {

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import purple_image from './purple_image.png';
 import './input.css';
 import './report.css';
@@ -241,6 +241,117 @@ export const UserDataReport = () => {
                                     <td>{user.total_liked_albums}</td>
                                     <td>{user.total_liked_songs}</td>
                                     <td>{user.total_playlists}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </section>
+    );
+};
+
+export const SongDataReport = ({ userName }) => {
+    const [songReport, setSongReport] = useState(null);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const [filters, setFilters] = useState({
+        username: userName,
+        song_name: "",
+        album_name: "",
+        date_from: "",
+        date_to: "",
+        streams: "",
+        likes: "",
+        unique_listeners: "",
+    });
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prevFilters => ({
+            ...prevFilters,
+            [name]: value
+        }));
+    };
+
+    const fetchFilteredSongReport = async () => {
+        setLoading(true);
+        setError(null);
+        setSongReport(null);
+
+        try {
+            const response = await fetch("https://cosc3380-coog-music-2.onrender.com/artistsongreport", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(filters),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setSongReport(data.data);
+            } else {
+                setError("No results found.");
+            }
+        } catch (err) {
+            setError("Failed to fetch song report.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Automatically fetch report on component mount
+    useEffect(() => {
+        fetchFilteredSongReport();
+    }, []); // Empty dependency array ensures it runs once when mounted
+
+    return (
+        <section className="everything">
+            <div className="profile-section">
+                <div className="profile-header">
+                    <h2 className="profile-username">Artist Song Report</h2>
+                </div>
+            </div>
+
+            {error && <p className="error-message">{error}</p>}
+
+            <div className="filter-section">
+                <h3>Filter Song Report</h3>
+                <div className="filter-form">
+                    <input type="text" name="song_name" placeholder="Song Name" value={filters.song_name} onChange={handleInputChange} />
+                    <input type="text" name="album_name" placeholder="Album Name" value={filters.album_name} onChange={handleInputChange} />
+                    <input type="date" name="date_from" placeholder="Start Date" value={filters.date_from} onChange={handleInputChange} />
+                    <input type="date" name="date_to" placeholder="End Date" value={filters.date_to} onChange={handleInputChange} />
+                    <input type="number" name="streams" placeholder="Min Streams" value={filters.streams} onChange={handleInputChange} />
+                    <input type="number" name="likes" placeholder="Min Likes" value={filters.likes} onChange={handleInputChange} />
+                    <input type="number" name="unique_listeners" placeholder="Min Unique Listeners" value={filters.unique_listeners} onChange={handleInputChange} />
+                    <button onClick={fetchFilteredSongReport}>Apply Filters</button>
+                </div>
+            </div>
+
+            {loading ? <p>Loading...</p> : null}
+            {songReport && (
+                <div className="report-section">
+                    <table className="report-table">
+                        <thead>
+                            <tr>
+                                <th>Song Name</th>
+                                <th>Album Name</th>
+                                <th>Date Joined</th>
+                                <th>Unique Songs</th>
+                                <th>Streams</th>
+                                <th>Likes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {songReport.map((song) => (
+                                <tr key={song.song_id}>
+                                    <td>{song.song_name}</td>
+                                    <td>{song.album_name}</td>
+                                    <td>{song.created_at}</td>
+                                    <td>{song.total_unique_listeners}</td>
+                                    <td>{song.total_streams}</td>
+                                    <td>{song.total_likes}</td>
                                 </tr>
                             ))}
                         </tbody>
