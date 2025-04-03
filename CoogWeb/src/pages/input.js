@@ -293,6 +293,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
         
                         if (data.success) {
                             setStats({
+                                image_url: data.image_url,
                                 follow: data.follow,
                                 streams: data.streams,
                                 likedSongs: data.likedSongs,
