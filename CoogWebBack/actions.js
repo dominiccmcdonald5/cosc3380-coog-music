@@ -2578,6 +2578,114 @@ const adminArtistReport = async (req, res) => {
     });
 };
 
+const adminUserReport = async (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", async () => {
+        try {
+            const parsedBody = JSON.parse(body);
+            const { username, date_from, date_to, streams, playlists, likedsong, likedalbums, following, uniquesongs } = parsedBody;
+
+            let query = `
+                SELECT 
+                    u.username, 
+                    u.created_at,
+                    
+                    -- Total streams by user
+                    (SELECT COUNT(*) FROM history h WHERE h.user_id = u.user_id) AS total_streams,
+
+                    -- Count of playlists created by user
+                    (SELECT COUNT(*) FROM playlist p WHERE p.user_id = u.user_id) AS total_playlists,
+
+                    -- Count of songs liked by user
+                    (SELECT COUNT(*) FROM liked_song ls WHERE ls.user_id = u.user_id) AS total_liked_songs,
+
+                    -- Count of albums liked by user
+                    (SELECT COUNT(*) FROM liked_album la WHERE la.user_id = u.user_id) AS total_liked_albums,
+
+                    -- Total artists user is following
+                    (SELECT COUNT(*) FROM following f WHERE f.user_id = u.user_id) AS total_following,
+
+                    -- Names of artists user is following (comma-separated)
+                    (SELECT GROUP_CONCAT(a.artist_name SEPARATOR ', ') 
+                     FROM following f 
+                     JOIN artist a ON f.artist_id = a.artist_id 
+                     WHERE f.user_id = u.user_id) AS following_who,
+
+                    -- Count of friends (users following each other)
+                    (SELECT COUNT(DISTINCT h.song_id) FROM history h WHERE h.user_id = u.user_id) AS total_unique_songs
+
+
+                FROM user u 
+                WHERE 1=1
+            `;
+
+            let queryParams = [];
+
+            if (username) {
+                query += ` AND u.username LIKE ?`;
+                queryParams.push(`%${username}%`);
+            }
+
+            if (date_from) {
+                query += ` AND u.created_at >= ?`;
+                queryParams.push(date_from);
+            }
+
+            if (date_to) {
+                query += ` AND u.created_at <= ?`;
+                queryParams.push(date_to);
+            }
+
+            query += ` HAVING 1=1`;
+
+            if (streams) {
+                query += ` AND total_streams >= ?`;
+                queryParams.push(streams);
+            }
+
+            if (playlists) {
+                query += ` AND total_playlists >= ?`;
+                queryParams.push(playlists);
+            }
+
+            if (likedsong) {
+                query += ` AND total_liked_songs >= ?`;
+                queryParams.push(likedsong);
+            }
+
+            if (likedalbums) {
+                query += ` AND total_liked_albums >= ?`;
+                queryParams.push(likedalbums);
+            }
+
+            if (following) {
+                query += ` AND total_following >= ?`;
+                queryParams.push(following);
+            }
+
+            if (uniquesongs ) {
+                query += ` AND total_unique_songs >= ?`;
+                queryParams.push(uniquesongs );
+            }
+
+            const [rows] = await pool.promise().query(query, queryParams);
+
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ success: true, data: rows }));
+
+        } catch (err) {
+            console.error("Error fetching user report:", err);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ success: false, message: "No Users Accessible" }));
+        }
+    });
+};
+
 module.exports = {
     getUsers,
     handleSignup,
@@ -2636,6 +2744,7 @@ module.exports = {
     checkFollowStatus,
     followArtist,
     unfollowArtist,
-    adminArtistReport
+    adminArtistReport,
+    adminUserReport
 };
 

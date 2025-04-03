@@ -67,7 +67,8 @@ const map_route = {
     '/checkfollowstatus',
     '/follow',
     '/unfollow',
-    '/adminartistreport'],
+    '/adminartistreport',
+    '/adminuserreport'],
     'PUT': [],
     'DELETE': [],
 };
