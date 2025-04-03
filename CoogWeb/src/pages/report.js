@@ -281,7 +281,7 @@ export const SongDataReport = ({ userName }) => {
         setSongReport(null);
 
         try {
-            const response = await fetch("https://cosc3380-coog-music-2.onrender.com/artistsongreport", {
+            const response = await fetch("https://cosc3380-coog-music-2.onrender.com/artistreport", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(filters),
