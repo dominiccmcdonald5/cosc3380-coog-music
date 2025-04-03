@@ -517,6 +517,8 @@ const getArtistInfo = async (req, res) => {
         if (!userName) {
             return res.status(400).json({ success: false, message: 'Username is required' });
         }
+
+        const [image_url] = await pool.promise().query(`SELECT image_url FROM artist WHERE artist = ?;`,[userName])
         const [followersResult] = await pool.promise().query(`
             SELECT COUNT(*) AS follow FROM following, artist WHERE artist.artist_id = following.artist_id AND artist.username = ?;`, [userName]);
 
@@ -534,7 +536,8 @@ const getArtistInfo = async (req, res) => {
 
             
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, 
+        res.end(JSON.stringify({ success: true,
+            image_url: image_url[0].image_url, 
             follow: followersResult[0].follow, 
             streams: streamsResult[0].streams_count, 
             likedSongs: likedSongsResult[0].liked_songs_count, 

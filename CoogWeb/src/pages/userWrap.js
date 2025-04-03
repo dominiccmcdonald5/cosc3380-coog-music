@@ -49,7 +49,7 @@ export const TopUserArtist = ({userId}) => {
 export const TopUserArtistCard = ({ artist }) => {
     return (
         <div className="top-artist-card">
-            <img src={artist.image_url} alt={artist.artist_name} className="top-artist-image" />
+            <img src={artist.image_url || purple_image} alt={artist.artist_name} className="top-artist-image" />
             <h3 className="top-artist-name">{artist.artist_name}</h3>
         </div>
     );

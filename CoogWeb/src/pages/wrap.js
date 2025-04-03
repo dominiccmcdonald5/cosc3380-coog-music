@@ -45,7 +45,7 @@ export const TopArtist = () => {
 export const TopArtistCard = ({ artist }) => {
     return (
         <div className="top-artist-card">
-            <img src={artist.image_url} alt={artist.username} className="top-artist-image" />
+            <img src={artist.image_url || purple_image} alt={artist.username} className="top-artist-image" />
             <h3 className="top-artist-name">{artist.username}</h3>
         </div>
     );

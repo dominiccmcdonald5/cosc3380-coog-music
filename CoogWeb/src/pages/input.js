@@ -318,7 +318,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
         <section className = "everything">
         <div className="profile-section">
             <div className="profile-header">
-                <img src={userImage} alt="Profile" className="profile-image" />
+                <img src={stats.image_url} alt="Profile" className="profile-image" />
                 <h2 className="profile-username">{userName}</h2>
             </div>
             <div className="Basic-Stats">

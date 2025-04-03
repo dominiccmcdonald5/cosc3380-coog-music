@@ -214,7 +214,7 @@ export const ArtistList = ({onArtistClick}) => {
 export const ArtistCard = ({ artist, onArtistClick }) => {
     return (
       <div className="artist-card">
-        <img src={artist.image} alt={artist.username} className="artist-image" />
+        <img src={artist.image_url || purple_image} alt={artist.username} className="artist-image" />
         <h3 className="artist-name">{artist.username}</h3>
         <button onClick={() => onArtistClick('artist-view', artist)} className="forward-button">
           <img src={forward} alt="forward" className="forward-icon" />
