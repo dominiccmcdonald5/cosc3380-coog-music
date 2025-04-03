@@ -537,7 +537,7 @@ const getArtistInfo = async (req, res) => {
             
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true,
-            image_url: image_url[0].image_url, 
+            image_url: image_url[0], 
             follow: followersResult[0].follow, 
             streams: streamsResult[0].streams_count, 
             likedSongs: likedSongsResult[0].liked_songs_count, 
