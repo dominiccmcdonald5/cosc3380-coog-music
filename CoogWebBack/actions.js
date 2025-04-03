@@ -2720,12 +2720,12 @@ const artistSongReport = async (req, res) => {
             let queryParams = [username];
 
             if (song_name) {
-                query += ` AND s.song_name LIKE ?`;
+                query += ` AND s.name LIKE ?`;
                 queryParams.push(`%${song_name}%`);
             }
 
             if (album_name) {
-                query += ` AND a.album_name LIKE ?`;
+                query += ` AND a.name LIKE ?`;
                 queryParams.push(`%${album_name}%`);
             }
 
