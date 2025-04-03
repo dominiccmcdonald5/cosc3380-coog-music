@@ -73,7 +73,7 @@ export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
         }
     }, [song.image]);
 
-    
+
 
     // Only call fetchInitialLike if accountType is 'user'
     useEffect(() => {
@@ -143,12 +143,12 @@ export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
     return (
         <div className="song-card">
             {/* Render Base64 Image */}
-            {imageBase64 && (
-                <img
-                    src={`data:image/png;base64,${imageBase64}`}
-                    alt={song.name}
-                    className="song-image"
-                />
+            {song.image && (
+            <img
+                src={song.image}
+                alt={song.name}
+                className="song-image"
+            />
             )}
 
             <h3 className="song-name">{song.name}</h3>
