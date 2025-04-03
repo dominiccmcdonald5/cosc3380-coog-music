@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import purple_image from './purple_image.png';
 import './input.css';
+import './report.css';
 
 export const DataReport = () => {
     const [artistReport, setArtistReport] = useState(null);
@@ -56,7 +57,7 @@ export const DataReport = () => {
         <section className="everything">
             <div className="profile-section">
                 <div className="profile-header">
-                    <h2 className="profile-username">Coog Music Data Report</h2>
+                    <h2 className="profile-username">Admin Artist Report</h2>
                 </div>
             </div>
 
@@ -88,7 +89,6 @@ export const DataReport = () => {
             {loading ? <p>Loading...</p> : null}
             {artistReport && (
                 <div className="report-section">
-                    <h3>Artist Report</h3>
                     <table className="report-table">
                         <thead>
                             <tr>

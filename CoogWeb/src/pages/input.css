@@ -459,7 +459,7 @@ box-shadow: 0 0 15px #B200FF;
   padding: 20px;
   background-color: #acacac;
   color: white;
-  width: 100%;
+  width: 800px;
 }
 
 .report-header {
@@ -489,7 +489,7 @@ box-shadow: 0 0 15px #B200FF;
 }
 
 .report-table {
-  width: 100%;
+  width: 800px;
   border-collapse: collapse;
 }
 

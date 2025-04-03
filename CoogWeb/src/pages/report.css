@@ -1,0 +1,122 @@
+.filter-section {
+    background-color: rgb(122, 118, 118);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: white;
+    width: 800px;
+    margin: auto;
+    font-family: 'Montserrat';
+    
+}
+
+.filter-section h3 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    font-family: 'Montserrat';
+    
+}
+
+.filter-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    font-family: 'Montserrat';
+    
+}
+
+.filter-form input, 
+.filter-form select {
+    padding: 10px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    background-color: #555;
+    color: white;
+    outline: none;
+    font-family: 'Montserrat';
+}
+
+.filter-form input::placeholder {
+    color: #bbb;
+    font-family: 'Montserrat';
+}
+
+.filter-form select {
+    cursor: pointer;
+}
+
+.filter-form button {
+    align-items: center,center;
+    grid-column: span 2;
+    background-color: #c89be1;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.filter-form button:hover {
+    background-color: #c277ea;
+}
+
+.report-section {
+    margin-top: 20px; /* Adjust this value to increase/decrease spacing */
+}
+.report-table-container {
+    margin-top: 10px;
+    overflow-y: auto; 
+    max-height: 300px; /* Keep it compact */
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+}
+
+.report-table {
+    width: 100%;
+    max-width: 600px; /* Keep the table small */
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 0 auto; /* Ensures it is centered */
+}
+
+.report-table th,
+.report-table td {
+    padding: 6px; /* Reduce padding */
+    border: 1px solid #ffffff;
+    text-align: left;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.report-table th {
+    background-color: #6a4a7d;
+    font-size: 14px; /* Reduce font size */
+}
+
+.report-header {
+    font-size: 20px; /* Reduce header size */
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px; /* Reduce font size */
+    margin-bottom: 15px;
+}
+
+.green-text {
+    color: green !important;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.red-text {
+    color: red !important; 
+    font-weight: bold;
+    font-size: 14px;
+}
