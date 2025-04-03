@@ -63,7 +63,7 @@ export const SongList = ({accountType, userId, setCurrentSong}) => {
 
 export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
     const [isLiked, setIsLiked] = useState(false); // State to track if the heart is "liked"    const [error, setError] = useState(null);
-
+    const [error, setError] = useState();
 
 
 
