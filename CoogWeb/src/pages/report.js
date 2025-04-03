@@ -131,3 +131,122 @@ export const DataReport = () => {
         </section>
     );
 };
+
+export const UserDataReport = () => {
+    const [userReport, setUserReport] = useState(null);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    // State for filter inputs
+    const [filters, setFilters] = useState({
+        username: "",
+        date_from: "",
+        date_to: "",
+        streams: "",
+        playlists: "",
+        likedsong: "",
+        likedalbums: "",
+        following: "",
+        uniquesongs: "",
+    });
+
+    // Handle input changes
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        
+        setFilters(prevFilters => ({
+            ...prevFilters,
+            [name]: value
+        }));
+    };
+
+    // Fetch artist report with filters
+    const fetchFilteredUserReport = async () => {
+        setLoading(true);
+        setError(null);
+        setUserReport(null);
+
+        try {
+            const response = await fetch("https://cosc3380-coog-music-2.onrender.com/adminuserreport", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(filters),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setUserReport(data.data); // Set filtered data
+            } else {
+                setError("No results found.");
+            }
+        } catch (err) {
+            setError("Failed to fetch user report.");
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    return (
+        <section className="everything">
+            <div className="profile-section">
+                <div className="profile-header">
+                    <h2 className="profile-username">Admin User Report</h2>
+                </div>
+            </div>
+
+            {error && <p className="error-message">{error}</p>}
+
+            {/* Artist Report Filter Section */}
+            <div className="filter-section">
+                <h3>Filter User Report</h3>
+                <div className="filter-form">
+                    <input type="text" name="username" placeholder="User Name" value={filters.username} onChange={handleInputChange} />
+                    <input type="date" name="date_from" placeholder="Start Date" value={filters.date_from} onChange={handleInputChange} />
+                    <input type="date" name="date_to" placeholder="End Date" value={filters.date_to} onChange={handleInputChange} />
+                    <input type="number" name="streams" placeholder="Min Streams" value={filters.streams} onChange={handleInputChange} />
+                    <input type="number" name="playlists" placeholder="Min Playlists" value={filters.playlists} onChange={handleInputChange} />
+                    <input type="number" name="likedsong" placeholder="Min Liked Songs" value={filters.likedsong} onChange={handleInputChange} />
+                    <input type="number" name="likedalbums" placeholder="Min Liked Albums" value={filters.likedalbums} onChange={handleInputChange} />
+                    <input type="number" name="following" placeholder="Min Following" value={filters.following} onChange={handleInputChange} />
+                    <input type="number" name="uniquesongs" placeholder="Min Unique Songs" value={filters.uniquesongs} onChange={handleInputChange} />
+                    <button onClick={fetchFilteredUserReport}>Apply Filters</button>
+                </div>
+            </div>
+
+            {/* Artist Report Output Section */}
+            {loading ? <p>Loading...</p> : null}
+            {userReport && (
+                <div className="report-section">
+                    <table className="report-table">
+                        <thead>
+                            <tr>
+                                <th>User Name</th>
+                                <th>Date Joined</th>
+                                <th>Unique Songs</th>
+                                <th>Following</th>
+                                <th>Streams</th>
+                                <th>Liked Albums</th>
+                                <th>Liked Songs</th>
+                                <th>Playlists</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {userReport.map((user) => (
+                                <tr key={user.artist_id}>
+                                    <td>{user.username}</td>
+                                    <td>{user.created_at}</td>
+                                    <td>{user.total_unique_songs}</td>
+                                    <td>{user.total_following}</td>
+                                    <td>{user.total_streams}</td>
+                                    <td>{user.total_liked_albums}</td>
+                                    <td>{user.total_liked_songs}</td>
+                                    <td>{user.total_playlists}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </section>
+    );
+};

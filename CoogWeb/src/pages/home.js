@@ -11,7 +11,7 @@ import pause_button from './pause_button.png';
 import play_button from './play_button.png';
 import { useLocation } from 'react-router-dom';
 import {useNavigate} from 'react-router-dom';
-import {DataReport} from './report';
+import {DataReport, UserDataReport} from './report';
 
 
 const TopBar = ({accountType, username, userId, userImage }) => {
@@ -59,6 +59,9 @@ const SideBar = ({ onButtonClick, accountType }) => {
       )}
       {accountType !== 'artist' && accountType !== 'user' && (
       <button className="side-bar-button" onClick={() => onButtonClick('data-report')}>Artist Report</button>
+      )}
+      {accountType !== 'artist' && accountType !== 'user' && (
+      <button className="side-bar-button" onClick={() => onButtonClick('data-report-user')}>User Report</button>
       )}
     </div>
   );
@@ -202,6 +205,7 @@ const renderScreen = (activeScreen, setActiveScreen, onArtistClick, onAlbumClick
     case 'remove-song-playlist': return <PlaylistFormRemove userName={userName} userId={userId}/>;
     case 'playlist-view': return <PlaylistViewPage playlist={selectedPlaylist} userId={userId} userName={userName} userImage={userImage}/>;
     case 'data-report': return <DataReport userName={userName}/>
+    case 'data-report-user': return <UserDataReport/>
     default: return <SongList />;
   }
 };

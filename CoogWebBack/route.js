@@ -177,6 +177,9 @@ function routes(req, res) {
     if (URL.startsWith('/adminartistreport') && method === 'POST') {
         return actions.adminArtistReport(req, res);
     }
+    if (URL.startsWith('/adminuserreport') && method === 'POST') {
+        return actions.adminUserReport(req, res);
+    }
 
 
     res.writeHead(404, { "Content-Type": "application/json" });
