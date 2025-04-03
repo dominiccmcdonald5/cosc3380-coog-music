@@ -2616,8 +2616,9 @@ const adminUserReport = async (req, res) => {
                      JOIN artist a ON f.artist_id = a.artist_id 
                      WHERE f.user_id = u.user_id) AS following_who,
 
-                    -- Count of unique songs streamed by the user
+                    -- Count of friends (users following each other)
                     (SELECT COUNT(DISTINCT h.song_id) FROM history h WHERE h.user_id = u.user_id) AS total_unique_songs
+
 
                 FROM user u 
                 WHERE 1=1
