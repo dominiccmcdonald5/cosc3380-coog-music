@@ -2831,6 +2831,7 @@ module.exports = {
     followArtist,
     unfollowArtist,
     adminArtistReport,
-    adminUserReport
+    adminUserReport,
+    artistSongReport
 };
 
