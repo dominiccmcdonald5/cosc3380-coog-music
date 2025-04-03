@@ -2596,7 +2596,7 @@ const adminUserReport = async (req, res) => {
                     u.created_at,
 
                     -- Total streams by user
-                    (SELECT COUNT(*) FROM history h WHERE h.user_id = u.user_i/d) AS total_streams,
+                    (SELECT COUNT(*) FROM history h WHERE h.user_id = u.user_id) AS total_streams,
 
                     -- Count of playlists created by user
                     (SELECT COUNT(*) FROM playlist p WHERE p.user_id = u.user_id) AS total_playlists,
