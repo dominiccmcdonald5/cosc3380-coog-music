@@ -2573,7 +2573,7 @@ const adminArtistReport = async (req, res) => {
         } catch (err) {
             console.error("Error fetching artist report:", err);
             res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: false, message: "Failed to fetch artist report" }));
+            res.end(JSON.stringify({ success: false, message: "No Artists Accessible" }));
         }
     });
 };
