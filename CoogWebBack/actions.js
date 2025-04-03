@@ -2588,13 +2588,13 @@ const adminUserReport = async (req, res) => {
     req.on("end", async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const { username, date_from, date_to, streams, playlists, likedsong, likedalbums, following, uniquesongs } = parsedBody;
+            const { username, date_from, date_to, streams, playlists, likedsong, likedalbums, following, following_who, uniquesongs } = parsedBody;
 
             let query = `
                 SELECT 
                     u.username, 
                     u.created_at,
-                    
+
                     -- Total streams by user
                     (SELECT COUNT(*) FROM history h WHERE h.user_id = u.user_id) AS total_streams,
 
@@ -2616,9 +2616,8 @@ const adminUserReport = async (req, res) => {
                      JOIN artist a ON f.artist_id = a.artist_id 
                      WHERE f.user_id = u.user_id) AS following_who,
 
-                    -- Count of friends (users following each other)
+                    -- Count of unique songs streamed
                     (SELECT COUNT(DISTINCT h.song_id) FROM history h WHERE h.user_id = u.user_id) AS total_unique_songs
-
 
                 FROM user u 
                 WHERE 1=1
@@ -2641,34 +2640,41 @@ const adminUserReport = async (req, res) => {
                 queryParams.push(date_to);
             }
 
-            // Applying filters for counts
+            // HAVING clause for aggregated columns
+            query += ` HAVING 1=1`;
+
             if (streams) {
-                query += ` AND (SELECT COUNT(*) FROM history h WHERE h.user_id = u.user_id) >= ?`;
+                query += ` AND total_streams >= ?`;
                 queryParams.push(streams);
             }
 
             if (playlists) {
-                query += ` AND (SELECT COUNT(*) FROM playlist p WHERE p.user_id = u.user_id) >= ?`;
+                query += ` AND total_playlists >= ?`;
                 queryParams.push(playlists);
             }
 
             if (likedsong) {
-                query += ` AND (SELECT COUNT(*) FROM liked_song ls WHERE ls.user_id = u.user_id) >= ?`;
+                query += ` AND total_liked_songs >= ?`;
                 queryParams.push(likedsong);
             }
 
             if (likedalbums) {
-                query += ` AND (SELECT COUNT(*) FROM liked_album la WHERE la.user_id = u.user_id) >= ?`;
+                query += ` AND total_liked_albums >= ?`;
                 queryParams.push(likedalbums);
             }
 
             if (following) {
-                query += ` AND (SELECT COUNT(*) FROM following f WHERE f.user_id = u.user_id) >= ?`;
+                query += ` AND total_following >= ?`;
                 queryParams.push(following);
             }
 
+            if (following_who) {
+                query += ` AND FIND_IN_SET(?, following_who) > 0`;
+                queryParams.push(following_who);
+            }
+
             if (uniquesongs) {
-                query += ` AND (SELECT COUNT(DISTINCT h.song_id) FROM history h WHERE h.user_id = u.user_id) >= ?`;
+                query += ` AND total_unique_songs >= ?`;
                 queryParams.push(uniquesongs);
             }
 
