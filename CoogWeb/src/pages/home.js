@@ -58,7 +58,7 @@ const SideBar = ({ onButtonClick, accountType }) => {
       <button className="side-bar-button" onClick={() => onButtonClick('cougar-wrap-up')}>Cougar Wrap-Up</button>
       )}
       {accountType !== 'artist' && accountType !== 'user' && (
-      <button className="side-bar-button" onClick={() => onButtonClick('data-report')}>Data Report</button>
+      <button className="side-bar-button" onClick={() => onButtonClick('data-report')}>Artist Report</button>
       )}
     </div>
   );

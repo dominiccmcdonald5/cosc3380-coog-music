@@ -19,12 +19,19 @@ export const DataReport = () => {
         likes: "",
         followers: "",
         unique: "",
-        verified: "",
+        verified: null,
     });
 
     // Handle input changes
     const handleInputChange = (e) => {
-        setFilters({ ...filters, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        
+        setFilters(prev => ({
+            ...prev,
+            [name]: name === "verified" 
+                ? value === "" ? null : parseInt(value, 10)
+                : value
+        }));
     };
 
     // Fetch artist report with filters
@@ -77,9 +84,9 @@ export const DataReport = () => {
                     <input type="number" name="followers" placeholder="Min Followers" value={filters.followers} onChange={handleInputChange} />
                     <input type="number" name="unique" placeholder="Min Unique Listeners" value={filters.unique} onChange={handleInputChange} />
                     <select name="verified" value={filters.verified} onChange={handleInputChange}>
-                        <option value="">Verified?</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
+                    <option value="">Select verification</option>
+                <option value="1">Yes</option>
+                <option value="0">No</option>
                     </select>
                     <button onClick={fetchFilteredArtistReport}>Apply Filters</button>
                 </div>
