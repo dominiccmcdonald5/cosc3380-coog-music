@@ -180,7 +180,7 @@ function routes(req, res) {
     if (URL.startsWith('/adminuserreport') && method === 'POST') {
         return actions.adminUserReport(req, res);
     }
-    if (URL.startsWith('/artistsongreport') && method === 'POST') {
+    if (URL.startsWith('/artistreport') && method === 'POST') {
         return actions.artistSongReport(req, res);
     }
 

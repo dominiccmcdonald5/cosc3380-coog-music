@@ -69,7 +69,7 @@ const map_route = {
     '/unfollow',
     '/adminartistreport',
     '/adminuserreport',
-    '/artistsongreport'],
+    '/artistreport'],
     'PUT': [],
     'DELETE': [],
 };
