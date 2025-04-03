@@ -2611,7 +2611,7 @@ const adminUserReport = async (req, res) => {
                     (SELECT COUNT(*) FROM following f WHERE f.user_id = u.user_id) AS total_following,
 
                     -- Names of artists user is following (comma-separated)
-                    (SELECT GROUP_CONCAT(a.artist_name SEPARATOR ', ') 
+                    (SELECT GROUP_CONCAT(a.username SEPARATOR ', ') 
                      FROM following f 
                      JOIN artist a ON f.artist_id = a.artist_id 
                      WHERE f.user_id = u.user_id) AS following_who,
