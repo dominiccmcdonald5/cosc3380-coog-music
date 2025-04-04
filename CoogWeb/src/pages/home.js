@@ -113,7 +113,7 @@ export const BottomBar = ({ currentSong }) => {
   return (
     <div className="bottom-bar">
       <div className="now-playing">
-        <img src={song.photo} alt={song.name} className="song-photo" />
+        <img src={song.image || purple_image} alt={song.name} className="song-photo" />
         <span className="current-song-name">{song.name}</span>
       </div>
       <button className="play-pause-btn" onClick={togglePlayPause}>

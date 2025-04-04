@@ -62,18 +62,10 @@ export const SongList = ({accountType, userId, setCurrentSong}) => {
 };
 
 export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
-    const [isLiked, setIsLiked] = useState(false); // State to track if the heart is "liked"
-    const [imageBase64, setImageBase64] = useState(null); // State to hold the base64 image
-    const [error, setError] = useState(null);
+    const [isLiked, setIsLiked] = useState(false); // State to track if the heart is "liked"    const [error, setError] = useState(null);
+    const [error, setError] = useState();
 
-    // Set the base64 image if available
-    useEffect(() => {
-        if (song.image) {
-            setImageBase64(song.image); // Directly set the base64 string
-        }
-    }, [song.image]);
 
-    
 
     // Only call fetchInitialLike if accountType is 'user'
     useEffect(() => {
@@ -143,12 +135,12 @@ export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
     return (
         <div className="song-card">
             {/* Render Base64 Image */}
-            {imageBase64 && (
-                <img
-                    src={`data:image/png;base64,${imageBase64}`}
-                    alt={song.name}
-                    className="song-image"
-                />
+            {song.image && (
+            <img
+                src={song.image}
+                alt={song.name}
+                className="song-image"
+            />
             )}
 
             <h3 className="song-name">{song.name}</h3>
@@ -222,7 +214,7 @@ export const ArtistList = ({onArtistClick}) => {
 export const ArtistCard = ({ artist, onArtistClick }) => {
     return (
       <div className="artist-card">
-        <img src={artist.image_url} alt={artist.username} className="artist-image" />
+        <img src={artist.image_url || purple_image} alt={artist.username} className="artist-image" />
         <h3 className="artist-name">{artist.username}</h3>
         <button onClick={() => onArtistClick('artist-view', artist)} className="forward-button">
           <img src={forward} alt="forward" className="forward-icon" />
@@ -343,7 +335,7 @@ export const AlbumCard = ({ album, onAlbumClick, accountType, userId }) => {
   
     return (
         <div className="album-card">
-            <img src={album.photo} alt={album.album_name} className="album-image" />
+            <img src={album.album_image || purple_image} alt={album.album_name} className="album-image" />
             <h3 className="album-name">{album.album_name}</h3>
             <h3 className="album-artist">{album.artist_username}</h3>
             <div className="bottom-section">
