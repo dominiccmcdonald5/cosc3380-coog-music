@@ -338,7 +338,7 @@ export const SongDataReport = ({ userName }) => {
                                 <th>Song Name</th>
                                 <th>Album Name</th>
                                 <th>Date Joined</th>
-                                <th>Unique Songs</th>
+                                <th>Unique Listeners</th>
                                 <th>Streams</th>
                                 <th>Likes</th>
                             </tr>
