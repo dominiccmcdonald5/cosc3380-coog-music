@@ -22,13 +22,16 @@ export const SongForm = ({ userName, userId }) => {
 
     const handleSongUpload = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            if (file.type === "audio/mp3" || file.type === "audio/mpeg" || file.name.endsWith('.mp3')) {
-                setSong(prev => ({ ...prev, songFile: file }));
-                setPreviewAudio(URL.createObjectURL(file)); // Create object URL for preview
-            } else {
-                alert("Only MP3 audio files are allowed!");
-            }
+        if (file && file.type.startsWith("audio/")) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64Audio = reader.result.split(',')[1]; // Remove the data prefix
+                setSong(prev => ({ ...prev, songFileBase64: base64Audio }));
+                setPreviewAudio(URL.createObjectURL(file)); // For previewing the audio
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert("Only audio files are allowed!");
         }
     };
 
@@ -96,7 +99,7 @@ export const SongForm = ({ userName, userId }) => {
                     value={song.image} onChange={handleChange} required />
 
                 <label>Song File (MP3)</label>
-                <input type="file" name="songFile" accept="audio/mp3,audio/mpeg"
+                <input type="file" name="songFile" accept="audio/*"
                     onChange={handleSongUpload} required />
 
                 {previewAudio && (

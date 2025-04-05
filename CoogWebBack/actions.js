@@ -637,6 +637,7 @@ const createSong = async (req, res) => {
             const sanitizedName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             const blobName = `songs/${artist}/${Date.now()}_${sanitizedName}.mp3`;
 
+            // If the audio is base64-encoded, decode it
             const buffer = Buffer.from(songFileBase64, 'base64');
 
             if (buffer.length > 10 * 1024 * 1024) {
