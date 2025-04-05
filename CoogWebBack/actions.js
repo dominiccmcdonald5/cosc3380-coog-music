@@ -596,48 +596,56 @@ const createSong = async (req, res) => {
 
     req.on('end', async () => {
         try {
+            console.log('Raw body received:', body);  // Log the raw body for debugging
+
+            // Try parsing the JSON body
             const parsedBody = JSON.parse(body);
             const { name, artist, genre, album, image, songFileBase64 } = parsedBody;
 
             // Validate required fields
             if (!name || !artist || !genre || !album || !songFileBase64) {
-                return res.status(400).json({ 
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ 
                     success: false, 
                     message: 'Missing required fields (image is optional)' 
-                });
+                }));
             }
 
-            // Convert base64 to buffer for audio file
-            const buffer = Buffer.from(songFileBase64, 'base64');
+            const AZURE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
+            const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_CONNECTION_STRING);
+            const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_CONTAINER_NAME);
 
-            // Validate file size (e.g., 10MB limit)
-            if (buffer.length > 10 * 1024 * 1024) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'File size exceeds 10MB limit'
-                });
-            }
+            // Create container if it doesn't exist
+            await containerClient.createIfNotExists({ access: 'blob' });
 
-            // Use the uploadToAzureBlob function from azure.js
             const sanitizedName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             const blobName = `songs/${artist}/${Date.now()}_${sanitizedName}.mp3`;
 
-            const songUrl = await uploadToAzureBlob(buffer, blobName);  // Upload to Azure and get the URL
+            const buffer = Buffer.from(songFileBase64, 'base64');
 
-            // Verify album exists and belongs to artist
+            if (buffer.length > 10 * 1024 * 1024) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({
+                    success: false,
+                    message: 'File size exceeds 10MB limit'
+                }));
+            }
+
+            const songUrl = await uploadToAzureBlob(buffer, blobName);
+
             const [albumExists] = await pool.promise().execute(
                 `SELECT album_id, artist_id FROM album WHERE name = ? AND artist_id = ?`,
-                [album, artist]  // Secure query
+                [album, artist] 
             );
 
             if (!albumExists.length) {
-                return res.status(400).json({
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({
                     success: false,
                     message: 'Album not found or does not belong to artist'
-                });
+                }));
             }
 
-            // Insert song data into the database
             await pool.promise().query(
                 `INSERT INTO song (name, artist_id, album_id, genre, image_url, song_url, created_at)
                  VALUES (?, ?, ?, ?, ?, ?, NOW())`,
@@ -647,26 +655,29 @@ const createSong = async (req, res) => {
                     albumExists[0].album_id,
                     genre,
                     image || null,
-                    songUrl  // URL from Azure Blob Storage
+                    songUrl
                 ]
             );
 
-            res.status(201).json({
+            res.writeHead(201, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
                 success: true,
                 message: 'Song uploaded successfully',
-                songUrl: songUrl  // Return the URL of the uploaded song
-            });
+                songUrl: songUrl
+            }));
 
         } catch (err) {
             console.error('Error in createSong:', err);
-            res.status(500).json({
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
                 success: false,
                 message: 'Internal server error',
                 error: err.message
-            });
+            }));
         }
     });
 };
+
 
 
 
