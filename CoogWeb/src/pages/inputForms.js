@@ -8,28 +8,24 @@ export const SongForm = ({ userName, userId }) => {
         artist: userId,
         genre: "",
         album: "",
-        image: "", // <-- now it's a link (string)
-        songFileBase64: null
+        image: "",
+        songFile: null // Changed from base64 to File object
     });
 
     const [previewAudio, setPreviewAudio] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setSong((prev) => ({ ...prev, [name]: value }));
+        setSong(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSongUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.type === "audio/mp3" || file.type === "audio/mpeg") {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onloadend = () => {
-                    const base64Data = reader.result.split(",")[1]; // strip prefix
-                    setSong({ ...song, songFileBase64: base64Data });
-                    setPreviewAudio(reader.result); // for optional preview
-                };
+            if (file.type === "audio/mp3" || file.type === "audio/mpeg" || file.name.endsWith('.mp3')) {
+                setSong(prev => ({ ...prev, songFile: file }));
+                setPreviewAudio(URL.createObjectURL(file)); // Create object URL for preview
             } else {
                 alert("Only MP3 audio files are allowed!");
             }
@@ -38,13 +34,20 @@ export const SongForm = ({ userName, userId }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Submitting song:", song);
+        setIsUploading(true);
 
         try {
+            const formData = new FormData();
+            formData.append('name', song.name);
+            formData.append('artist', song.artist);
+            formData.append('genre', song.genre);
+            formData.append('album', song.album);
+            formData.append('image', song.image);
+            formData.append('songFile', song.songFile); // Append the File object directly
+
             const response = await fetch('https://cosc3380-coog-music-2.onrender.com/createsong', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(song),
+                body: formData, // No Content-Type header needed for FormData
             });
 
             const data = await response.json();
@@ -57,15 +60,20 @@ export const SongForm = ({ userName, userId }) => {
                     genre: "",
                     album: "",
                     image: "",
-                    songFileBase64: null
+                    songFile: null
                 });
+                if (previewAudio) {
+                    URL.revokeObjectURL(previewAudio); // Clean up object URL
+                }
                 setPreviewAudio(null);
             } else {
-                alert("Failed to add song: " + data.message);
+                alert("Failed to add song: " + (data.message || "Unknown error"));
             }
         } catch (error) {
             console.error("Error adding song:", error);
             alert("Error connecting to the server.");
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -78,19 +86,24 @@ export const SongForm = ({ userName, userId }) => {
             </div>
             <form className="song-form" onSubmit={handleSubmit}>
                 <label>Song Name</label>
-                <input type="text" name="name" placeholder="Enter song name" value={song.name} onChange={handleChange} required />
+                <input type="text" name="name" placeholder="Enter song name" 
+                       value={song.name} onChange={handleChange} required />
 
                 <label>Genre</label>
-                <input type="text" name="genre" placeholder="Enter genre" value={song.genre} onChange={handleChange} required />
+                <input type="text" name="genre" placeholder="Enter genre" 
+                       value={song.genre} onChange={handleChange} required />
 
                 <label>Album Name</label>
-                <input type="text" name="album" placeholder="Enter album name" value={song.album} onChange={handleChange} required />
+                <input type="text" name="album" placeholder="Enter album name" 
+                       value={song.album} onChange={handleChange} required />
 
                 <label>Image Link</label>
-                <input type="text" name="image" placeholder="Enter image URL" value={song.image} onChange={handleChange} required />
+                <input type="text" name="image" placeholder="Enter image URL" 
+                       value={song.image} onChange={handleChange} required />
 
                 <label>Song File (MP3)</label>
-                <input type="file" name="songFile" accept="audio/mp3" onChange={handleSongUpload} required />
+                <input type="file" name="songFile" accept="audio/mp3,audio/mpeg" 
+                       onChange={handleSongUpload} required />
 
                 {previewAudio && (
                     <div>
@@ -99,7 +112,9 @@ export const SongForm = ({ userName, userId }) => {
                     </div>
                 )}
 
-                <button type="submit">Create</button>
+                <button type="submit" disabled={isUploading}>
+                    {isUploading ? 'Uploading...' : 'Create'}
+                </button>
             </form>
         </section>
     );

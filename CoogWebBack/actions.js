@@ -585,7 +585,6 @@ const getArtistProfileAlbum = async (req, res) => {
     });
 };
 
-const { BlobServiceClient } = require('@azure/storage-blob');
 
 const createSong = async (req, res) => {
     let body = '';
@@ -597,63 +596,90 @@ const createSong = async (req, res) => {
     req.on('end', async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const { name, artist, genre, album, image, songFileBase64 } = parsedBody; // expect the song file as base64
+            const { name, artist, genre, album, image, songFileBase64 } = parsedBody;
 
-            if (!name || !artist || !genre || !album || !image || !songFileBase64) {
-                throw new Error('Missing required fields');
+            // Validate required fields
+            if (!name || !artist || !genre || !album || !songFileBase64) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Missing required fields (image is optional)' 
+                });
             }
 
-            // Upload to Azure Blob Storage
-            const AZURE_CONTAINER_NAME = 'musiccontainer';
-            const AZURE_STORAGE_ACCOUNT = 'cosc3380team6';
-            const SAS_TOKEN = 'sv=2024-11-04&ss=b&srt=sco&sp=rwlaciytfx&se=2025-04-06T04:12:00Z&st=2025-04-05T20:12:00Z&spr=https&sig=MCzOhlK3oPMmXyZPWhDfeNfaqT691pZpMvw5hM4YpQQ%3D';
+            // SECURITY FIX: Don't hardcode SAS token - use environment variables
+            const AZURE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
+            const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_CONNECTION_STRING);
+            const containerClient = blobServiceClient.getContainerClient('musiccontainer');
+            
+            // Create container if it doesn't exist
+            await containerClient.createIfNotExists({ access: 'blob' });
 
-            const blobServiceClient = new BlobServiceClient(
-                `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/?${SAS_TOKEN}`
-            );
-
-            const containerClient = blobServiceClient.getContainerClient(AZURE_CONTAINER_NAME);
-            const blobName = `${Date.now()}-${name}.mp3`;
-            const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-
+            // Generate unique filename with sanitization
+            const sanitizedName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const blobName = `songs/${artist}/${Date.now()}_${sanitizedName}.mp3`;
+            
             // Convert base64 to buffer
             const buffer = Buffer.from(songFileBase64, 'base64');
+            
+            // Validate file size (e.g., 10MB limit)
+            if (buffer.length > 10 * 1024 * 1024) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'File size exceeds 10MB limit' 
+                });
+            }
 
+            // Upload to Azure
+            const blockBlobClient = containerClient.getBlockBlobClient(blobName);
             await blockBlobClient.uploadData(buffer, {
-                blobHTTPHeaders: { blobContentType: "audio/mpeg" }
+                blobHTTPHeaders: { blobContentType: 'audio/mpeg' }
             });
 
-            const songUrl = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${blobName}`;
-
-            // Continue as usual
+            // Verify album exists and belongs to artist
             const [albumExists] = await pool.promise().execute(
-                "SELECT album_id, artist_id FROM album WHERE name = ?",
-                [album]
+                `SELECT album_id, artist_id FROM album 
+                 WHERE name = ? AND artist_id = ?`,
+                [album, artist] // More secure query
             );
 
-            if (albumExists.length === 0) {
-                return res.status(400).json({ success: false, message: 'Album does not exist' });
+            if (!albumExists.length) {
+                // Delete the uploaded blob if album validation fails
+                await blockBlobClient.deleteIfExists();
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Album not found or does not belong to artist' 
+                });
             }
 
-            const album_id = albumExists[0].album_id;
-            const album_artist_id = albumExists[0].artist_id;
-
-            if (album_artist_id !== Number(artist)) {
-                return res.status(400).json({ success: false, message: 'Album does not belong to artist' });
-            }
-
-            // Insert into DB with songUrl
+            // Insert into database
             await pool.promise().query(
-                `INSERT INTO song (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
-                VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
-                [name, artist, album_id, genre, image, songUrl]
+                `INSERT INTO song (
+                    name, artist_id, album_id, genre, 
+                    image_url, song_url, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+                [
+                    name, 
+                    artist, 
+                    albumExists[0].album_id, 
+                    genre, 
+                    image || null,  // Make image optional
+                    blockBlobClient.url  // Use the URL from Azure client
+                ]
             );
 
-            res.status(201).json({ success: true, message: 'Song uploaded and saved' });
+            res.status(201).json({ 
+                success: true, 
+                message: 'Song uploaded successfully',
+                songUrl: blockBlobClient.url 
+            });
 
         } catch (err) {
-            console.error('Error uploading song:', err);
-            res.status(500).json({ success: false, message: err.message });
+            console.error('Error in createSong:', err);
+            res.status(500).json({ 
+                success: false, 
+                message: 'Internal server error',
+                error: err.message 
+            });
         }
     });
 };
