@@ -589,7 +589,7 @@ const getArtistProfileAlbum = async (req, res) => {
 
 const createSong = async (req, res) => {
     let body = '';
-
+    console.log('Raw body:', body); 
     req.on('data', (chunk) => {
         body += chunk.toString(); // Accumulate data chunks
     });
