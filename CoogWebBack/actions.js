@@ -3,6 +3,7 @@ const pool = require('./database.js');
 const queries = require('./queries.js');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
+const { BlobServiceClient } = require('@azure/storage-blob');
 
 const getUsers = (req, res) => {
     pool.query(queries.getUsers, (error, results) => {
@@ -584,6 +585,8 @@ const getArtistProfileAlbum = async (req, res) => {
     });
 };
 
+const { BlobServiceClient } = require('@azure/storage-blob');
+
 const createSong = async (req, res) => {
     let body = '';
 
@@ -594,54 +597,67 @@ const createSong = async (req, res) => {
     req.on('end', async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const { name, artist, genre, album, image, URL } = parsedBody;
-            console.log(name,image,URL);
+            const { name, artist, genre, album, image, songFileBase64 } = parsedBody; // expect the song file as base64
 
-            // Validate required fields
-            if (!name || !artist || !genre || !album || !image || !URL) {
+            if (!name || !artist || !genre || !album || !image || !songFileBase64) {
                 throw new Error('Missing required fields');
             }
 
-            image = image || null;  // Use null if empty
-            URL = URL || null;
+            // Upload to Azure Blob Storage
+            const AZURE_CONTAINER_NAME = 'musiccontainer';
+            const AZURE_STORAGE_ACCOUNT = 'cosc3380team6';
+            const SAS_TOKEN = 'sv=2024-11-04&ss=b&srt=sco&sp=rwlaciytfx&se=2025-04-06T04:12:00Z&st=2025-04-05T20:12:00Z&spr=https&sig=MCzOhlK3oPMmXyZPWhDfeNfaqT691pZpMvw5hM4YpQQ%3D';
 
-            // Check if the album exists and belongs to the artist
+            const blobServiceClient = new BlobServiceClient(
+                `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/?${SAS_TOKEN}`
+            );
+
+            const containerClient = blobServiceClient.getContainerClient(AZURE_CONTAINER_NAME);
+            const blobName = `${Date.now()}-${name}.mp3`;
+            const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+            // Convert base64 to buffer
+            const buffer = Buffer.from(songFileBase64, 'base64');
+
+            await blockBlobClient.uploadData(buffer, {
+                blobHTTPHeaders: { blobContentType: "audio/mpeg" }
+            });
+
+            const songUrl = `https://${AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/${AZURE_CONTAINER_NAME}/${blobName}`;
+
+            // Continue as usual
             const [albumExists] = await pool.promise().execute(
                 "SELECT album_id, artist_id FROM album WHERE name = ?",
                 [album]
             );
 
             if (albumExists.length === 0) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: 'Album does not exist' }));
+                return res.status(400).json({ success: false, message: 'Album does not exist' });
             }
 
             const album_id = albumExists[0].album_id;
             const album_artist_id = albumExists[0].artist_id;
 
-
-            // Ensure the artist adding the song is the album's owner
             if (album_artist_id !== Number(artist)) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: 'album does not exist' }));
+                return res.status(400).json({ success: false, message: 'Album does not belong to artist' });
             }
 
-            // Insert the song
+            // Insert into DB with songUrl
             await pool.promise().query(
-                `INSERT INTO song (name, artist_id, album_id, genre, image_url, play_count, likes,length, song_url, created_at)
-                 VALUES (?, ?, ?, ?, ?, 0, 0,0, ?, NOW())`,
-                [name, artist, album_id, genre, image, URL]
+                `INSERT INTO song (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
+                VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
+                [name, artist, album_id, genre, image, songUrl]
             );
 
-            res.writeHead(201, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true, message: 'Song added successfully' }));
+            res.status(201).json({ success: true, message: 'Song uploaded and saved' });
+
         } catch (err) {
-            console.error('Error adding song:', err);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: err.message || 'Failed to add song' }));
+            console.error('Error uploading song:', err);
+            res.status(500).json({ success: false, message: err.message });
         }
     });
 };
+
 
 const editSong = async (req, res) => {
     let body = '';
