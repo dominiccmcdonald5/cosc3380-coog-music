@@ -590,11 +590,14 @@ const createSong = async (req, res) => {
     let body = '';
 
     req.on('data', (chunk) => {
-        body += chunk.toString();
+        body += chunk.toString(); // Accumulate data chunks
     });
 
     req.on('end', async () => {
         try {
+            console.log('Raw body received:', body);  // Log the raw body for debugging
+
+            // Try parsing the JSON body
             const parsedBody = JSON.parse(body);
             const { name, artist, genre, album, image, songFileBase64 } = parsedBody;
 
@@ -614,10 +617,9 @@ const createSong = async (req, res) => {
             // Create container if it doesn't exist
             await containerClient.createIfNotExists({ access: 'blob' });
 
-            // Generate unique filename with sanitization for mp3 folder
+            // Generate unique filename with sanitization
             const sanitizedName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            // Set the song file path under mp3/ folder
-            const blobName = `mp3/${artist}/${Date.now()}_${sanitizedName}.mp3`;
+            const blobName = `songs/${artist}/${Date.now()}_${sanitizedName}.mp3`;
 
             // Convert base64 to buffer for audio
             const buffer = Buffer.from(songFileBase64, 'base64');
@@ -630,17 +632,17 @@ const createSong = async (req, res) => {
                 });
             }
 
-            // Upload to Azure blob storage
+            // Upload to Azure
             const blockBlobClient = containerClient.getBlockBlobClient(blobName);
             await blockBlobClient.uploadData(buffer, {
                 blobHTTPHeaders: { blobContentType: 'audio/mpeg' }
             });
 
-            // Verify album exists and belongs to the artist
+            // Verify album exists and belongs to artist
             const [albumExists] = await pool.promise().execute(
                 `SELECT album_id, artist_id FROM album 
                  WHERE name = ? AND artist_id = ?`,
-                [album, artist] // More secure query to avoid SQL injection
+                [album, artist] // More secure query
             );
 
             if (!albumExists.length) {
@@ -652,7 +654,7 @@ const createSong = async (req, res) => {
                 });
             }
 
-            // Insert song into the database
+            // Insert into database
             const [result] = await pool.promise().query(
                 `INSERT INTO song (
                     name, artist_id, album_id, genre, 
@@ -664,7 +666,7 @@ const createSong = async (req, res) => {
                     albumExists[0].album_id, 
                     genre, 
                     image || null,  // Make image optional
-                    blockBlobClient.url  // Use the URL from Azure blob client
+                    blockBlobClient.url  // Use the URL from Azure client
                 ]
             );
 
@@ -672,7 +674,7 @@ const createSong = async (req, res) => {
             res.status(201).json({ 
                 success: true, 
                 message: 'Song uploaded successfully',
-                songUrl: blockBlobClient.url  // Return the song URL in the response
+                songUrl: blockBlobClient.url 
             });
 
         } catch (err) {
@@ -685,6 +687,7 @@ const createSong = async (req, res) => {
         }
     });
 };
+
 
 
 const editSong = async (req, res) => {
