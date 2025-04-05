@@ -609,18 +609,18 @@ const createSong = async (req, res) => {
             // SECURITY FIX: Don't hardcode SAS token - use environment variables
             const AZURE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
             const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_CONNECTION_STRING);
-            const containerClient = blobServiceClient.getContainerClient('musiccontainer');
-            
+            const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_CONTAINER_NAME);
+
             // Create container if it doesn't exist
             await containerClient.createIfNotExists({ access: 'blob' });
 
             // Generate unique filename with sanitization
             const sanitizedName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             const blobName = `songs/${artist}/${Date.now()}_${sanitizedName}.mp3`;
-            
-            // Convert base64 to buffer
+
+            // Convert base64 to buffer for audio
             const buffer = Buffer.from(songFileBase64, 'base64');
-            
+
             // Validate file size (e.g., 10MB limit)
             if (buffer.length > 10 * 1024 * 1024) {
                 return res.status(400).json({ 
@@ -652,7 +652,7 @@ const createSong = async (req, res) => {
             }
 
             // Insert into database
-            await pool.promise().query(
+            const [result] = await pool.promise().query(
                 `INSERT INTO song (
                     name, artist_id, album_id, genre, 
                     image_url, song_url, created_at
@@ -667,6 +667,7 @@ const createSong = async (req, res) => {
                 ]
             );
 
+            // Send success response with the song URL
             res.status(201).json({ 
                 success: true, 
                 message: 'Song uploaded successfully',
