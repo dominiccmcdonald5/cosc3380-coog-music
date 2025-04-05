@@ -4,6 +4,7 @@ const queries = require('./queries.js');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const { BlobServiceClient } = require('@azure/storage-blob');
+import { uploadToAzureBlob } from './azure'; 
 
 const getUsers = (req, res) => {
     pool.query(queries.getUsers, (error, results) => {
@@ -595,9 +596,6 @@ const createSong = async (req, res) => {
 
     req.on('end', async () => {
         try {
-            console.log('Raw body received:', body);  // Log the raw body for debugging
-
-            // Try parsing the JSON body
             const parsedBody = JSON.parse(body);
             const { name, artist, genre, album, image, songFileBase64 } = parsedBody;
 
@@ -609,84 +607,67 @@ const createSong = async (req, res) => {
                 });
             }
 
-            // SECURITY FIX: Don't hardcode SAS token - use environment variables
-            const AZURE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
-            const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_CONNECTION_STRING);
-            const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_CONTAINER_NAME);
-
-            // Create container if it doesn't exist
-            await containerClient.createIfNotExists({ access: 'blob' });
-
-            // Generate unique filename with sanitization
-            const sanitizedName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            const blobName = `songs/${artist}/${Date.now()}_${sanitizedName}.mp3`;
-
-            // Convert base64 to buffer for audio
+            // Convert base64 to buffer for audio file
             const buffer = Buffer.from(songFileBase64, 'base64');
 
             // Validate file size (e.g., 10MB limit)
             if (buffer.length > 10 * 1024 * 1024) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'File size exceeds 10MB limit' 
+                return res.status(400).json({
+                    success: false,
+                    message: 'File size exceeds 10MB limit'
                 });
             }
 
-            // Upload to Azure
-            const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-            await blockBlobClient.uploadData(buffer, {
-                blobHTTPHeaders: { blobContentType: 'audio/mpeg' }
-            });
+            // Use the uploadToAzureBlob function from azure.js
+            const sanitizedName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const blobName = `songs/${artist}/${Date.now()}_${sanitizedName}.mp3`;
+
+            const songUrl = await uploadToAzureBlob(buffer, blobName);  // Upload to Azure and get the URL
 
             // Verify album exists and belongs to artist
             const [albumExists] = await pool.promise().execute(
-                `SELECT album_id, artist_id FROM album 
-                 WHERE name = ? AND artist_id = ?`,
-                [album, artist] // More secure query
+                `SELECT album_id, artist_id FROM album WHERE name = ? AND artist_id = ?`,
+                [album, artist]  // Secure query
             );
 
             if (!albumExists.length) {
-                // Delete the uploaded blob if album validation fails
-                await blockBlobClient.deleteIfExists();
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Album not found or does not belong to artist' 
+                return res.status(400).json({
+                    success: false,
+                    message: 'Album not found or does not belong to artist'
                 });
             }
 
-            // Insert into database
-            const [result] = await pool.promise().query(
-                `INSERT INTO song (
-                    name, artist_id, album_id, genre, 
-                    image_url, song_url, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+            // Insert song data into the database
+            await pool.promise().query(
+                `INSERT INTO song (name, artist_id, album_id, genre, image_url, song_url, created_at)
+                 VALUES (?, ?, ?, ?, ?, ?, NOW())`,
                 [
-                    name, 
-                    artist, 
-                    albumExists[0].album_id, 
-                    genre, 
-                    image || null,  // Make image optional
-                    blockBlobClient.url  // Use the URL from Azure client
+                    name,
+                    artist,
+                    albumExists[0].album_id,
+                    genre,
+                    image || null,
+                    songUrl  // URL from Azure Blob Storage
                 ]
             );
 
-            // Send success response with the song URL
-            res.status(201).json({ 
-                success: true, 
+            res.status(201).json({
+                success: true,
                 message: 'Song uploaded successfully',
-                songUrl: blockBlobClient.url 
+                songUrl: songUrl  // Return the URL of the uploaded song
             });
 
         } catch (err) {
             console.error('Error in createSong:', err);
-            res.status(500).json({ 
-                success: false, 
+            res.status(500).json({
+                success: false,
                 message: 'Internal server error',
-                error: err.message 
+                error: err.message
             });
         }
     });
 };
+
 
 
 
