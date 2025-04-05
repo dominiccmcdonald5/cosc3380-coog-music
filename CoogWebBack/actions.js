@@ -207,7 +207,9 @@ const getArtistViewInfo = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { username} = parsedBody;
         if (!username) {
-            return res.status(400).json({ success: false, message: 'Username is required' });
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Username is required' }));
+            return;
         }
 
 
@@ -354,7 +356,9 @@ const getAlbumViewInfo = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { album_name} = parsedBody;
         if (!album_name) {
-            return res.status(400).json({ success: false, message: 'Username is required' });
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Username is required' }));
+            return;
         }
 
 
@@ -517,7 +521,9 @@ const getArtistInfo = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { userName} = parsedBody;
         if (!userName) {
-            return res.status(400).json({ success: false, message: 'Username is required' });
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Username is required' }));
+            return;
         }
 
         const [imageResult] = await pool.promise().query(`SELECT image_url FROM artist WHERE artist.username = ?;`,[userName])
@@ -1906,7 +1912,9 @@ const getTopUserSongs = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { userId} = parsedBody;
         if (!userId) {
-            return res.status(400).json({ success: false, message: 'Username is required' });
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Failed to get Top User Songs' }));
+            return;
         }
 
         const [songs] = await pool.promise().query(`SELECT 
@@ -1948,7 +1956,9 @@ const getTopUserArtists = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { userId} = parsedBody;
         if (!userId) {
-            return res.status(400).json({ success: false, message: 'Username is required' });
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Username is required' }));
+            return;
         }
 
         const [topArtists] = await pool.promise().query(`SELECT 
@@ -1988,7 +1998,9 @@ const getTopUserAlbums = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { userId} = parsedBody;
         if (!userId) {
-            return res.status(400).json({ success: false, message: 'Username is required' });
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Username is required' }));
+            return;
         }
 
         const [topAlbums] = await pool.promise().query(`SELECT 
@@ -2030,7 +2042,9 @@ const getTopUserGenres = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { userId} = parsedBody;
         if (!userId) {
-            return res.status(400).json({ success: false, message: 'Username is required' });
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Username is required' }));
+            return;
         }
 
         const [topGenres] = await pool.promise().query(`SELECT 
@@ -2067,7 +2081,9 @@ const getTopUserOther = async (req, res) => {
             const { userId } = parsedBody;
             
             if (!userId) {
-                return res.status(400).json({ success: false, message: 'User ID is required' });
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Username is required' }));
+            return;
             }
 
             const [streamCount] = await pool.promise().query(
