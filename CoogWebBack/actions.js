@@ -593,76 +593,106 @@ const getArtistProfileAlbum = async (req, res) => {
 };
 
 
-import Busboy from 'busboy';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import pool from './database.js';
+const createSong = async (req, res) => {
+    let body = '';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+    console.log('Raw body:', body); 
+    req.on('data', (chunk) => {
+        body += chunk.toString(); // Accumulate data chunks
+    });
 
-// Create Song Function
-export function createSong(req, res) {
-  const busboy = Busboy({ headers: req.headers });
-  const fields = {};
-  let fileName = '';
-  let songFilePath = '';
+    req.on('end', async () => {
+        try {
+            console.log('Raw body received:', body);  // Log the raw body for debugging
 
-  busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-    if (!filename) return;
+            // Try parsing the JSON body
+            const parsedBody = JSON.parse(body);
+            const { name, artist, genre, album, image, songFileBase64 } = parsedBody;
 
-    // Save to local /uploads directory
-    const uploadsDir = path.join(__dirname, 'uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir);
-    }
+            // Validate required fields
+            if (!name || !artist || !genre || !album || !songFileBase64) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ 
+                    success: false, 
+                    message: 'Missing required fields (image is optional)' 
+                }));
+            }
 
-    fileName = `${Date.now()}-${filename}`;
-    songFilePath = path.join(uploadsDir, fileName);
-    file.pipe(fs.createWriteStream(songFilePath));
-  });
+            // Optional image URL validation (if provided)
+            if (image && !isValidUrl(image)) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ 
+                    success: false, 
+                    message: 'Invalid image URL' 
+                }));
+            }
 
-  busboy.on('field', (fieldname, val) => {
-    fields[fieldname] = val;
-  });
+            const AZURE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
+            const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_CONNECTION_STRING);
+            const containerClient = blobServiceClient.getContainerClient(process.env.AZURE_CONTAINER_NAME);
 
-  busboy.on('finish', async () => {
-    if (!fields.name || !fields.artist || !fields.genre || !fields.album || !fields.image || !fileName) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ message: 'Missing required fields' }));
-    }
+            // Create container if it doesn't exist
+            await containerClient.createIfNotExists({ access: 'blob' });
 
-    try {
-      const sql = `
-        INSERT INTO Songs (name, artist, genre, album, image, file_path)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `;
-      const values = [
-        fields.name,
-        fields.artist,
-        fields.genre,
-        fields.album,
-        fields.image,
-        fileName // storing just the filename
-      ];
+            const sanitizedName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const blobName = `songs/${artist}/${Date.now()}_${sanitizedName}.mp3`;
 
-      const [result] = await pool.query(sql, values);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true, id: result.insertId }));
-    } catch (err) {
-      console.error('SQL Error:', err);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: 'Database error' }));
-    }
-  });
+            const buffer = Buffer.from(songFileBase64, 'base64');
 
-  req.pipe(busboy);
-}
+            if (buffer.length > 10 * 1024 * 1024) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({
+                    success: false,
+                    message: 'File size exceeds 10MB limit'
+                }));
+            }
 
+            const songUrl = await uploadToAzureBlob(buffer, blobName);
 
+            const [albumExists] = await pool.promise().execute(
+                `SELECT album_id, artist_id FROM album WHERE name = ? AND artist_id = ?`,
+                [album, artist] 
+            );
 
+            if (!albumExists.length) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({
+                    success: false,
+                    message: 'Album not found or does not belong to artist'
+                }));
+            }
+
+            await pool.promise().query(
+                `INSERT INTO song (name, artist_id, album_id, genre, image_url, song_url, created_at)
+                 VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+                [
+                    name,
+                    artist,
+                    albumExists[0].album_id,
+                    genre,
+                    image || null,
+                    songUrl
+                ]
+            );
+
+            res.writeHead(201, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                message: 'Song uploaded successfully',
+                songUrl: songUrl
+            }));
+
+        } catch (err) {
+            console.error('Error in createSong:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                message: 'Internal server error',
+                error: err.message
+            }));
+        }
+    });
+};
 
 
 const editSong = async (req, res) => {
