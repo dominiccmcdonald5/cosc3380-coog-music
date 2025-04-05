@@ -4,7 +4,7 @@ const queries = require('./queries.js');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const { BlobServiceClient } = require('@azure/storage-blob');
-import { uploadToAzureBlob } from './azure'; 
+import { uploadToAzureBlob } from './azure.js'; 
 
 const getUsers = (req, res) => {
     pool.query(queries.getUsers, (error, results) => {
@@ -608,6 +608,15 @@ const createSong = async (req, res) => {
                 return res.end(JSON.stringify({ 
                     success: false, 
                     message: 'Missing required fields (image is optional)' 
+                }));
+            }
+
+            // Optional image URL validation (if provided)
+            if (image && !isValidUrl(image)) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ 
+                    success: false, 
+                    message: 'Invalid image URL' 
                 }));
             }
 
