@@ -4,7 +4,7 @@ const queries = require('./queries.js');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const { BlobServiceClient } = require('@azure/storage-blob');
-import { uploadToAzureBlob } from './azure.js'; 
+import { uploadToAzureBlobFromServer } from './azure.js'; 
 
 const getUsers = (req, res) => {
     pool.query(queries.getUsers, (error, results) => {
@@ -648,7 +648,7 @@ const createSong = async (req, res) => {
                 }));
             }
 
-            const songUrl = await uploadToAzureBlob(buffer, blobName);
+            const songUrl = await uploadToAzureBlobFromServer(buffer, blobName);
 
             const [albumExists] = await pool.promise().execute(
                 `SELECT album_id, artist_id FROM album WHERE name = ? AND artist_id = ?`,

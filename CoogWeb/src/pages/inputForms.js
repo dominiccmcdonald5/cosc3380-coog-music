@@ -9,7 +9,7 @@ export const SongForm = ({ userName, userId }) => {
         genre: "",
         album: "",
         image: "",
-        songFile: null // This will hold the audio file (not base64)
+        songFileBase64: "" // Store base64-encoded audio here
     });
 
     const [previewAudio, setPreviewAudio] = useState(null);
@@ -45,7 +45,7 @@ export const SongForm = ({ userName, userId }) => {
         formData.append("genre", song.genre);
         formData.append("album", song.album);
         formData.append("image", song.image);
-        formData.append("songFile", song.songFile); // Append the audio file here
+        formData.append("songFileBase64", song.songFileBase64); // Send base64 audio here
 
         try {
             setIsUploading(true); // Show uploading state
@@ -64,7 +64,7 @@ export const SongForm = ({ userName, userId }) => {
 
             const data = await response.json();
             alert("Song added successfully!");
-            setSong({ name: "", artist: userId, genre: "", album: "", image: "", songFile: null });
+            setSong({ name: "", artist: userId, genre: "", album: "", image: "", songFileBase64: "" });
             setPreviewAudio(null);
             setIsUploading(false); // Reset uploading state
         } catch (error) {
@@ -98,7 +98,7 @@ export const SongForm = ({ userName, userId }) => {
                 <input type="text" name="image" placeholder="Enter image URL"
                     value={song.image} onChange={handleChange} required />
 
-                <label>Song File (MP3)</label>
+                <label>Song File (Audio)</label>
                 <input type="file" name="songFile" accept="audio/*"
                     onChange={handleSongUpload} required />
 
