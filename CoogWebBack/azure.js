@@ -1,42 +1,36 @@
+// utils/azureUploader.js
 import { BlobServiceClient } from "@azure/storage-blob";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
-// Load environment variables from the .env file
 dotenv.config();
 
 const AZURE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
-const CONTAINER_NAME = "mp3"; // You can change this based on your container name
+const CONTAINER_NAME = "mp3";
 
 /**
- * Uploads a file to Azure Blob Storage.
- * 
- * @param {Buffer} fileBuffer - The file content to be uploaded.
- * @param {string} fileName - The name to assign to the uploaded blob.
- * @returns {Promise<string>} - The URL of the uploaded blob.
+ * Uploads a file buffer to Azure Blob Storage.
+ * @param {Buffer} fileBuffer - The file content as a Buffer.
+ * @param {string} fileName - The blob name (including extension).
+ * @returns {Promise<string>} - The public URL of the uploaded file.
  */
 export async function uploadToAzureBlobFromServer(fileBuffer, fileName) {
-  try {
-    // Create a BlobServiceClient instance from the connection string
-    const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_CONNECTION_STRING);
+  if (!AZURE_CONNECTION_STRING) {
+    throw new Error("AZURE_STORAGE_CONNECTION_STRING is not defined.");
+  }
 
-    // Get the container client for the 'mp3' container
+  try {
+    const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_CONNECTION_STRING);
     const containerClient = blobServiceClient.getContainerClient(CONTAINER_NAME);
 
-    // Create the container if it doesn't already exist
     await containerClient.createIfNotExists({ access: "blob" });
 
-    // Get a BlockBlobClient to interact with a specific blob (file)
     const blockBlobClient = containerClient.getBlockBlobClient(fileName);
-
-    // Upload the file (buffer) to the blob
     await blockBlobClient.uploadData(fileBuffer);
 
-    // Construct the URL to access the uploaded blob
     const blobUrl = `https://${blobServiceClient.accountName}.blob.core.windows.net/${CONTAINER_NAME}/${fileName}`;
-
     return blobUrl;
-  } catch (error) {
-    console.error("Error uploading file to Azure Blob Storage:", error);
-    throw new Error("Failed to upload file to Azure Blob Storage");
+  } catch (err) {
+    console.error("Failed to upload to Azure Blob:", err);
+    throw err;
   }
 }

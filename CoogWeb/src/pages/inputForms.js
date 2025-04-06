@@ -9,11 +9,12 @@ export const SongForm = ({ userName, userId }) => {
         genre: "",
         album: "",
         image: "",
-        songFileBase64: "" // Store base64-encoded audio here
+        songFileBase64: ""
     });
 
     const [previewAudio, setPreviewAudio] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [uploadStatus, setUploadStatus] = useState("");
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -25,51 +26,56 @@ export const SongForm = ({ userName, userId }) => {
         if (file && file.type.startsWith("audio/")) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                const base64Audio = reader.result.split(',')[1]; // Remove the data prefix
+                const base64Audio = reader.result.split(',')[1];
                 setSong(prev => ({ ...prev, songFileBase64: base64Audio }));
-                setPreviewAudio(URL.createObjectURL(file)); // For previewing the audio
+                setPreviewAudio(URL.createObjectURL(file));
             };
             reader.readAsDataURL(file);
         } else {
-            alert("Only audio files are allowed!");
+            setUploadStatus("❌ Only audio files are allowed!");
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Song submitted:", song);
+        setUploadStatus("Uploading...");
+        setIsUploading(true);
 
         const formData = new FormData();
-        formData.append("name", song.name);
+        formData.append("name", song.name || "Untitled");
         formData.append("artist", song.artist);
         formData.append("genre", song.genre);
         formData.append("album", song.album);
         formData.append("image", song.image);
-        formData.append("songFileBase64", song.songFileBase64); // Send base64 audio here
+        formData.append("songFileBase64", song.songFileBase64);
 
         try {
-            setIsUploading(true); // Show uploading state
             const response = await fetch('https://cosc3380-coog-music-2.onrender.com/createsong', {
                 method: 'POST',
-                body: formData // Send FormData instead of JSON
+                body: formData
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const data = await response.json();
-                console.error("Error response:", data);
-                alert("Failed to add song: " + data.message);
-                setIsUploading(false);
+                setUploadStatus(`❌ Failed: ${data.message || 'Upload failed'}`);
                 return;
             }
 
-            const data = await response.json();
-            alert("Song added successfully!");
-            setSong({ name: "", artist: userId, genre: "", album: "", image: "", songFileBase64: "" });
+            setUploadStatus("✅ Song uploaded successfully!");
+            setSong({
+                name: "",
+                artist: userId,
+                genre: "",
+                album: "",
+                image: "",
+                songFileBase64: ""
+            });
             setPreviewAudio(null);
-            setIsUploading(false); // Reset uploading state
         } catch (error) {
-            console.error("Error adding song:", error);
-            alert("Error connecting to the server.");
+            setUploadStatus("❌ Error connecting to the server.");
+            console.error(error);
+        } finally {
             setIsUploading(false);
         }
     };
@@ -81,26 +87,56 @@ export const SongForm = ({ userName, userId }) => {
                     <h2 className="input-username">Create a Song!</h2>
                 </div>
             </div>
+
             <form className="song-form" onSubmit={handleSubmit}>
                 <label>Song Name</label>
-                <input type="text" name="name" placeholder="Enter song name"
-                    value={song.name} onChange={handleChange} required />
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Enter song name"
+                    value={song.name}
+                    onChange={handleChange}
+                    required
+                />
 
                 <label>Genre</label>
-                <input type="text" name="genre" placeholder="Enter genre"
-                    value={song.genre} onChange={handleChange} required />
+                <input
+                    type="text"
+                    name="genre"
+                    placeholder="Enter genre"
+                    value={song.genre}
+                    onChange={handleChange}
+                    required
+                />
 
                 <label>Album Name</label>
-                <input type="text" name="album" placeholder="Enter album name"
-                    value={song.album} onChange={handleChange} required />
+                <input
+                    type="text"
+                    name="album"
+                    placeholder="Enter album name"
+                    value={song.album}
+                    onChange={handleChange}
+                    required
+                />
 
                 <label>Image Link</label>
-                <input type="text" name="image" placeholder="Enter image URL"
-                    value={song.image} onChange={handleChange} required />
+                <input
+                    type="text"
+                    name="image"
+                    placeholder="Enter image URL"
+                    value={song.image}
+                    onChange={handleChange}
+                    required
+                />
 
                 <label>Song File (Audio)</label>
-                <input type="file" name="songFile" accept="audio/*"
-                    onChange={handleSongUpload} required />
+                <input
+                    type="file"
+                    name="songFile"
+                    accept="audio/*"
+                    onChange={handleSongUpload}
+                    required
+                />
 
                 {previewAudio && (
                     <div>
@@ -112,6 +148,19 @@ export const SongForm = ({ userName, userId }) => {
                 <button type="submit" disabled={isUploading}>
                     {isUploading ? 'Uploading...' : 'Create'}
                 </button>
+
+                {uploadStatus && (
+                    <div style={{
+                        marginTop: '1rem',
+                        padding: '0.75rem',
+                        borderRadius: '6px',
+                        backgroundColor: uploadStatus.startsWith("✅") ? "#14532d" :
+                                         uploadStatus.startsWith("❌") ? "#7f1d1d" : "#1e3a8a",
+                        color: "#fff"
+                    }}>
+                        {uploadStatus}
+                    </div>
+                )}
             </form>
         </section>
     );
