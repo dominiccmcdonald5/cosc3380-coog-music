@@ -323,7 +323,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
             <div className="profile-header">
                 <img src={stats.image_url} alt="Profile" className="profile-image" />
                 <h2 className="profile-username">{userName}</h2>
-                {data.isVerified == 1 && (
+                {stats.isVerified == 1 && (
                             <img src={verified} alt="Verified" className="verifieddd-icon" />
                         )}
             </div>
