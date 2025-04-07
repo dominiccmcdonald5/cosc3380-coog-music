@@ -678,7 +678,7 @@ const createSong = async (req, res) => {
                 `INSERT INTO song 
                 (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
                 VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
-                [name, artist, album, genre, imageUrl || null, songUrl]
+                [name, artist, album, genre, imageUrl || null, songFile]
             );
 
             return res.writeHead(201, { 'Content-Type': 'application/json' })
