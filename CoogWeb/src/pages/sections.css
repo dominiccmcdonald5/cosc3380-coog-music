@@ -10,9 +10,14 @@
     background-color: #180F1C; 
 }
 
-.verified-icon {
-    width: 30px; /* Adjust size as needed */
-    height: 30px; /* Adjust size as needed */
+.artist-headerr {
+    display: flex;
+    align-items: center;
+  }
+
+.verifiedd-icon {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
     margin-left: 10px; /* Space between username and icon */
     vertical-align: middle; /* Align icon with text */
   }

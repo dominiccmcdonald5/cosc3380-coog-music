@@ -209,8 +209,12 @@ export const ArtistCard = ({ artist, onArtistClick }) => {
     return (
       <div className="artist-card">
         <img src={artist.image_url || purple_image} alt={artist.username} className="artist-image" />
+        <div className="artist-headerr">
         <h3 className="artist-name">{artist.username}</h3>
-        {artist.isVerified == 1 && <img src={verified} alt="Verified" className="verified-icon" />}
+        {artist.isVerified == 1 && (
+            <img src={verified} alt="Verified" className="verifiedd-icon" />
+        )}
+        </div>
         <button onClick={() => onArtistClick('artist-view', artist)} className="forward-button">
           <img src={forward} alt="forward" className="forward-icon" />
         </button>
