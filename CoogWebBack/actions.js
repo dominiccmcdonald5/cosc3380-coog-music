@@ -2602,10 +2602,10 @@ const adminArtistReport = async (req, res) => {
             query += ` AND a.created_at <= ?`;
             queryParams.push(date_to);
             }
-            if (verified) {
-            query += ` AND a.isVerified = ?`;
-            queryParams.push(verified);
-            }
+            if (verified !== undefined && verified !== null && verified !== "") {
+                query += ` AND a.isVerified = ?`;
+                queryParams.push(verified);
+              }
 
             query += `
             ) AS artist_data
