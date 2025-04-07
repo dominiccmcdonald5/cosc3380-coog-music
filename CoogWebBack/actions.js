@@ -599,65 +599,53 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const createSong = async (req, res) => {
-    let body = '';
-
-    // Parse incoming form data using multer
+    // We don't need to manually parse JSON. Let multer handle the form data
     upload.single('songFile')(req, res, async (err) => {
         if (err) {
             console.error('Error uploading file:', err);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ success: false, message: 'File upload failed' }));
+            return res.status(500).json({ success: false, message: 'File upload failed' });
         }
 
         try {
-            // Ensure all other fields are provided
-            const { name, artist, genre, album, image } = req.body;  // Getting other form fields
+            // Get the form fields (these will be populated by multer)
+            const { name, artist, genre, album, image } = req.body;
             const songFile = req.file;  // The uploaded file from multer
 
+            // Ensure all required fields are provided
             if (!name || !artist || !genre || !album || !songFile) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ 
-                    success: false, 
-                    message: 'Missing required fields (name, artist, genre, album, song file)' 
-                }));
+                return res.status(400).json({
+                    success: false,
+                    message: 'Missing required fields (name, artist, genre, album, song file)',
+                });
             }
 
-            // Verify album belongs to artist (same as before)
+            // Verify album belongs to artist
             const [albumCheck] = await pool.promise().query(
                 "SELECT artist_id FROM album WHERE album_id = ?",
                 [album]
             );
 
             if (albumCheck.length === 0) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ 
-                    success: false, 
-                    message: 'Album does not exist' 
-                }));
+                return res.status(400).json({ success: false, message: 'Album does not exist' });
             }
 
             if (albumCheck[0].artist_id !== Number(artist)) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ 
-                    success: false, 
-                    message: 'Album does not belong to this artist' 
-                }));
+                return res.status(400).json({ success: false, message: 'Album does not belong to this artist' });
             }
 
             // The song file path
             const songFilePath = songFile.path;  // This is the path to the uploaded file on the server
 
-            // Your code to upload the song to Azure Blob Storage
+            // Upload the song to Azure Blob Storage
             let uploadedUrl;
             try {
                 uploadedUrl = await uploadToAzureBlobFromServer(songFilePath, songFile.filename);  // Use path to upload file
             } catch (uploadErr) {
                 console.error('Azure upload failed:', uploadErr);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ 
-                    success: false, 
-                    message: 'Failed to upload file to Azure Blob Storage' 
-                }));
+                return res.status(500).json({
+                    success: false,
+                    message: 'Failed to upload file to Azure Blob Storage',
+                });
             }
 
             // Insert the song into the database
@@ -668,8 +656,7 @@ const createSong = async (req, res) => {
                 [name, artist, album, genre, image || null, uploadedUrl]
             );
 
-            res.writeHead(201, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ 
+            return res.status(201).json({
                 success: true,
                 message: 'Song created successfully',
                 song: {
@@ -680,17 +667,16 @@ const createSong = async (req, res) => {
                     genre,
                     image_url: image || null,
                     song_url: uploadedUrl,
-                    length: 0
-                }
-            }));
+                    length: 0,
+                },
+            });
 
         } catch (error) {
             console.error('Error creating song:', error);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ 
-                success: false, 
-                message: error.message || 'Failed to create song' 
-            }));
+            return res.status(500).json({
+                success: false,
+                message: error.message || 'Failed to create song',
+            });
         }
     });
 };
