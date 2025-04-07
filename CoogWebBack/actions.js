@@ -620,13 +620,13 @@ const createSong = async (req, res) => {
                     }));
             }
 
-            if (album) {
+            
                 // Verify album belongs to artist (assuming album check logic exists in the DB)
                 const [albumCheck] = await pool.promise().query(
                     "SELECT album_id, artist_id FROM album WHERE name = ?",
                     [album]
                 );
-
+                
                 if (albumCheck.length === 0) {
                     album = null; // Set album to null if not found
                 } else {
@@ -636,7 +636,7 @@ const createSong = async (req, res) => {
                             .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
                     }
                 }
-            }
+            
 
             // Handle image (image is expected to be Base64 or URL from frontend)
             const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
