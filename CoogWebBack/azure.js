@@ -11,7 +11,7 @@ async function uploadToAzureBlobFromServer(fileBuffer, fileName) {
     const blockBlobClient = containerClient.getBlockBlobClient(fileName);
     await blockBlobClient.uploadData(fileBuffer);
 
-    return `https://musiclibraryfiles.blob.core.windows.net/${CONTAINER_NAME}/${fileName}`;
+    return `https://musiccontainer.blob.core.windows.net/${CONTAINER_NAME}/${fileName}`;
 
 }
 
