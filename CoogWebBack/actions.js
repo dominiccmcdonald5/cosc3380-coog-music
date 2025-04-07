@@ -635,7 +635,6 @@ const createSong = async (req, res) => {
                         return res.writeHead(400, { 'Content-Type': 'application/json' })
                             .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
                     }
-                    album = albumCheck[0].album_id; // Use album ID for insertion
                 }
             }
 
@@ -692,7 +691,7 @@ if (!imageMatches) {
                 `INSERT INTO song 
                 (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
                 VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
-                [name, artist, album, genre, imageUrl || null, songFile]
+                [name, artist, albumCheck[0].abum_id, genre, imageUrl || null, songFile]
             );
 
             return res.writeHead(201, { 'Content-Type': 'application/json' })
@@ -703,7 +702,7 @@ if (!imageMatches) {
                         song_id: result.insertId,
                         name,
                         artist_id: artist,
-                        album_id: album,
+                        album_id: albumCheck[0].abum_id,
                         genre,
                         image_url: imageUrl || null,
                         song_url: songUrl,
