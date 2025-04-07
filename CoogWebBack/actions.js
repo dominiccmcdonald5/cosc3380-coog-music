@@ -691,7 +691,7 @@ if (!imageMatches) {
                 `INSERT INTO song 
                 (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
                 VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
-                [name, artist, albumCheck[0].abum_id, genre, imageUrl || null, songFile]
+                [name, artist, albumCheck[0].abum_id, genre, imageUrl || null, songUrl]
             );
 
             return res.writeHead(201, { 'Content-Type': 'application/json' })
