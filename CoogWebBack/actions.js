@@ -636,53 +636,55 @@ const createSong = async (req, res) => {
                     .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
             }
 
-            // Handle image (image is expected to be Base64)
+            // Handle image (image is expected to be Base64 or URL from frontend)
             let imageUrl = null;
             if (image) {
-                // Save image logic here (e.g., upload to cloud storage or local storage)
-                imageUrl = await saveImage(image);
+                imageUrl = image; // Directly use the image URL from the frontend (no uploading to Azure)
             }
 
-            // Handle song file
+            // Handle song file (store the song in Azure Blob Storage)
             let songFilePath = null;
+            let songUrl = null;
             if (songFile) {
                 // Extract file extension from MIME type (e.g., 'audio/mp3' => 'mp3')
                 const mimeType = songFile.split(';')[0].split(':')[1]; // 'audio/mp3', 'audio/wav', etc.
                 const fileExtension = mimeType.split('/')[1]; // Extract file extension (mp3, wav, etc.)
                 const songFileName = Date.now() + '.' + fileExtension; // Unique file name with extension
 
-                // Save the song file
+                // Save the song file locally (optional)
                 songFilePath = path.join(__dirname, 'uploads', songFileName);
                 fs.writeFileSync(songFilePath, songFile); // Save the song to disk
 
-                // Optionally upload song to cloud storage (e.g., Azure Blob Storage)
-                const uploadedUrl = await uploadToAzureBlobFromServer(songFilePath, songFileName);
+                // Upload the song to Azure Blob Storage
+                songUrl = await uploadToAzureBlobFromServer(songFilePath, songFileName); // Assuming this function uploads and returns the URL
 
-                // Insert the song into the database (assuming DB pool and SQL queries are correct)
-                const [result] = await pool.promise().query(
-                    `INSERT INTO song 
-                    (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
-                    VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
-                    [name, artist, album, genre, imageUrl || null, uploadedUrl]
-                );
-
-                return res.writeHead(201, { 'Content-Type': 'application/json' })
-                    .end(JSON.stringify({
-                        success: true,
-                        message: 'Song created successfully',
-                        song: {
-                            song_id: result.insertId,
-                            name,
-                            artist_id: artist,
-                            album_id: album,
-                            genre,
-                            image_url: imageUrl || null,
-                            song_url: uploadedUrl,
-                            length: 0,
-                        },
-                    }));
+                // Optionally, remove the song from local storage after uploading to Azure
+                fs.unlinkSync(songFilePath); // Clean up local file
             }
 
+            // Insert the song into the database
+            const [result] = await pool.promise().query(
+                `INSERT INTO song 
+                (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
+                VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
+                [name, artist, album, genre, imageUrl || null, songUrl]
+            );
+
+            return res.writeHead(201, { 'Content-Type': 'application/json' })
+                .end(JSON.stringify({
+                    success: true,
+                    message: 'Song created successfully',
+                    song: {
+                        song_id: result.insertId,
+                        name,
+                        artist_id: artist,
+                        album_id: album,
+                        genre,
+                        image_url: imageUrl || null,
+                        song_url: songUrl,
+                        length: 0,
+                    },
+                }));
         } catch (error) {
             console.error('Error creating song:', error);
             return res.writeHead(500, { 'Content-Type': 'application/json' })
@@ -694,26 +696,7 @@ const createSong = async (req, res) => {
     });
 };
 
-// Function to handle image saving (you can modify this to save the image to cloud storage or database)
-const saveImage = async (base64Image) => {
-    // Decode the Base64 image
-    const matches = base64Image.match(/^data:image\/([a-zA-Z0-9]+);base64,([^\"]+)$/);
-    if (matches && matches.length === 3) {
-        const imageBuffer = Buffer.from(matches[2], 'base64'); // Convert base64 string to buffer
-        const imageFileName = Date.now() + '.' + matches[1]; // Use the image MIME type to generate the file extension
-        const imageFilePath = path.join(__dirname, 'uploads', imageFileName);
 
-        // Save the image to disk (or upload to a cloud service)
-        fs.writeFileSync(imageFilePath, imageBuffer);
-
-        // Optionally upload image to Azure Blob Storage
-        const uploadedImageUrl = await uploadToAzureBlobFromServer(imageFilePath, imageFileName);
-
-        return uploadedImageUrl; // Return the URL of the uploaded image
-    } else {
-        throw new Error('Invalid image data');
-    }
-};
 
 
 const editSong = async (req, res) => {
