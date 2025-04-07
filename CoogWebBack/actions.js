@@ -2854,6 +2854,44 @@ const artistSongReport = async (req, res) => {
     });
 };
 
+const streamSong = async (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+        try {
+            const parsedBody = JSON.parse(body);
+            const { userId, songId } = parsedBody;
+            
+            if (!userId || !songId) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: 'User ID and Song ID are required' }));
+                return;
+            }
+
+            await pool.promise().query(
+                `INSERT INTO history (user_id, song_id, last_listen) VALUES (?, ?, NOW());`,
+                [userId, songId]
+            );
+
+
+            // Send response with the correct status
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                success: true, 
+                message: "song streamed successfully" 
+            }));
+
+        } catch (err) {
+            console.error('Error following artist:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: 'Failed to stream song' }));
+        }
+    });
+};
 
 
 module.exports = {
@@ -2916,6 +2954,7 @@ module.exports = {
     unfollowArtist,
     adminArtistReport,
     adminUserReport,
-    artistSongReport
+    artistSongReport,
+    streamSong
 };
 

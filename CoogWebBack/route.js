@@ -183,6 +183,9 @@ function routes(req, res) {
     if (URL.startsWith('/artistreport') && method === 'POST') {
         return actions.artistSongReport(req, res);
     }
+    if (URL.startsWith('/streamsong') && method === 'POST') {
+        return actions.streamSong(req, res);
+    }
 
 
     res.writeHead(404, { "Content-Type": "application/json" });
