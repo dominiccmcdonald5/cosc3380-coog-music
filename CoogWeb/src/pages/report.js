@@ -72,25 +72,93 @@ export const DataReport = () => {
 
             {/* Artist Report Filter Section */}
             <div className="filter-section">
-                <h3>Filter Artist Report</h3>
-                <div className="filter-form">
-                    <input type="text" name="username" placeholder="Artist Name" value={filters.username} onChange={handleInputChange} />
-                    <input type="date" name="date_from" placeholder="Start Date" value={filters.date_from} onChange={handleInputChange} />
-                    <input type="date" name="date_to" placeholder="End Date" value={filters.date_to} onChange={handleInputChange} />
-                    <input type="number" name="streams" placeholder="Min Streams" value={filters.streams} onChange={handleInputChange} />
-                    <input type="number" name="songs" placeholder="Min Songs" value={filters.songs} onChange={handleInputChange} />
-                    <input type="number" name="albums" placeholder="Min Albums" value={filters.albums} onChange={handleInputChange} />
-                    <input type="number" name="likes" placeholder="Min Likes" value={filters.likes} onChange={handleInputChange} />
-                    <input type="number" name="followers" placeholder="Min Followers" value={filters.followers} onChange={handleInputChange} />
-                    <input type="number" name="unique" placeholder="Min Unique Listeners" value={filters.unique} onChange={handleInputChange} />
-                    <select name="verified" value={filters.verified} onChange={handleInputChange}>
-                    <option value="">Select verification</option>
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-                    </select>
-                    <button onClick={fetchFilteredArtistReport}>Apply Filters</button>
-                </div>
+  <h3>Filter Artist Report</h3>
+  <div className="filter-form">
+    <input
+      type="text"
+      name="username"
+      placeholder="Artist Name"
+      value={filters.username}
+      onChange={handleInputChange}
+    />
+
+    <div className="filter-input">
+      <label htmlFor="date_from">Start Date</label>
+      <input
+        type="date"
+        id="date_from"
+        name="date_from"
+        value={filters.date_from}
+        onChange={handleInputChange}
+      />
+    </div>
+
+            <div className="filter-input">
+            <label htmlFor="date_to">End Date</label>
+            <input
+                type="date"
+                id="date_to"
+                name="date_to"
+                value={filters.date_to}
+                onChange={handleInputChange}
+            />
             </div>
+
+            <input
+            type="number"
+            name="streams"
+            placeholder="Min Streams"
+            value={filters.streams}
+            onChange={handleInputChange}
+            />
+            <input
+            type="number"
+            name="songs"
+            placeholder="Min Songs"
+            value={filters.songs}
+            onChange={handleInputChange}
+            />
+            <input
+            type="number"
+            name="albums"
+            placeholder="Min Albums"
+            value={filters.albums}
+            onChange={handleInputChange}
+            />
+            <input
+            type="number"
+            name="likes"
+            placeholder="Min Likes"
+            value={filters.likes}
+            onChange={handleInputChange}
+            />
+            <input
+            type="number"
+            name="followers"
+            placeholder="Min Followers"
+            value={filters.followers}
+            onChange={handleInputChange}
+            />
+            <input
+            type="number"
+            name="unique"
+            placeholder="Min Unique Listeners"
+            value={filters.unique}
+            onChange={handleInputChange}
+            />
+            <select
+            name="verified"
+            value={filters.verified}
+            onChange={handleInputChange}
+            >
+            <option value="">Select verification</option>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+            </select>
+
+            <button onClick={fetchFilteredArtistReport}>Apply Filters</button>
+        </div>
+        </div>
 
             {/* Artist Report Output Section */}
             {loading ? <p>Loading...</p> : null}
@@ -183,7 +251,7 @@ export const UserDataReport = () => {
         <section className="everything">
             <div className="profile-section">
                 <div className="profile-header">
-                    <h2 className="profile-username">Admin User Report</h2>
+                    <h2 className="profile-username">Admin New User Report</h2>
                 </div>
             </div>
 
@@ -319,16 +387,68 @@ export const SongDataReport = ({ userName }) => {
             <div className="filter-section">
                 <h3>Filter Song Report</h3>
                 <div className="filter-form">
-                    <input type="text" name="song_name" placeholder="Song Name" value={filters.song_name} onChange={handleInputChange} />
-                    <input type="text" name="album_name" placeholder="Album Name" value={filters.album_name} onChange={handleInputChange} />
-                    <input type="date" name="date_from" placeholder="Start Date" value={filters.date_from} onChange={handleInputChange} />
-                    <input type="date" name="date_to" placeholder="End Date" value={filters.date_to} onChange={handleInputChange} />
-                    <input type="number" name="streams" placeholder="Min Streams" value={filters.streams} onChange={handleInputChange} />
-                    <input type="number" name="likes" placeholder="Min Likes" value={filters.likes} onChange={handleInputChange} />
-                    <input type="number" name="unique_listeners" placeholder="Min Unique Listeners" value={filters.unique_listeners} onChange={handleInputChange} />
+                    <input
+                    type="text"
+                    name="song_name"
+                    placeholder="Song Name"
+                    value={filters.song_name}
+                    onChange={handleInputChange}
+                    />
+                    <input
+                    type="text"
+                    name="album_name"
+                    placeholder="Album Name"
+                    value={filters.album_name}
+                    onChange={handleInputChange}
+                    />
+
+                    <div className="filter-input">
+                    <label htmlFor="date_from">Start Date</label>
+                    <input
+                        type="date"
+                        id="date_from"
+                        name="date_from"
+                        value={filters.date_from}
+                        onChange={handleInputChange}
+                    />
+                    </div>
+
+                    <div className="filter-input">
+                    <label htmlFor="date_to">End Date</label>
+                    <input
+                        type="date"
+                        id="date_to"
+                        name="date_to"
+                        value={filters.date_to}
+                        onChange={handleInputChange}
+                    />
+                    </div>
+
+                    <input
+                    type="number"
+                    name="streams"
+                    placeholder="Min Streams"
+                    value={filters.streams}
+                    onChange={handleInputChange}
+                    />
+                    <input
+                    type="number"
+                    name="likes"
+                    placeholder="Min Likes"
+                    value={filters.likes}
+                    onChange={handleInputChange}
+                    />
+                    <input
+                    type="number"
+                    name="unique_listeners"
+                    placeholder="Min Unique Listeners"
+                    value={filters.unique_listeners}
+                    onChange={handleInputChange}
+                    />
+
                     <button onClick={fetchFilteredSongReport}>Apply Filters</button>
                 </div>
-            </div>
+                </div>
 
             {loading ? <p>Loading...</p> : null}
             {songReport && (
