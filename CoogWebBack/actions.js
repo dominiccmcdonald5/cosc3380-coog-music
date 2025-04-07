@@ -596,7 +596,17 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + path.extname(file.originalname));  // rename the file to avoid conflicts
     },
 });
-const upload = multer({ storage: storage });
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, 'uploads/');
+        },
+        filename: (req, file, cb) => {
+            cb(null, Date.now() + path.extname(file.originalname));
+        },
+    }),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB size limit
+});
 
 const createSong = async (req, res) => {
     // We don't need to manually parse JSON. Let multer handle the form data
