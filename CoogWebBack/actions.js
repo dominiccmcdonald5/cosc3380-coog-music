@@ -646,23 +646,32 @@ const createSong = async (req, res) => {
 
             // Handle song file (store the song in Azure Blob Storage)
             let songFilePath = null;
-            let songUrl = null;
-            if (songFile) {
-                // Extract file extension from MIME type (e.g., 'audio/mp3' => 'mp3')
-                const mimeType = songFile.split(';')[0].split(':')[1]; // 'audio/mp3', 'audio/wav', etc.
-                const fileExtension = mimeType.split('/')[1]; // Extract file extension (mp3, wav, etc.)
-                const songFileName = Date.now() + '.' + fileExtension; // Unique file name with extension
+let songUrl = null;
+if (songFile) {
+    // Check if songFile is a Buffer or a File object
+    const mimeType = songFile.mimetype || songFile.split(';')[0].split(':')[1]; // Get mime type from File object (if available) or Base64 string
 
-                // Save the song file locally (optional)
-                songFilePath = path.join(__dirname, 'uploads', songFileName);
-                fs.writeFileSync(songFilePath, songFile); // Save the song to disk
+    // Extract the file extension from MIME type (e.g., 'audio/mp3' => 'mp3')
+    const fileExtension = mimeType.split('/')[1]; // Extract file extension (mp3, wav, etc.)
+    const songFileName = Date.now() + '.' + fileExtension; // Unique file name with extension
 
-                // Upload the song to Azure Blob Storage
-                songUrl = await uploadToAzureBlobFromServer(songFilePath, songFileName); // Assuming this function uploads and returns the URL
+    // Save the song file locally (optional)
+    songFilePath = path.join(__dirname, 'uploads', songFileName);
 
-                // Optionally, remove the song from local storage after uploading to Azure
-                fs.unlinkSync(songFilePath); // Clean up local file
-            }
+    // If songFile is a Buffer (binary data)
+    if (Buffer.isBuffer(songFile)) {
+        fs.writeFileSync(songFilePath, songFile); // Save the binary data to a file
+    } else {
+        // If it's a File object (for example, from a form), use songFile.buffer for binary data
+        fs.writeFileSync(songFilePath, songFile.buffer); // Write the buffer from the File object
+    }
+
+    // Upload the song to Azure Blob Storage
+    songUrl = await uploadToAzureBlobFromServer(songFilePath, songFileName); // Assuming this function uploads and returns the URL
+
+    // Optionally, remove the song from local storage after uploading to Azure
+    fs.unlinkSync(songFilePath); // Clean up local file
+}
 
             // Insert the song into the database
             const [result] = await pool.promise().query(
