@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 const {uploadToAzureBlobFromServer} = require('./azure.js');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
 
 const getUsers = (req, res) => {
     pool.query(queries.getUsers, (error, results) => {
@@ -587,26 +588,41 @@ const getArtistProfileAlbum = async (req, res) => {
     });
 };
 
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');  // specify the folder to save files
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));  // rename the file to avoid conflicts
+    },
+});
+const upload = multer({ storage: storage });
+
 const createSong = async (req, res) => {
     let body = '';
-    req.on('data', (chunk) => {
-        body += chunk.toString();
-    });
 
-    req.on('end', async () => {
+    // Parse incoming form data using multer
+    upload.single('songFile')(req, res, async (err) => {
+        if (err) {
+            console.error('Error uploading file:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ success: false, message: 'File upload failed' }));
+        }
+
         try {
-            const { name, artist, genre, album, image, URL } = JSON.parse(body);
+            // Ensure all other fields are provided
+            const { name, artist, genre, album, image } = req.body;  // Getting other form fields
+            const songFile = req.file;  // The uploaded file from multer
 
-            // Validate required fields
-            if (!name || !artist || !genre || !album || !URL) {
+            if (!name || !artist || !genre || !album || !songFile) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ 
                     success: false, 
-                    message: 'Missing required fields (name, artist, genre, album, URL)' 
+                    message: 'Missing required fields (name, artist, genre, album, song file)' 
                 }));
             }
 
-            // Verify album belongs to artist
+            // Verify album belongs to artist (same as before)
             const [albumCheck] = await pool.promise().query(
                 "SELECT artist_id FROM album WHERE album_id = ?",
                 [album]
@@ -628,14 +644,13 @@ const createSong = async (req, res) => {
                 }));
             }
 
-            // Upload song to Azure Blob Storage
+            // The song file path
+            const songFilePath = songFile.path;  // This is the path to the uploaded file on the server
+
+            // Your code to upload the song to Azure Blob Storage
             let uploadedUrl;
             try {
-                const filePath = path.resolve(URL); // Local path to file
-                const buffer = fs.readFileSync(filePath); // Load file as buffer
-                const fileName = path.basename(filePath); // e.g. song.mp3
-
-                uploadedUrl = await uploadToAzureBlobFromServer(buffer, fileName); // Upload and get URL
+                uploadedUrl = await uploadToAzureBlobFromServer(songFilePath, songFile.filename);  // Use path to upload file
             } catch (uploadErr) {
                 console.error('Azure upload failed:', uploadErr);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -645,7 +660,7 @@ const createSong = async (req, res) => {
                 }));
             }
 
-            // Insert the song
+            // Insert the song into the database
             const [result] = await pool.promise().query(
                 `INSERT INTO song 
                 (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)

@@ -2,18 +2,15 @@ import React, {useState} from 'react';
 import purple_image from './purple_image.png';
 import './inputForms.css';
 
-export const SongForm = ({userName, userId}) => {
+export const SongForm = ({ userName, userId }) => {
     const [song, setSong] = useState({
         name: "",
         artist: userId,
         genre: "",
         album: "",
         image: null,
-        URL: null
+        songFile: null // Instead of storing URL, store the file itself
     });
-
-    const [previewImage, setPreviewImage] = useState(null);
-    const [previewAudio, setPreviewAudio] = useState(null);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -23,54 +20,55 @@ export const SongForm = ({userName, userId}) => {
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Check if the uploaded file is a JPEG
-            if (file.type === "image/png") {
+            // Check if the uploaded file is a valid image
+            if (file.type.startsWith("image/")) {
                 const reader = new FileReader();
                 reader.readAsDataURL(file); // Convert to Base64
                 reader.onloadend = () => {
-                    setSong({ ...song, image: reader.result }); // Store as Base64 string
+                    setSong({ ...song, image: reader.result }); // Store image as Base64 (for preview or backend processing)
                 };
             } else {
-                alert("Only JPEG images are allowed!");
+                alert("Only image files are allowed!");
             }
         }
     };
-    
-    
+
     const handleSongUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Check if the uploaded file is an MP3
-            if (file.type === "audio/mp3") {
-                const reader = new FileReader();
-                reader.readAsDataURL(file); // Convert to Base64
-                reader.onloadend = () => {
-                    setSong({ ...song, URL: reader.result }); // Store as Base64 string
-                };
+            // Check if the uploaded file is an audio file
+            if (file.type.startsWith("audio/")) {
+                setSong({ ...song, songFile: file }); // Store file directly, not as Base64
             } else {
-                alert("Only MP3 audio files are allowed!");
+                alert("Only audio files are allowed!");
             }
         }
     };
-    
-    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Song submitted:", song);
-        
-        try {
-          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/createsong', {
-            method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(song),
-        });
 
-        const data = await response.json();
-            
+        // FormData is used to send the file
+        const formData = new FormData();
+        formData.append("name", song.name);
+        formData.append("artist", song.artist);
+        formData.append("genre", song.genre);
+        formData.append("album", song.album);
+        formData.append("image", song.image); // Sending the image as Base64 (or you can change to send a URL if you want to upload it separately)
+        formData.append("songFile", song.songFile); // Send the song file directly
+
+        try {
+            const response = await fetch("https://cosc3380-coog-music-2.onrender.com/createsong", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+
             if (response.ok) {
                 alert("Song added successfully!");
-                setSong({ name: "", artist: userId,genre: "", album: "", image: "", URL: "" }); // Reset form
+                setSong({ name: "", artist: userId, genre: "", album: "", image: null, songFile: null }); // Reset form
             } else {
                 alert("Failed to add song: " + data.message);
             }
@@ -82,32 +80,64 @@ export const SongForm = ({userName, userId}) => {
 
     return (
         <section className="everything">
-        <div className="input-section">
-                    <div className="profile-header">
-                        <h2 className="input-username">Create a Song!</h2>
-                    </div>
-        </div>
-        <form className="song-form" onSubmit={handleSubmit}>
-            <label>Song Name</label>
-            <input type="text" name="name" placeholder="Enter song name" value={song.name} onChange={handleChange} required />
+            <div className="input-section">
+                <div className="profile-header">
+                    <h2 className="input-username">Create a Song!</h2>
+                </div>
+            </div>
+            <form className="song-form" onSubmit={handleSubmit}>
+                <label>Song Name</label>
+                <input 
+                    type="text" 
+                    name="name" 
+                    placeholder="Enter song name" 
+                    value={song.name} 
+                    onChange={handleChange} 
+                    required 
+                />
 
-            <label>Genre Name</label>
-            <input type="text" name="genre" placeholder="Enter genre" value={song.genre} onChange={handleChange} required />
+                <label>Genre Name</label>
+                <input 
+                    type="text" 
+                    name="genre" 
+                    placeholder="Enter genre" 
+                    value={song.genre} 
+                    onChange={handleChange} 
+                    required 
+                />
 
-            <label>Album Name</label>
-            <input type="text" name="album" placeholder="Enter album name" value={song.album} onChange={handleChange} required />
+                <label>Album Name</label>
+                <input 
+                    type="text" 
+                    name="album" 
+                    placeholder="Enter album name" 
+                    value={song.album} 
+                    onChange={handleChange} 
+                    required 
+                />
 
-            <label>Image Name</label>
-            <input type="file" name="image" placeholder="Enter image name" accept="image/png" onChange={handleImageUpload}  />
+                <label>Image File</label>
+                <input 
+                    type="file" 
+                    name="image" 
+                    accept="image/*" 
+                    onChange={handleImageUpload}  
+                />
 
-            <label>Song URL</label>
-            <input type="file" name="URL" placeholder="Enter song URL" accept="audio/mp3" onChange={handleSongUpload} required />
+                <label>Song File</label>
+                <input 
+                    type="file" 
+                    name="songFile" 
+                    accept="audio/*" 
+                    onChange={handleSongUpload} 
+                    required 
+                />
 
-            <button type="submit">Create</button>
-        </form>
+                <button type="submit">Create</button>
+            </form>
         </section>
     );
-}
+};
 
 export const SongFormEdit = ({userName,userId}) => {
     const [song, setSong] = useState({
