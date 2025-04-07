@@ -257,7 +257,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
           <div className="profile-header">
             <img src={artist.image_url} alt="Profile" className="profile-image" />
             <h2 className="profile-username">{artist.username}</h2>
-            {info.isVerified && <img src={verified} alt="Verified" className="verified-icon" />}
+            {info.isVerified == 1 && <img src={verified} alt="Verified" className="verified-icon" />}
           </div>
           <div className="basic-stats">
             <p className="basic-stats-text">Followers: {info.follow}</p>
