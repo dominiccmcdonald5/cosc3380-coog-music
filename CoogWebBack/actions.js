@@ -644,8 +644,24 @@ const createSong = async (req, res) => {
                 imageUrl = image; // Directly use the image URL from the frontend (no uploading to Azure)
             }
 
-            const buffer = Buffer.from(await songFile.arrayBuffer());
-            const songUrl = await uploadToAzureBlobFromServer(buffer, songFile.name);
+            const audioMatches = songFile.match(/^data:audio\/(\w+);base64,(.+)$/);
+            if (!audioMatches) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid audio file format'
+                    }));
+            }
+
+            const fileType = audioMatches[1]; // mp3, wav, etc.
+            const base64Data = audioMatches[2];
+            const buffer = Buffer.from(base64Data, 'base64');
+
+            // Generate filename
+            const fileName = `${Date.now()}.${fileType}`;
+
+            // Upload to Azure
+            const songUrl = await uploadToAzureBlobFromServer(buffer, fileName);
     
 
             // Insert the song into the database
