@@ -621,21 +621,21 @@ const createSong = async (req, res) => {
             }
 
             if (album) {
-            // Verify album belongs to artist (assuming album check logic exists in the DB)
-            const [albumCheck] = await pool.promise().query(
-                "SELECT artist_id FROM album WHERE name = ?",
-                [album]
-            );
+                // Verify album belongs to artist (assuming album check logic exists in the DB)
+                const [albumCheck] = await pool.promise().query(
+                    "SELECT artist_id FROM album WHERE name = ?",
+                    [album]
+                );
 
-            if (albumCheck.length === 0) {
-                album = null; // Set album to null if not found
-            } else {
-                // Verify the album belongs to the specified artist
-                if (albumCheck[0].artist_id !== Number(artist)) {
-                    return res.writeHead(400, { 'Content-Type': 'application/json' })
-                        .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
+                if (albumCheck.length === 0) {
+                    album = null; // Set album to null if not found
+                } else {
+                    // Verify the album belongs to the specified artist
+                    if (albumCheck[0].artist_id !== Number(artist)) {
+                        return res.writeHead(400, { 'Content-Type': 'application/json' })
+                            .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
+                    }
                 }
-            }
             }
 
             // Handle image (image is expected to be Base64 or URL from frontend)
@@ -644,6 +644,16 @@ const createSong = async (req, res) => {
                 imageUrl = image; // Directly use the image URL from the frontend (no uploading to Azure)
             }
 
+            // Ensure songFile is a base64 string before proceeding
+            if (typeof songFile !== 'string' || !songFile.startsWith('data:audio/')) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid audio file format'
+                    }));
+            }
+
+            // Extract file type and base64 data from songFile
             const audioMatches = songFile.match(/^data:audio\/(\w+);base64,(.+)$/);
             if (!audioMatches) {
                 return res.writeHead(400, { 'Content-Type': 'application/json' })
@@ -662,7 +672,6 @@ const createSong = async (req, res) => {
 
             // Upload to Azure
             const songUrl = await uploadToAzureBlobFromServer(buffer, fileName);
-    
 
             // Insert the song into the database
             const [result] = await pool.promise().query(
@@ -697,6 +706,7 @@ const createSong = async (req, res) => {
         }
     });
 };
+
 
 
 

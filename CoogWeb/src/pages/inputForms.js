@@ -8,8 +8,8 @@ export const SongForm = ({ userName, userId }) => {
         artist: userId,
         genre: "",
         album: "",
-        image: null,
-        songFile: null // Instead of storing URL, store the file itself
+        image: null, // Store the image file itself
+        songFile: null // Store the song file itself
     });
 
     const handleChange = (e) => {
@@ -22,11 +22,17 @@ export const SongForm = ({ userName, userId }) => {
         if (file) {
             // Check if the uploaded file is a valid image
             if (file.type.startsWith("image/")) {
+                // Create a FileReader to read the image file as a data URL (base64)
                 const reader = new FileReader();
-                reader.readAsDataURL(file); // Convert to Base64
+    
+                // When the file is read, update the state with the base64 data URL
                 reader.onloadend = () => {
-                    setSong({ ...song, image: reader.result }); // Store image as Base64 (for preview or backend processing)
+                    const imageBase64 = reader.result; // The base64 data URL
+                    setSong((prevSong) => ({ ...prevSong, image: imageBase64 }));
                 };
+    
+                // Read the file as a data URL (base64)
+                reader.readAsDataURL(file);
             } else {
                 alert("Only image files are allowed!");
             }
@@ -36,9 +42,18 @@ export const SongForm = ({ userName, userId }) => {
     const handleSongUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Check if the uploaded file is an audio file
             if (file.type.startsWith("audio/")) {
-                setSong({ ...song, songFile: file }); // Store file directly, not as Base64
+                // Create a FileReader to read the file as a data URL (base64)
+                const reader = new FileReader();
+    
+                // When the file is read, update the state with the base64 data URL
+                reader.onloadend = () => {
+                    const songBase64 = reader.result; // The base64 data URL
+                    setSong((prevSong) => ({ ...prevSong, songFile: songBase64 }));
+                };
+    
+                // Read the file as a data URL (base64)
+                reader.readAsDataURL(file);
             } else {
                 alert("Only audio files are allowed!");
             }
@@ -49,19 +64,13 @@ export const SongForm = ({ userName, userId }) => {
         e.preventDefault();
         console.log("Song submitted:", song);
 
-        // FormData is used to send the file
-        const formData = new FormData();
-        formData.append("name", song.name);
-        formData.append("artist", song.artist);
-        formData.append("genre", song.genre);
-        formData.append("album", song.album);
-        formData.append("image", song.image); // Sending the image as Base64 (or you can change to send a URL if you want to upload it separately)
-        formData.append("songFile", song.songFile); // Send the song file directly
+        // Create FormData to send files and other form data
 
         try {
             const response = await fetch("https://cosc3380-coog-music-2.onrender.com/createsong", {
                 method: "POST",
-                body: formData,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(song),
             });
 
             const data = await response.json();
