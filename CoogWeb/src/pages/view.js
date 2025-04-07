@@ -3,6 +3,7 @@ import purple_image from './purple_image.png';
 import heart from './heart.png';
 import './view.css';
 import play_button from './play.png';
+import verified from './isverifiedlogo.png';
 
 export const AlbumViewList = ({artist = {}}) => {
     const [albums, setAlbums] = useState([]);
@@ -210,6 +211,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
         streams: 0,
         likedSongs: 0,
         likedAlbums: 0,
+        isVerified: false,
     });
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -231,7 +233,8 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
                             follow: data.follow,
                             streams: data.streams,
                             likedSongs: data.likedSongs,
-                            likedAlbums: data.likedAlbums});  
+                            likedAlbums: data.likedAlbums,
+                            isVerified: data.isVerified});  
                     } else {
                         setError('Failed to fetch artist info');
                     }
@@ -254,6 +257,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
           <div className="profile-header">
             <img src={artist.image_url} alt="Profile" className="profile-image" />
             <h2 className="profile-username">{artist.username}</h2>
+            {info.isVerified == 1 && <img src={verified} alt="Verified" className="verified-icon" />}
           </div>
           <div className="basic-stats">
             <p className="basic-stats-text">Followers: {info.follow}</p>

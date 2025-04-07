@@ -10,6 +10,18 @@
     background-color: #180F1C; 
 }
 
+.artist-headerr {
+    display: flex;
+    align-items: center;
+  }
+
+.verifiedd-icon {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+    margin-left: 10px; /* Space between username and icon */
+    vertical-align: middle; /* Align icon with text */
+  }
+
 .song-card {
     background: #303030;
     color: white;

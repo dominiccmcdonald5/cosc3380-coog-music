@@ -24,6 +24,13 @@
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
     margin-right: 20px; /* Add spacing between the image and username */
   }
+
+  .verified-icon {
+    width: 30px; /* Adjust size as needed */
+    height: 30px; /* Adjust size as needed */
+    margin-left: 10px; /* Space between username and icon */
+    vertical-align: middle; /* Align icon with text */
+  }
   
   .profile-username {
     font-size: 60px;

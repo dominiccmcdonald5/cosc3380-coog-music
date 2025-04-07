@@ -146,7 +146,7 @@ const handleLogin = async (req, res) => {
 
 const getArtistList = async (req, res) => {
     try {
-        const [artists] = await pool.promise().query(`SELECT artist_id, username, image_url FROM artist`);
+        const [artists] = await pool.promise().query(`SELECT artist_id, username, image_url, isVerified FROM artist`);
         
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, artists}));  // Ensure response is sent
@@ -228,13 +228,15 @@ const getArtistViewInfo = async (req, res) => {
             FROM liked_album, album, artist 
             WHERE album.album_id = liked_album.album_id AND album.artist_id = artist.artist_id AND artist.username = ?;`, [username]);
 
+        const [isVerifiedAccount] = await pool.promise().query(`SELECT isVerified FROM artist WHERE username = ?;`, [username]);
             
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, 
             follow: followersResult[0].follow, 
             streams: streamsResult[0].streams_count, 
             likedSongs: likedSongsResult[0].liked_songs_count, 
-            likedAlbums: likedAlbumsResult[0].liked_albums_count 
+            likedAlbums: likedAlbumsResult[0].liked_albums_count, 
+            isVerified: isVerifiedAccount[0].isVerified
         }));
     }catch (err) {
         console.error('Error fetching artists:', err);
@@ -538,6 +540,7 @@ const getArtistInfo = async (req, res) => {
             FROM liked_album, album, artist 
             WHERE album.album_id = liked_album.album_id AND album.artist_id = artist.artist_id AND artist.username = ?;`, [userName]);
 
+        const [isVerifiedAccount] = await pool.promise().query(`SELECT isVerified FROM artist WHERE username = ?;`, [userName]);
             
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true,
@@ -545,7 +548,8 @@ const getArtistInfo = async (req, res) => {
             follow: followersResult[0].follow, 
             streams: streamsResult[0].streams_count, 
             likedSongs: likedSongsResult[0].liked_songs_count, 
-            likedAlbums: likedAlbumsResult[0].liked_albums_count 
+            likedAlbums: likedAlbumsResult[0].liked_albums_count ,
+            isVerified: isVerifiedAccount[0].isVerified
         }));
     }catch (err) {
         console.error('Error fetching artists:', err);
@@ -2571,81 +2575,70 @@ const adminArtistReport = async (req, res) => {
             const parsedBody = JSON.parse(body);
             const { username, date_from, date_to, streams, songs, albums, likes, followers, unique, verified } = parsedBody;
             
-            let query = `SELECT a.username, a.created_at, a.isVerified,
-					(SELECT COUNT(*) FROM history s 
-                     JOIN song so ON s.song_id = so.song_id 
-                     WHERE so.artist_id = a.artist_id) AS total_streams,
-                    
-                    -- Count songs from songs table
-                    (SELECT COUNT(*) FROM song so WHERE so.artist_id = a.artist_id) AS total_songs,
-
-                    -- Count albums from albums table
-                    (SELECT COUNT(*) FROM album al WHERE al.artist_id = a.artist_id) AS total_albums,
-
-                    -- Count likes from likes table
-                    (SELECT COUNT(*) FROM liked_song l JOIN song so ON l.song_id = so.song_id WHERE so.artist_id = a.artist_id) AS total_likes,
-
-                    -- Count followers from followers table
-                    (SELECT COUNT(*) FROM following f WHERE f.artist_id = a.artist_id) AS total_followers,
-
-                    (SELECT COUNT(DISTINCT s.user_id) FROM history s 
-                     JOIN song so ON s.song_id = so.song_id 
-                     WHERE so.artist_id = a.artist_id) AS unique_listeners
-            
-            FROM artist as a WHERE 1=1`; // Base query
+            let query = `
+            SELECT * FROM (
+                SELECT a.username, a.created_at, a.isVerified,
+                (SELECT COUNT(*) FROM history s 
+                    JOIN song so ON s.song_id = so.song_id 
+                    WHERE so.artist_id = a.artist_id) AS total_streams,
+                
+                (SELECT COUNT(*) FROM song so WHERE so.artist_id = a.artist_id) AS total_songs,
+                (SELECT COUNT(*) FROM album al WHERE al.artist_id = a.artist_id) AS total_albums,
+                (SELECT COUNT(*) FROM liked_song l JOIN song so ON l.song_id = so.song_id WHERE so.artist_id = a.artist_id) AS total_likes,
+                (SELECT COUNT(*) FROM following f WHERE f.artist_id = a.artist_id) AS total_followers,
+                (SELECT COUNT(DISTINCT s.user_id) FROM history s 
+                    JOIN song so ON s.song_id = so.song_id 
+                    WHERE so.artist_id = a.artist_id) AS unique_listeners
+                FROM artist AS a
+                WHERE 1=1
+            `;
             let queryParams = [];
-            
+
             if (username) {
-                query += ` AND username LIKE ?`;
-                queryParams.push(`%${username}%`);
+            query += ` AND a.username LIKE ?`;
+            queryParams.push(`%${username}%`);
             }
-
             if (date_from) {
-                query += ` AND created_at >= ?`;
-                queryParams.push(date_from);
+            query += ` AND a.created_at >= ?`;
+            queryParams.push(date_from);
             }
-
             if (date_to) {
-                query += ` AND created_at <= ?`;
-                queryParams.push(date_to);
+            query += ` AND a.created_at <= ?`;
+            queryParams.push(date_to);
             }
-
-            if (verified) {
-                query += AND `isVerified = ?`;
+            if (verified !== undefined && verified !== null && verified !== "") {
+                query += ` AND a.isVerified = ?`;
                 queryParams.push(verified);
-            }
+              }
 
-            query += ` HAVING 1=1`;
+            query += `
+            ) AS artist_data
+            WHERE 1=1
+            `;
 
             if (streams) {
-                query += ` AND total_streams >= ?`;
-                queryParams.push(streams);
+            query += ` AND total_streams >= ?`;
+            queryParams.push(streams);
             }
-
             if (songs) {
-                query += ` AND total_songs >= ?`;
-                queryParams.push(songs);
+            query += ` AND total_songs >= ?`;
+            queryParams.push(songs);
             }
-
             if (albums) {
-                query += ` AND total_albums >= ?`;
-                queryParams.push(albums);
+            query += ` AND total_albums >= ?`;
+            queryParams.push(albums);
             }
-
-
             if (likes) {
-                query += ` AND total_likes >= ?`;
-                queryParams.push(likes);
+            query += ` AND total_likes >= ?`;
+            queryParams.push(likes);
             }
-
             if (followers) {
-                query += ` AND total_followers >= ?`;
-                queryParams.push(followers)
+            query += ` AND total_followers >= ?`;
+            queryParams.push(followers);
             }
-
             if (unique) {
-                query += ` AND unique_listeners >= ?`;
-                queryParams.push(unique);
+            query += ` AND unique_listeners >= ?`;
+            queryParams.push(unique);
             }
 
             const [rows] = await pool.promise().query(query, queryParams);
