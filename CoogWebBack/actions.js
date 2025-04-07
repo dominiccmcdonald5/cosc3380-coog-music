@@ -228,13 +228,15 @@ const getArtistViewInfo = async (req, res) => {
             FROM liked_album, album, artist 
             WHERE album.album_id = liked_album.album_id AND album.artist_id = artist.artist_id AND artist.username = ?;`, [username]);
 
+        const [isVerifiedAccount] = await pool.promise().query(`SELECT isVerified FROM artist WHERE username = ?;`, [username]);
             
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, 
             follow: followersResult[0].follow, 
             streams: streamsResult[0].streams_count, 
             likedSongs: likedSongsResult[0].liked_songs_count, 
-            likedAlbums: likedAlbumsResult[0].liked_albums_count 
+            likedAlbums: likedAlbumsResult[0].liked_albums_count, 
+            isVerified: isVerifiedAccount[0].isVerified
         }));
     }catch (err) {
         console.error('Error fetching artists:', err);
