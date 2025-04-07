@@ -70,7 +70,7 @@ const SideBar = ({ onButtonClick, accountType }) => {
   );
 };
 
-export const BottomBar = ({ currentSong }) => {
+export const BottomBar = ({ currentSong, userId, accountType }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
 
@@ -79,32 +79,54 @@ export const BottomBar = ({ currentSong }) => {
 
   // Ensure audio src updates when the song changes
   useEffect(() => {
-    console.log("Audio ref:", audioRef.current); // Debugging
-    if (audioRef.current) {
-      console.log("Setting audio src:", song.song_url); // Debugging
-      audioRef.current.src = song.song_url; // Set the src explicitly
-      console.log("Audio element src after setting:", audioRef.current.src); // Debugging
+    if (song && audioRef.current) {
+      // Only log stream to backend for non-admin and non-artist users
+      if (accountType !== 'artist' && accountType !== 'admin') {
+        const streamSong = async () => {
+          try {
+            const response = await fetch('https://cosc3380-coog-music-2.onrender.com/streamsong', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ userId: userId, songId: song.song_id }), // Ensure song.song_id is defined
+            });
+            console.log('Backend response:', response);
+            
+            const data = await response.json();
+            console.log('Stream data:', data);
+          } catch (error) {
+            console.error('Error streaming song:', error);
+          }
+        };
+
+        // Call the streamSong function to log the song play in the history
+        streamSong();
+      }
+
+      // Set the audio source
+      console.log('Setting audio src:', song.song_url); // Debugging
+      audioRef.current.src = song.song_url;
+      console.log('Audio element src after setting:', audioRef.current.src); // Debugging
       setIsPlaying(false); // Reset play state
     }
-  }, [song]);
+  }, [song, userId, accountType]); // Depend on song, userId, and accountType to re-trigger the effect
 
   const togglePlayPause = () => {
     if (audioRef.current) {
-      console.log("Audio src:", audioRef.current.src); // Debugging
-      console.log("Audio paused:", audioRef.current.paused); // Debugging
       if (!isPlaying) {
         audioRef.current
           .play()
           .then(() => {
-            console.log("Playback started"); // Debugging
+            console.log('Playback started'); // Debugging
             setIsPlaying(true);
           })
           .catch((error) => {
-            console.error("Playback failed:", error); // Debugging
+            console.error('Playback failed:', error); // Debugging
           });
       } else {
         audioRef.current.pause();
-        console.log("Playback paused"); // Debugging
+        console.log('Playback paused'); // Debugging
         setIsPlaying(false);
       }
     }
@@ -113,8 +135,12 @@ export const BottomBar = ({ currentSong }) => {
   return (
     <div className="bottom-bar">
       <div className="now-playing">
-        <img src={song.image || purple_image} alt={song.name} className="song-photo" />
-        <span className="current-song-name">{song.name}</span>
+        <img
+          src={song?.image || purple_image}
+          alt={song?.name || 'Song Image'}
+          className="song-photo"
+        />
+        <span className="current-song-name">{song?.name || 'Song Name'}</span>
       </div>
       <button className="play-pause-btn" onClick={togglePlayPause}>
         <img
@@ -124,7 +150,7 @@ export const BottomBar = ({ currentSong }) => {
         />
       </button>
       {/* Audio element with ref and src */}
-      <audio ref={audioRef} src={song.song_url} />
+      <audio ref={audioRef} />
     </div>
   );
 };
@@ -174,7 +200,7 @@ const Home = () => {
           {renderScreen(activeScreen, setActiveScreen, handleArtistClick, handleAlbumClick, handlePlaylistClick, accountType, selectedArtist,selectedAlbum, userName, userImage, userId, selectedPlaylist, setCurrentSong)}
         </div>
       </div>
-      <BottomBar currentSong={currentSong} />
+      <BottomBar currentSong={currentSong} userId={userId} accountType={accountType} />
     </div>
   );
 };
