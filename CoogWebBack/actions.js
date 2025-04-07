@@ -185,7 +185,7 @@ const getUserList = async (req, res) => {
 
 const getSongList = async (req, res) => {
     try {
-        const [songs] = await pool.promise().query(`SELECT song_id, name, song.image_url AS image, artist.username AS artist_username, song.song_url FROM artist, song WHERE song.artist_id = artist.artist_id`);
+        const [songs] = await pool.promise().query(`SELECT song_id, name, song.image_url AS image, artist.username AS artist_username, song.song_url AS song_url FROM artist, song WHERE song.artist_id = artist.artist_id`);
         
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, songs}));  // Ensure response is sent
