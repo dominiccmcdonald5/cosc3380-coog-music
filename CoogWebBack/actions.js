@@ -3,6 +3,9 @@ const pool = require('./database.js');
 const queries = require('./queries.js');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
+const {uploadToAzureBlobFromServer} = require('./azure.js');
+const fs = require('fs');
+const path = require('path');
 
 const getUsers = (req, res) => {
     pool.query(queries.getUsers, (error, results) => {
@@ -586,59 +589,93 @@ const getArtistProfileAlbum = async (req, res) => {
 
 const createSong = async (req, res) => {
     let body = '';
-
     req.on('data', (chunk) => {
         body += chunk.toString();
     });
 
     req.on('end', async () => {
         try {
-            const parsedBody = JSON.parse(body);
-            const { name, artist, genre, album, image, URL } = parsedBody;
-            console.log(name,image,URL);
+            const { name, artist, genre, album, image, URL } = JSON.parse(body);
 
             // Validate required fields
-            if (!name || !artist || !genre || !album || !image || !URL) {
-                throw new Error('Missing required fields');
+            if (!name || !artist || !genre || !album || !URL) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ 
+                    success: false, 
+                    message: 'Missing required fields (name, artist, genre, album, URL)' 
+                }));
             }
 
-            image = image || null;  // Use null if empty
-            URL = URL || null;
-
-            // Check if the album exists and belongs to the artist
-            const [albumExists] = await pool.promise().execute(
-                "SELECT album_id, artist_id FROM album WHERE name = ?",
+            // Verify album belongs to artist
+            const [albumCheck] = await pool.promise().query(
+                "SELECT artist_id FROM album WHERE album_id = ?",
                 [album]
             );
 
-            if (albumExists.length === 0) {
+            if (albumCheck.length === 0) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: 'Album does not exist' }));
+                return res.end(JSON.stringify({ 
+                    success: false, 
+                    message: 'Album does not exist' 
+                }));
             }
 
-            const album_id = albumExists[0].album_id;
-            const album_artist_id = albumExists[0].artist_id;
-
-
-            // Ensure the artist adding the song is the album's owner
-            if (album_artist_id !== Number(artist)) {
+            if (albumCheck[0].artist_id !== Number(artist)) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: 'album does not exist' }));
+                return res.end(JSON.stringify({ 
+                    success: false, 
+                    message: 'Album does not belong to this artist' 
+                }));
+            }
+
+            // Upload song to Azure Blob Storage
+            let uploadedUrl;
+            try {
+                const filePath = path.resolve(URL); // Local path to file
+                const buffer = fs.readFileSync(filePath); // Load file as buffer
+                const fileName = path.basename(filePath); // e.g. song.mp3
+
+                uploadedUrl = await uploadToAzureBlobFromServer(buffer, fileName); // Upload and get URL
+            } catch (uploadErr) {
+                console.error('Azure upload failed:', uploadErr);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ 
+                    success: false, 
+                    message: 'Failed to upload file to Azure Blob Storage' 
+                }));
             }
 
             // Insert the song
-            await pool.promise().query(
-                `INSERT INTO song (name, artist_id, album_id, genre, image_url, play_count, likes,length, song_url, created_at)
-                 VALUES (?, ?, ?, ?, ?, 0, 0,0, ?, NOW())`,
-                [name, artist, album_id, genre, image, URL]
+            const [result] = await pool.promise().query(
+                `INSERT INTO song 
+                (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
+                VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
+                [name, artist, album, genre, image || null, uploadedUrl]
             );
 
             res.writeHead(201, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true, message: 'Song added successfully' }));
-        } catch (err) {
-            console.error('Error adding song:', err);
+            res.end(JSON.stringify({ 
+                success: true,
+                message: 'Song created successfully',
+                song: {
+                    song_id: result.insertId,
+                    name,
+                    artist_id: artist,
+                    album_id: album,
+                    genre,
+                    image_url: image || null,
+                    song_url: uploadedUrl,
+                    length: 0
+                }
+            }));
+
+        } catch (error) {
+            console.error('Error creating song:', error);
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: err.message || 'Failed to add song' }));
+            res.end(JSON.stringify({ 
+                success: false, 
+                message: error.message || 'Failed to create song' 
+            }));
         }
     });
 };
