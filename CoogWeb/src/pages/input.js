@@ -273,6 +273,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
         streams: 0,
         likedSongs: 0,
         likedAlbums: 0,
+        isVerified: false
     });
 
     const [loading, setLoading] = useState(true);  // To track loading state
@@ -297,7 +298,8 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
                                 follow: data.follow,
                                 streams: data.streams,
                                 likedSongs: data.likedSongs,
-                                likedAlbums: data.likedAlbums});  
+                                likedAlbums: data.likedAlbums,
+                                isVerified: data.isVerified});  
                         } else {
                             setError('Failed to fetch artist info');
                         }
@@ -321,6 +323,9 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
             <div className="profile-header">
                 <img src={stats.image_url} alt="Profile" className="profile-image" />
                 <h2 className="profile-username">{userName}</h2>
+                {artist.isVerified == 1 && (
+                            <img src={verified} alt="Verified" className="verifieddd-icon" />
+                        )}
             </div>
             <div className="Basic-Stats">
                 <p className="basic-stats-text"> Followers: {stats.follow}</p>

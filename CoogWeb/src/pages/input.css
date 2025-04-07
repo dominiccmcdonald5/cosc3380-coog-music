@@ -6,6 +6,12 @@
     
   }
 
+  .verifieddd-icon {
+    width: 20px; /* Adjust size as needed */
+    height: 20px; /* Adjust size as needed */
+    margin-left: 10px; /* Space between username and icon */
+    vertical-align: middle; /* Align icon with text */
+  }
   .profile-section:hover {
     box-shadow: 0 0 15px rgba(226, 160, 239, 0.5); /* Lavender glow effect on hover */
   }
