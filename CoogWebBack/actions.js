@@ -644,55 +644,9 @@ const createSong = async (req, res) => {
                 imageUrl = image; // Directly use the image URL from the frontend (no uploading to Azure)
             }
 
-            let songFilePath = null;
-let songUrl = null;
-
-if (songFile) {
-    try {
-        // 1. Get the file extension from the original filename (more reliable than MIME type)
-        const originalExtension = path.extname(songFile.originalname || songFile.name); // .mp3, .wav, etc.
-        const songFileName = Date.now() + originalExtension;
-
-        // 2. Create uploads directory if it doesn't exist
-        const uploadDir = path.join(__dirname, 'uploads');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-
-        // 3. Save the file locally (if you're getting a Buffer or base64 string)
-        songFilePath = path.join(uploadDir, songFileName);
-        
-        // Different handling based on input type:
-        if (songFile.buffer) {
-            // If it's a Buffer (from multer/memoryStorage)
-            fs.writeFileSync(songFilePath, songFile.buffer);
-        } else if (songFile.path) {
-            // If it's already on disk (from multer/diskStorage)
-            songFilePath = songFile.path; // Use existing path
-        } else if (typeof songFile === 'string' && songFile.startsWith('data:')) {
-            // If it's a base64 string
-            const base64Data = songFile.replace(/^data:audio\/\w+;base64,/, '');
-            const buffer = Buffer.from(base64Data, 'base64');
-            fs.writeFileSync(songFilePath, buffer);
-        } else {
-            throw new Error('Unsupported file format');
-        }
-
-        // 4. Upload to Azure Blob Storage
-        songUrl = await uploadToAzureBlobFromServer(songFilePath, songFileName);
-
-        // 5. Clean up local file
-        fs.unlinkSync(songFilePath);
-        songFilePath = null; // Mark as cleaned up
-
-    } catch (error) {
-        // Clean up in case of error
-        if (songFilePath && fs.existsSync(songFilePath)) {
-            fs.unlinkSync(songFilePath).catch(() => {});
-        }
-        throw error; // Re-throw for handling by caller
-    }
-}
+            const buffer = Buffer.from(await songFile.arrayBuffer());
+            const songUrl = await uploadToAzureBlobFromServer(buffer, songFile.name);
+    
 
             // Insert the song into the database
             const [result] = await pool.promise().query(
