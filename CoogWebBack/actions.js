@@ -589,9 +589,16 @@ const getArtistProfileAlbum = async (req, res) => {
 };
 
 const createSong = async (req, res) => {
+    let body = "";
+    
+    // Listen for incoming data
+    req.on('data', chunk => {
+        body += chunk.toString(); // Append received chunks
+    });
     try {
         // Get the form fields (these will be populated by formData sent from the frontend)
-        const { name, artist, genre, album, image, songFile } = req.body;
+        const parsedBody = JSON.parse(body);
+        const { name, artist, genre, album, image, songFile } = parsedBody;
 
         // Check if any required fields are missing
         if (!name || !artist || !genre || !album || !songFile) {
