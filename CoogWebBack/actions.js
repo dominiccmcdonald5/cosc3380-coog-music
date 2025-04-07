@@ -632,7 +632,7 @@ const createSong = async (req, res) => {
                 );
                 
                 if (albumCheck.length === 0) {
-                    album = null; // Set album to null if not found
+                    albumCheck[0].album_id = null; // Set album to null if not found
                 } else {
                     // Verify the album belongs to the specified artist
                     if (albumCheck[0].artist_id !== Number(artist)) {
