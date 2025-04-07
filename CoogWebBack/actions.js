@@ -2669,7 +2669,7 @@ const adminUserReport = async (req, res) => {
 
             let query = `
                 SELECT 
-                    u.user_id, AS user_id,
+                    u.user_id AS user_id,
                     u.username AS user_name, 
                     u.created_at AS created_at,
 
