@@ -623,13 +623,18 @@ const createSong = async (req, res) => {
             if (album) {
             // Verify album belongs to artist (assuming album check logic exists in the DB)
             const [albumCheck] = await pool.promise().query(
-                "SELECT artist_id FROM album WHERE album.name = ?",
+                "SELECT artist_id FROM album WHERE name = ?",
                 [album]
             );
 
-            if (albumCheck[0].artist_id !== Number(artist)) {
-                return res.writeHead(400, { 'Content-Type': 'application/json' })
-                    .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
+            if (albumCheck.length === 0) {
+                album = null; // Set album to null if not found
+            } else {
+                // Verify the album belongs to the specified artist
+                if (albumCheck[0].artist_id !== Number(artist)) {
+                    return res.writeHead(400, { 'Content-Type': 'application/json' })
+                        .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
+                }
             }
             }
 
