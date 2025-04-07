@@ -603,7 +603,7 @@ const createSong = async (req, res) => {
             const { name, artist, genre, album, image, songFile } = parsedBody;
 
             // Check if any required fields are missing
-            if (!name || !artist || !genre || !album || !songFile) {
+            if (!name || !artist || !genre || !songFile) {
                 return res.writeHead(400, { 'Content-Type': 'application/json' })
                     .end(JSON.stringify({
                         success: false,
@@ -620,20 +620,17 @@ const createSong = async (req, res) => {
                     }));
             }
 
+            if (album) {
             // Verify album belongs to artist (assuming album check logic exists in the DB)
             const [albumCheck] = await pool.promise().query(
                 "SELECT artist_id FROM album WHERE album_id = ?",
                 [album]
             );
 
-            if (albumCheck.length === 0) {
-                return res.writeHead(400, { 'Content-Type': 'application/json' })
-                    .end(JSON.stringify({ success: false, message: 'Album does not exist' }));
-            }
-
             if (albumCheck[0].artist_id !== Number(artist)) {
                 return res.writeHead(400, { 'Content-Type': 'application/json' })
                     .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
+            }
             }
 
             // Handle image (image is expected to be Base64 or URL from frontend)
