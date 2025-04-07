@@ -639,10 +639,24 @@ const createSong = async (req, res) => {
             }
 
             // Handle image (image is expected to be Base64 or URL from frontend)
-            let imageUrl = null;
-            if (image) {
-                imageUrl = image; // Directly use the image URL from the frontend (no uploading to Azure)
-            }
+            const imageMatches = imageFile.match(/^data:image\/(\w+);base64,(.+)$/);
+if (!imageMatches) {
+    return res.writeHead(400, { 'Content-Type': 'application/json' })
+        .end(JSON.stringify({
+            success: false,
+            message: 'Invalid image file format'
+        }));
+}
+
+            const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
+            const base64DataImage = imageMatches[2];
+            const bufferImage = Buffer.from(base64Data, 'base64');
+
+            // Generate filename
+            const fileNameImage = `${name}-${Date.now()}.${fileType}`;
+
+            // Upload to Azure (or any storage service)
+            const imageUrl = await uploadToAzureBlobFromServer(buffer, fileNameImage);
 
             // Ensure songFile is a base64 string before proceeding
             if (typeof songFile !== 'string' || !songFile.startsWith('data:audio/')) {
