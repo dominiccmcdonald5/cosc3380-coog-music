@@ -2588,6 +2588,7 @@ const adminArtistReport = async (req, res) => {
                 FROM artist AS a
                 WHERE 1=1
             `;
+            let queryParams = [];
 
             if (username) {
             query += ` AND a.username LIKE ?`;
