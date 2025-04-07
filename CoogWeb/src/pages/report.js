@@ -191,13 +191,34 @@ export const UserDataReport = () => {
 
             {/* Artist Report Filter Section */}
             <div className="filter-section">
-                <h3>Filter User Report</h3>
-                <div className="filter-form">
-                    <input type="date" name="date_from" placeholder="Start Date" value={filters.date_from} onChange={handleInputChange} />
-                    <input type="date" name="date_to" placeholder="End Date" value={filters.date_to} onChange={handleInputChange} />
-                    <button onClick={fetchFilteredUserReport}>Apply Filters</button>
-                </div>
-            </div>
+  <h3>Filter User Report</h3>
+  <div className="filter-form">
+    <div className="filter-input">
+      <label htmlFor="date_from">Start Date</label>
+      <input
+        type="date"
+        id="date_from"
+        name="date_from"
+        value={filters.date_from}
+        onChange={handleInputChange}
+      />
+    </div>
+
+    <div className="filter-input">
+      <label htmlFor="date_to">End Date</label>
+      <input
+        type="date"
+        id="date_to"
+        name="date_to"
+        value={filters.date_to}
+        onChange={handleInputChange}
+      />
+    </div>
+
+    <button onClick={fetchFilteredUserReport}>Apply Filters</button>
+  </div>
+</div>
+
 
             {/* Artist Report Output Section */}
             {loading ? <p>Loading...</p> : null}
