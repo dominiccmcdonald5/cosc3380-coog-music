@@ -623,7 +623,7 @@ const createSong = async (req, res) => {
             if (album) {
             // Verify album belongs to artist (assuming album check logic exists in the DB)
             const [albumCheck] = await pool.promise().query(
-                "SELECT artist_id FROM album WHERE album_id = ?",
+                "SELECT artist_id FROM album WHERE album.name = ?",
                 [album]
             );
 
