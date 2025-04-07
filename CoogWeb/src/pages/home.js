@@ -81,8 +81,8 @@ export const BottomBar = ({ currentSong }) => {
   useEffect(() => {
     console.log("Audio ref:", audioRef.current); // Debugging
     if (audioRef.current) {
-      console.log("Setting audio src:", song.url); // Debugging
-      audioRef.current.src = song.url; // Set the src explicitly
+      console.log("Setting audio src:", song.song_url); // Debugging
+      audioRef.current.src = song.song_url; // Set the src explicitly
       console.log("Audio element src after setting:", audioRef.current.src); // Debugging
       setIsPlaying(false); // Reset play state
     }
@@ -124,7 +124,7 @@ export const BottomBar = ({ currentSong }) => {
         />
       </button>
       {/* Audio element with ref and src */}
-      <audio ref={audioRef} src={song.url} />
+      <audio ref={audioRef} src={song.song_url} />
     </div>
   );
 };
@@ -137,8 +137,8 @@ const Home = () => {
   
 
   const [currentSong, setCurrentSong] = useState({
-      name: "Dawn of Change",
-      url: "/dawnofchange.mp3", // Ensure this path is correct
+      name: "No Song Playing",
+      url: "No Song", // Ensure this path is correct
       photo: purple_image, // Ensure this is imported or a valid path
   });
 

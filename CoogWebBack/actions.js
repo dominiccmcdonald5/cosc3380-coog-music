@@ -3,10 +3,10 @@ const pool = require('./database.js');
 const queries = require('./queries.js');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
-const { BlobServiceClient } = require('@azure/storage-blob');
-import { uploadToAzureBlobFromServer } from './azure.js'; 
-const { parseBuffer } = require('music-metadata');
+const {uploadToAzureBlobFromServer} = require('./azure.js');
 const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
 
 const getUsers = (req, res) => {
     pool.query(queries.getUsers, (error, results) => {
@@ -185,7 +185,7 @@ const getUserList = async (req, res) => {
 
 const getSongList = async (req, res) => {
     try {
-        const [songs] = await pool.promise().query(`SELECT song_id, name, song.image_url AS image, artist.username AS artist_username FROM artist, song WHERE song.artist_id = artist.artist_id`);
+        const [songs] = await pool.promise().query(`SELECT song_id, name, song.image_url AS image, artist.username AS artist_username, song.song_url AS song_url FROM artist, song WHERE song.artist_id = artist.artist_id`);
         
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, songs}));  // Ensure response is sent
@@ -209,9 +209,7 @@ const getArtistViewInfo = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { username} = parsedBody;
         if (!username) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Username is required' }));
-            return;
+            return res.status(400).json({ success: false, message: 'Username is required' });
         }
 
 
@@ -358,9 +356,7 @@ const getAlbumViewInfo = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { album_name} = parsedBody;
         if (!album_name) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Username is required' }));
-            return;
+            return res.status(400).json({ success: false, message: 'Username is required' });
         }
 
 
@@ -523,9 +519,7 @@ const getArtistInfo = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { userName} = parsedBody;
         if (!userName) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Username is required' }));
-            return;
+            return res.status(400).json({ success: false, message: 'Username is required' });
         }
 
         const [imageResult] = await pool.promise().query(`SELECT image_url FROM artist WHERE artist.username = ?;`,[userName])
@@ -594,121 +588,140 @@ const getArtistProfileAlbum = async (req, res) => {
     });
 };
 
+const createSong = async (req, res) => {
+    let body = "";
 
-const uploadSong = async (req, res) => {
-    try {
-      const formData = await new Promise((resolve, reject) => {
-        const busboy = require('busboy');
-        const bb = busboy({ headers: req.headers });
-        const fields = {};
-        let fileBuffer = null;
-        let fileName = '';
-  
-        bb.on('file', (_, file, info) => {
-          const chunks = [];
-          fileName = info.filename;
-  
-          file.on('data', (chunk) => chunks.push(chunk));
-          file.on('end', () => {
-            fileBuffer = Buffer.concat(chunks);
-          });
-        });
-  
-        bb.on('field', (name, val) => {
-          fields[name] = val;
-        });
-  
-        bb.on('finish', () => {
-          if (!fileBuffer) {
-            return reject(new Error('No file uploaded'));
-          }
-          resolve({ fields, fileBuffer, fileName });
-        });
-  
-        req.pipe(bb);
-      });
-  
-      const { username, title, genre, albumName } = formData.fields;
-      const buffer = formData.fileBuffer;
-      const fileName = formData.fileName;
-  
-      // Metadata parsing
-      const metadata = await parseBuffer(buffer);
-      const duration = metadata.format.duration
-        ? Math.floor(metadata.format.duration)
-        : 0;
-  
-      // Upload to Azure Blob
-      const blobPath = `uploads/${Date.now()}_${fileName}`;
-      const fileUrl = await uploadToAzureBlobFromServer(buffer, blobPath);
-  
-      // Get user
-      const [userRows] = await pool.promise().query(
-        'SELECT user_id FROM users WHERE username = ?',
-        [username]
-      );
-      if (!userRows.length) {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ error: 'User not found' }));
-      }
-      const user_id = userRows[0].user_id;
-  
-      // Handle album
-      let albumId = null;
-      if (albumName) {
-        const [albumRows] = await pool.promise().query(
-          'SELECT album_id FROM album WHERE title = ? AND user_id = ?',
-          [albumName, user_id]
-        );
-  
-        if (albumRows.length) {
-          albumId = albumRows[0].album_id;
-        } else {
-          const [albumInsert] = await pool.promise().query(
-            'INSERT INTO album (title, user_id) VALUES (?, ?)',
-            [albumName, user_id]
-          );
-          albumId = albumInsert.insertId;
+    // Listen for incoming data
+    req.on('data', chunk => {
+        body += chunk.toString(); // Append received chunks
+    });
+
+    req.on('end', async () => {  // Ensure data is fully received before parsing
+        try {
+            // Get the form fields (these will be populated by formData sent from the frontend)
+            const parsedBody = JSON.parse(body);
+            const { name, artist, genre, album, image, songFile } = parsedBody;
+
+            // Check if any required fields are missing
+            if (!name || !artist || !genre || !songFile) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Missing required fields (name, artist, genre, album, song file)',
+                    }));
+            }
+
+            // Validate length of fields
+            if (name.length > 255 || artist.length > 255 || genre.length > 255) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'One or more fields are too long',
+                    }));
+            }
+
+            
+                // Verify album belongs to artist (assuming album check logic exists in the DB)
+                const [albumCheck] = await pool.promise().query(
+                    "SELECT album_id, artist_id FROM album WHERE name = ?",
+                    [album]
+                );
+                
+                if (albumCheck.length === 0) {
+                    album = null; // Set album to null if not found
+                } else {
+                    // Verify the album belongs to the specified artist
+                    if (albumCheck[0].artist_id !== Number(artist)) {
+                        return res.writeHead(400, { 'Content-Type': 'application/json' })
+                            .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
+                    }
+                }
+            
+
+            // Handle image (image is expected to be Base64 or URL from frontend)
+            const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+if (!imageMatches) {
+    return res.writeHead(400, { 'Content-Type': 'application/json' })
+        .end(JSON.stringify({
+            success: false,
+            message: 'Invalid image file format'
+        }));
+}
+
+            const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
+            const base64DataImage = imageMatches[2];
+            const bufferImage = Buffer.from(base64DataImage, 'base64');
+
+            // Generate filename
+            const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
+
+            // Upload to Azure (or any storage service)
+            const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
+
+            // Ensure songFile is a base64 string before proceeding
+            if (typeof songFile !== 'string' || !songFile.startsWith('data:audio/')) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid audio file format'
+                    }));
+            }
+
+            // Extract file type and base64 data from songFile
+            const audioMatches = songFile.match(/^data:audio\/(\w+);base64,(.+)$/);
+            if (!audioMatches) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid audio file format'
+                    }));
+            }
+
+            const fileType = audioMatches[1]; // mp3, wav, etc.
+            const base64Data = audioMatches[2];
+            const buffer = Buffer.from(base64Data, 'base64');
+
+            // Generate filename
+            const fileName = `${name}-${artist}-${Date.now()}.${fileType}`; 
+            // Upload to Azure
+            const songUrl = await uploadToAzureBlobFromServer(buffer, fileName);
+
+            // Insert the song into the database
+            const [result] = await pool.promise().query(
+                `INSERT INTO song 
+                (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
+                VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
+                [name, artist, albumCheck[0].abum_id, genre, imageUrl || null, songUrl]
+            );
+
+            return res.writeHead(201, { 'Content-Type': 'application/json' })
+                .end(JSON.stringify({
+                    success: true,
+                    message: 'Song created successfully',
+                    song: {
+                        song_id: result.insertId,
+                        name,
+                        artist_id: artist,
+                        album_id: albumCheck[0].abum_id,
+                        genre,
+                        image_url: imageUrl || null,
+                        song_url: songUrl,
+                        length: 0,
+                    },
+                }));
+        } catch (error) {
+            console.error('Error creating song:', error);
+            return res.writeHead(500, { 'Content-Type': 'application/json' })
+                .end(JSON.stringify({
+                    success: false,
+                    message: error.message || 'Failed to create song',
+                }));
         }
-      }
-  
-      // Insert song
-      const [songInsert] = await pool.promise().query(
-        `INSERT INTO songs (title, duration, file_path, file_format, user_id, album_id, genre, URL, uploaded_at, plays_count)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), 0)`,
-        [
-          title || metadata.common.title || fileName.replace(/\.[^/.]+$/, ''),
-          duration,
-          fileUrl,
-          fileName.split('.').pop() || 'mp3',
-          user_id,
-          albumId,
-          genre || null,
-          fileUrl,
-        ]
-      );
-  
-      // Respond
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(
-        JSON.stringify({
-          success: true,
-          song: {
-            song_id: songInsert.insertId,
-            title,
-            file_path: fileUrl,
-            duration,
-            artist_name: username,
-            album_id: albumId,
-          },
-        })
-      );
-    } catch (err) {
-      console.error('Upload error:', err);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: err.message || 'Upload failed' }));
-    }
-  };
+    });
+};
+
+
+
 
 
 const editSong = async (req, res) => {
@@ -1958,9 +1971,7 @@ const getTopUserSongs = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { userId} = parsedBody;
         if (!userId) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Failed to get Top User Songs' }));
-            return;
+            return res.status(400).json({ success: false, message: 'Username is required' });
         }
 
         const [songs] = await pool.promise().query(`SELECT 
@@ -2002,9 +2013,7 @@ const getTopUserArtists = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { userId} = parsedBody;
         if (!userId) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Username is required' }));
-            return;
+            return res.status(400).json({ success: false, message: 'Username is required' });
         }
 
         const [topArtists] = await pool.promise().query(`SELECT 
@@ -2044,9 +2053,7 @@ const getTopUserAlbums = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { userId} = parsedBody;
         if (!userId) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Username is required' }));
-            return;
+            return res.status(400).json({ success: false, message: 'Username is required' });
         }
 
         const [topAlbums] = await pool.promise().query(`SELECT 
@@ -2088,9 +2095,7 @@ const getTopUserGenres = async (req, res) => {
         const parsedBody = JSON.parse(body);
         const { userId} = parsedBody;
         if (!userId) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Username is required' }));
-            return;
+            return res.status(400).json({ success: false, message: 'Username is required' });
         }
 
         const [topGenres] = await pool.promise().query(`SELECT 
@@ -2127,9 +2132,7 @@ const getTopUserOther = async (req, res) => {
             const { userId } = parsedBody;
             
             if (!userId) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Username is required' }));
-            return;
+                return res.status(400).json({ success: false, message: 'User ID is required' });
             }
 
             const [streamCount] = await pool.promise().query(
