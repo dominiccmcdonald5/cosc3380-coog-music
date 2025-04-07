@@ -4,7 +4,7 @@ import './input.css';
 import {SongForm, SongFormDelete, SongFormEdit} from './inputForms.js';
 import {PlaylistViewPage} from './view.js';
 import forward from './forward.png';
-
+import verified from './isverifiedlogo.png';
 export const PlaylistList = ({ onPlaylistClick, userName, userId }) => {
     const [playlists, setPlaylists] = useState([]);
         const [loading, setLoading] = useState(true);  // To track loading state
