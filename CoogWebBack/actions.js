@@ -668,8 +668,7 @@ const createSong = async (req, res) => {
             const buffer = Buffer.from(base64Data, 'base64');
 
             // Generate filename
-            const fileName = `${Date.now()}.${fileType}`;
-
+            const fileName = `${name}-${artist}-${Date.now()}.${fileType}`; 
             // Upload to Azure
             const songUrl = await uploadToAzureBlobFromServer(buffer, fileName);
 
