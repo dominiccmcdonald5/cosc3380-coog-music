@@ -19,7 +19,7 @@ export const DataReport = () => {
         likes: "",
         followers: "",
         unique: "",
-        verified: null,
+        verified: "",
     });
 
     // Handle input changes

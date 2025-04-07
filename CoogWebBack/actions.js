@@ -2611,7 +2611,7 @@ const adminArtistReport = async (req, res) => {
             }
 
             if (verified) {
-                query += AND `isVerified = ?`;
+                query += `AND isVerified = ?`;
                 queryParams.push(verified);
             }
 
