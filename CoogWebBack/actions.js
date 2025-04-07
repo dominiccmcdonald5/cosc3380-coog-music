@@ -590,105 +590,108 @@ const getArtistProfileAlbum = async (req, res) => {
 
 const createSong = async (req, res) => {
     let body = "";
-    
+
     // Listen for incoming data
     req.on('data', chunk => {
         body += chunk.toString(); // Append received chunks
     });
-    try {
-        // Get the form fields (these will be populated by formData sent from the frontend)
-        const parsedBody = JSON.parse(body);
-        const { name, artist, genre, album, image, songFile } = parsedBody;
 
-        // Check if any required fields are missing
-        if (!name || !artist || !genre || !album || !songFile) {
-            return res.writeHead(400, { 'Content-Type': 'application/json' })
-                .end(JSON.stringify({
-                    success: false,
-                    message: 'Missing required fields (name, artist, genre, album, song file)',
-                }));
-        }
+    req.on('end', async () => {  // Ensure data is fully received before parsing
+        try {
+            // Get the form fields (these will be populated by formData sent from the frontend)
+            const parsedBody = JSON.parse(body);
+            const { name, artist, genre, album, image, songFile } = parsedBody;
 
-        // Validate length of fields
-        if (name.length > 255 || artist.length > 255 || genre.length > 255) {
-            return res.writeHead(400, { 'Content-Type': 'application/json' })
-                .end(JSON.stringify({
-                    success: false,
-                    message: 'One or more fields are too long',
-                }));
-        }
+            // Check if any required fields are missing
+            if (!name || !artist || !genre || !album || !songFile) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Missing required fields (name, artist, genre, album, song file)',
+                    }));
+            }
 
-        // Verify album belongs to artist (assuming album check logic exists in the DB)
-        const [albumCheck] = await pool.promise().query(
-            "SELECT artist_id FROM album WHERE album_id = ?",
-            [album]
-        );
+            // Validate length of fields
+            if (name.length > 255 || artist.length > 255 || genre.length > 255) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'One or more fields are too long',
+                    }));
+            }
 
-        if (albumCheck.length === 0) {
-            return res.writeHead(400, { 'Content-Type': 'application/json' })
-                .end(JSON.stringify({ success: false, message: 'Album does not exist' }));
-        }
-
-        if (albumCheck[0].artist_id !== Number(artist)) {
-            return res.writeHead(400, { 'Content-Type': 'application/json' })
-                .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
-        }
-
-        // Handle image (image is expected to be Base64)
-        let imageUrl = null;
-        if (image) {
-            // Save image logic here (e.g., upload to cloud storage or local storage)
-            imageUrl = await saveImage(image);
-        }
-
-        // Handle song file
-        let songFilePath = null;
-        if (songFile) {
-            // Extract file extension from MIME type (e.g., 'audio/mp3' => 'mp3')
-            const mimeType = songFile.split(';')[0].split(':')[1]; // 'audio/mp3', 'audio/wav', etc.
-            const fileExtension = mimeType.split('/')[1]; // Extract file extension (mp3, wav, etc.)
-            const songFileName = Date.now() + '.' + fileExtension; // Unique file name with extension
-
-            // Save the song file
-            songFilePath = path.join(__dirname, 'uploads', songFileName);
-            fs.writeFileSync(songFilePath, songFile); // Save the song to disk
-
-            // Optionally upload song to cloud storage (e.g., Azure Blob Storage)
-            const uploadedUrl = await uploadToAzureBlobFromServer(songFilePath, songFileName);
-
-            // Insert the song into the database (assuming DB pool and SQL queries are correct)
-            const [result] = await pool.promise().query(
-                `INSERT INTO song 
-                (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
-                VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
-                [name, artist, album, genre, imageUrl || null, uploadedUrl]
+            // Verify album belongs to artist (assuming album check logic exists in the DB)
+            const [albumCheck] = await pool.promise().query(
+                "SELECT artist_id FROM album WHERE album_id = ?",
+                [album]
             );
 
-            return res.writeHead(201, { 'Content-Type': 'application/json' })
+            if (albumCheck.length === 0) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({ success: false, message: 'Album does not exist' }));
+            }
+
+            if (albumCheck[0].artist_id !== Number(artist)) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
+            }
+
+            // Handle image (image is expected to be Base64)
+            let imageUrl = null;
+            if (image) {
+                // Save image logic here (e.g., upload to cloud storage or local storage)
+                imageUrl = await saveImage(image);
+            }
+
+            // Handle song file
+            let songFilePath = null;
+            if (songFile) {
+                // Extract file extension from MIME type (e.g., 'audio/mp3' => 'mp3')
+                const mimeType = songFile.split(';')[0].split(':')[1]; // 'audio/mp3', 'audio/wav', etc.
+                const fileExtension = mimeType.split('/')[1]; // Extract file extension (mp3, wav, etc.)
+                const songFileName = Date.now() + '.' + fileExtension; // Unique file name with extension
+
+                // Save the song file
+                songFilePath = path.join(__dirname, 'uploads', songFileName);
+                fs.writeFileSync(songFilePath, songFile); // Save the song to disk
+
+                // Optionally upload song to cloud storage (e.g., Azure Blob Storage)
+                const uploadedUrl = await uploadToAzureBlobFromServer(songFilePath, songFileName);
+
+                // Insert the song into the database (assuming DB pool and SQL queries are correct)
+                const [result] = await pool.promise().query(
+                    `INSERT INTO song 
+                    (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
+                    VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
+                    [name, artist, album, genre, imageUrl || null, uploadedUrl]
+                );
+
+                return res.writeHead(201, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: true,
+                        message: 'Song created successfully',
+                        song: {
+                            song_id: result.insertId,
+                            name,
+                            artist_id: artist,
+                            album_id: album,
+                            genre,
+                            image_url: imageUrl || null,
+                            song_url: uploadedUrl,
+                            length: 0,
+                        },
+                    }));
+            }
+
+        } catch (error) {
+            console.error('Error creating song:', error);
+            return res.writeHead(500, { 'Content-Type': 'application/json' })
                 .end(JSON.stringify({
-                    success: true,
-                    message: 'Song created successfully',
-                    song: {
-                        song_id: result.insertId,
-                        name,
-                        artist_id: artist,
-                        album_id: album,
-                        genre,
-                        image_url: imageUrl || null,
-                        song_url: uploadedUrl,
-                        length: 0,
-                    },
+                    success: false,
+                    message: error.message || 'Failed to create song',
                 }));
         }
-
-    } catch (error) {
-        console.error('Error creating song:', error);
-        return res.writeHead(500, { 'Content-Type': 'application/json' })
-            .end(JSON.stringify({
-                success: false,
-                message: error.message || 'Failed to create song',
-            }));
-    }
+    });
 };
 
 // Function to handle image saving (you can modify this to save the image to cloud storage or database)
