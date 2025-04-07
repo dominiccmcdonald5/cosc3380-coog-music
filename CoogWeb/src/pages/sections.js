@@ -146,13 +146,6 @@ export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
             <h3 className="song-name">{song.name}</h3>
             <h3 className="song-artist">{song.artist_name}</h3>
 
-            {/* Render Audio Player for Song */}
-            {song.song_url && (
-                <audio controls>
-                    <source src={`data:audio/mp3;base64,${song.song_url}`} type="audio/mp3" />
-                    Your browser does not support the audio element.
-                </audio>
-            )}
 
             <div className="bottom-section">
                 {accountType !== 'artist' && accountType !== 'admin' && (
