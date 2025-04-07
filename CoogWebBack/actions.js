@@ -2702,7 +2702,7 @@ const adminUserReport = async (req, res) => {
                     LIMIT 1) AS favorite_artist
 
                 FROM user u 
-                WHERE 1=1;
+                WHERE 1=1
             `;
 
             let queryParams = [];
