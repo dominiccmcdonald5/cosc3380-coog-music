@@ -2665,41 +2665,47 @@ const adminUserReport = async (req, res) => {
     req.on("end", async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const { username, date_from, date_to, streams, playlists, likedsong, likedalbums, following, uniquesongs } = parsedBody;
+            const { date_from, date_to} = parsedBody;
 
             let query = `
                 SELECT 
-                    u.username, 
-                    u.created_at,
+                    u.user_id, AS user_id,
+                    u.username AS user_name, 
+                    u.created_at AS created_at,
 
-                    -- Total streams by user
-                    (SELECT COUNT(*) FROM history h WHERE h.user_id = u.user_id) AS total_streams,
+                    -- Most recent playlist created by the user
+                    (SELECT p.name 
+                    FROM playlist p 
+                    WHERE p.user_id = u.user_id 
+                    ORDER BY p.created_at DESC 
+                    LIMIT 1) AS most_recent_playlist,
 
-                    -- Count of playlists created by user
-                    (SELECT COUNT(*) FROM playlist p WHERE p.user_id = u.user_id) AS total_playlists,
+                    -- Number of songs in the most recent playlist
+                    (SELECT COUNT(*) 
+                    FROM song_in_playlist ps 
+                    WHERE ps.playlist_id = (
+                        SELECT p.playlist_id 
+                        FROM playlist p 
+                        WHERE p.user_id = u.user_id 
+                        ORDER BY p.created_at DESC 
+                        LIMIT 1
+                    )) AS songs_in_recent_playlist,
 
-                    -- Count of songs liked by user
-                    (SELECT COUNT(*) FROM liked_song ls WHERE ls.user_id = u.user_id) AS total_liked_songs,
-
-                    -- Count of albums liked by user
-                    (SELECT COUNT(*) FROM liked_album la WHERE la.user_id = u.user_id) AS total_liked_albums,
-
-                    -- Total artists user is following
-                    (SELECT COUNT(*) FROM following f WHERE f.user_id = u.user_id) AS total_following,
-
-                    -- Count of unique songs streamed
-                    (SELECT COUNT(DISTINCT h.song_id) FROM history h WHERE h.user_id = u.user_id) AS total_unique_songs
+                    -- Favorite artist (by number of streams)
+                    (SELECT a.username 
+                    FROM artist a 
+                    JOIN song s ON s.artist_id = a.artist_id 
+                    JOIN history h ON h.song_id = s.song_id 
+                    WHERE h.user_id = u.user_id 
+                    GROUP BY a.artist_id 
+                    ORDER BY COUNT(*) DESC 
+                    LIMIT 1) AS favorite_artist
 
                 FROM user u 
-                WHERE 1=1
+                WHERE 1=1;
             `;
 
             let queryParams = [];
-
-            if (username) {
-                query += ` AND u.username LIKE ?`;
-                queryParams.push(`%${username}%`);
-            }
 
             if (date_from) {
                 query += ` AND u.created_at >= ?`;
@@ -2709,39 +2715,6 @@ const adminUserReport = async (req, res) => {
             if (date_to) {
                 query += ` AND u.created_at <= ?`;
                 queryParams.push(date_to);
-            }
-
-            // HAVING clause for aggregated columns
-            query += ` HAVING 1=1`;
-
-            if (streams) {
-                query += ` AND total_streams >= ?`;
-                queryParams.push(streams);
-            }
-
-            if (playlists) {
-                query += ` AND total_playlists >= ?`;
-                queryParams.push(playlists);
-            }
-
-            if (likedsong) {
-                query += ` AND total_liked_songs >= ?`;
-                queryParams.push(likedsong);
-            }
-
-            if (likedalbums) {
-                query += ` AND total_liked_albums >= ?`;
-                queryParams.push(likedalbums);
-            }
-
-            if (following) {
-                query += ` AND total_following >= ?`;
-                queryParams.push(following);
-            }
-
-            if (uniquesongs) {
-                query += ` AND total_unique_songs >= ?`;
-                queryParams.push(uniquesongs);
             }
 
             const [rows] = await pool.promise().query(query, queryParams);

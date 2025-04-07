@@ -139,15 +139,8 @@ export const UserDataReport = () => {
 
     // State for filter inputs
     const [filters, setFilters] = useState({
-        username: "",
         date_from: "",
-        date_to: "",
-        streams: "",
-        playlists: "",
-        likedsong: "",
-        likedalbums: "",
-        following: "",
-        uniquesongs: "",
+        date_to: ""
     });
 
     // Handle input changes
@@ -200,15 +193,8 @@ export const UserDataReport = () => {
             <div className="filter-section">
                 <h3>Filter User Report</h3>
                 <div className="filter-form">
-                    <input type="text" name="username" placeholder="User Name" value={filters.username} onChange={handleInputChange} />
                     <input type="date" name="date_from" placeholder="Start Date" value={filters.date_from} onChange={handleInputChange} />
                     <input type="date" name="date_to" placeholder="End Date" value={filters.date_to} onChange={handleInputChange} />
-                    <input type="number" name="streams" placeholder="Min Streams" value={filters.streams} onChange={handleInputChange} />
-                    <input type="number" name="playlists" placeholder="Min Playlists" value={filters.playlists} onChange={handleInputChange} />
-                    <input type="number" name="likedsong" placeholder="Min Liked Songs" value={filters.likedsong} onChange={handleInputChange} />
-                    <input type="number" name="likedalbums" placeholder="Min Liked Albums" value={filters.likedalbums} onChange={handleInputChange} />
-                    <input type="number" name="following" placeholder="Min Following" value={filters.following} onChange={handleInputChange} />
-                    <input type="number" name="uniquesongs" placeholder="Min Unique Songs" value={filters.uniquesongs} onChange={handleInputChange} />
                     <button onClick={fetchFilteredUserReport}>Apply Filters</button>
                 </div>
             </div>
@@ -222,25 +208,19 @@ export const UserDataReport = () => {
                             <tr>
                                 <th>User Name</th>
                                 <th>Date Joined</th>
-                                <th>Unique Songs</th>
-                                <th>Following</th>
-                                <th>Streams</th>
-                                <th>Liked Albums</th>
-                                <th>Liked Songs</th>
-                                <th>Playlists</th>
+                                <th>Most Recent Playlist</th>
+                                <th>Songs in Recent Playlist</th>
+                                <th>Favorite Artist</th>
                             </tr>
                         </thead>
                         <tbody>
                             {userReport.map((user) => (
-                                <tr key={user.artist_id}>
-                                    <td>{user.username}</td>
+                                <tr key={user.user_id}>
+                                    <td>{user.user_name}</td>
                                     <td>{user.created_at}</td>
-                                    <td>{user.total_unique_songs}</td>
-                                    <td>{user.total_following}</td>
-                                    <td>{user.total_streams}</td>
-                                    <td>{user.total_liked_albums}</td>
-                                    <td>{user.total_liked_songs}</td>
-                                    <td>{user.total_playlists}</td>
+                                    <td>{user.most_recent_playlist}</td>
+                                    <td>{user.songs_in_recent_playlist}</td>
+                                    <td>{user.favorite_artist}</td>
                                 </tr>
                             ))}
                         </tbody>
