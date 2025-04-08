@@ -1828,12 +1828,19 @@ const editInfo = async (req, res) => {
                 updateValues.push(username);
                 await pool.promise().query(updateQuery, updateValues);
                 isWorking = true;
+
+                const [updatedUser] = await pool.promise().query(
+                    `SELECT image_url FROM ${accountType} WHERE username = ?`, [username]
+                  );
             }
             }
 
             if (isWorking) {
                 res.writeHead(201, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ success: true }));
+                res.end(JSON.stringify({
+                    success: true,
+                    image_url: updatedUser[0]?.image_url || null,
+                  }));
             } else {
                 res.writeHead(400, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ success: false, message: "No changes were made." }));

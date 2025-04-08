@@ -70,6 +70,7 @@ const SettingsPage = () => {
 
             const result = await response.json();
             if (result.success) {
+                setUserImage(result.image_url)
                 alert('Account deleted successfully');
                 navigate('/');  // Redirect to home page after deletion
             } else {
