@@ -722,9 +722,8 @@ export const PlaylistFormEdit = ({playlist, userId}) => {
                 // When the file is read, update the state with the base64 data URL
                 reader.onloadend = () => {
                     const imageBase64 = reader.result; // The base64 data URL
-                    setImage(imageBase64);
+                    setPlaylisting({ ...playlisting, image: imageBase64 });
                 };
-    
                 // Read the file as a data URL (base64)
                 reader.readAsDataURL(file);
             } else {
@@ -747,7 +746,7 @@ export const PlaylistFormEdit = ({playlist, userId}) => {
             
             if (response.ok) {
                 alert("Playlist edited successfully!");
-                setPlaylist({ prevName: playlisting.prevName, name: "", user: userId, image: ""}); // Reset form
+                setPlaylisting({ prevName: playlisting.prevName, name: "", user: userId, image: ""}); // Reset form
             } else {
                 alert("Failed to edit playlist: " + data.message);
             }
