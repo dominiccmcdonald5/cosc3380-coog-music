@@ -585,7 +585,7 @@ export const SongViewPlaylistCard = ({ song, setCurrentSong }) => {
     return (
         <div className="songView-card">
             <img src={song.song_image || purple_image} alt={song.song_name} className="songView-image" />
-            <h3 className="songView-name">{song.song_name}</h3>
+            <h3 className="songView-name">{song.name}</h3>
             <button onClick={() => setCurrentSong(song)} className="play-button">
                 <img src={play_button} alt="Play" className="play" />
             </button>
