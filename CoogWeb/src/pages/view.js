@@ -614,7 +614,8 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage}) => {
     
                     if (data.success) {
                         setStats({
-                            songCount: data.songCount});  
+                            songCount: data.songCount,
+                            image_url: data.image_url});  
                     } else {
                         setError('Failed to fetch playlist info');
                     }
@@ -635,7 +636,7 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage}) => {
         <section className="everything">
             <div className="profile-section">
                 <div className="profile-header">
-                    <img src={playlist.image_url || purple_image} alt="Playlist Cover" className="profile-image" />
+                    <img src={stats.image_url || purple_image} alt="Playlist Cover" className="profile-image" />
                     <h2 className="profile-username">{playlist.playlist_name}</h2>
                 </div>
                 <div className="basic-stats">
