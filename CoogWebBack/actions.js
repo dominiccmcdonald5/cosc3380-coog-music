@@ -2285,7 +2285,7 @@ const likeSong = async (req, res) => {
                 `SELECT playlist_id FROM playlist WHERE user_id = ? AND playlist.name = 'Liked Songs'`, [userId]);
 
             await pool.promise().query(
-                `INSERT INTO song_in_playlist (song_id, playlist_id, played_at) added_at (?, ?, NOW());`, [song_id, findPlaylistId[0].playlist_id]
+                `INSERT INTO song_in_playlist (song_id, playlist_id, added_at) VALUES (?, ?, NOW());`, [song_id, findPlaylistId[0].playlist_id]
             );
 
 
