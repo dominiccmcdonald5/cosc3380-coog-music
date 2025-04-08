@@ -31,7 +31,7 @@ function Signup() {
               // When the file is read, update the state with the base64 data URL
               reader.onloadend = () => {
                   const imageBase64 = reader.result; // The base64 data URL
-                  setSong((prevSong) => ({ ...prevSong, image: imageBase64 }));
+                  setImage(imageBase64);
               };
   
               // Read the file as a data URL (base64)
