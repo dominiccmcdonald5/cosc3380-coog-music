@@ -1468,11 +1468,30 @@ const createPlaylist = async (req, res) => {
                 return res.end(JSON.stringify({ success: false, message: 'Playlist already exist' }));
             }
 
+            const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+            if (!imageMatches) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image file format'
+                    }));
+            }
+
+            const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
+            const base64DataImage = imageMatches[2];
+            const bufferImage = Buffer.from(base64DataImage, 'base64');
+
+            // Generate filename
+            const fileNameImage = `${username}-${Date.now()}.${fileTypeImage}`;
+
+            // Upload to Azure (or any storage service)
+            const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
+
             // Insert the song
             await pool.promise().query(
                 `INSERT INTO playlist (name, user_id, image_url,created_at)
                  VALUES (?, ?, ?, NOW())`,
-                [name, user, image]
+                [name, user, imageUrl]
             );
 
             res.writeHead(201, { "Content-Type": "application/json" });
