@@ -5,6 +5,7 @@ import './view.css';
 import play_button from './play.png';
 import verified from './isverifiedlogo.png';
 
+
 export const AlbumViewList = ({artist = {}}) => {
     const [albums, setAlbums] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
@@ -528,14 +529,14 @@ export const SongPlaylistListCard = ({ song }) => {
     
     return (
         <div className="songView-card">
-            <img src={song.song_image} alt={song.song_name} className="songView-image" />
+            <img src={song.image} alt={song.song_name} className="songView-image" />
             <h3 className="songView-name">{song.song_name}</h3>
             <h3 className="songView-album">{song.artist_name}</h3>
         </div>
     );
 };
 
-export const SongViewPlaylistList = ({playlist = {}, userId}) => {
+export const SongViewPlaylistList = ({playlist = {}, userId,setCurrentSong}) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -574,23 +575,25 @@ export const SongViewPlaylistList = ({playlist = {}, userId}) => {
     return (
         <div className="songView-list">
             {songs.map((song, index) => (
-                <SongViewPlaylistCard key={index} song={song} />
+                <SongViewPlaylistCard key={index} song={song} setCurrentSong={setCurrentSong}/>
             ))}
         </div>
     );
 };
 
-export const SongViewPlaylistCard = ({ song }) => {
+export const SongViewPlaylistCard = ({ song, setCurrentSong }) => {
     return (
         <div className="songView-card">
-            <img src={song.song_image || purple_image} alt={song.song_name} className="songView-image" />
-            <h3 className="songView-name">{song.song_name}</h3>
-            <h3 className="songView-album">{song.album_name}</h3>
+            <img src={song.image || purple_image} alt={song.name} className="songView-image" />
+            <h3 className="songView-name">{song.name}</h3>
+            <button onClick={() => setCurrentSong(song)} className="play-button">
+                <img src={play_button} alt="Play" className="play" />
+            </button>
         </div>
     );
 };
 
-export const PlaylistViewPage = ({ playlist, userName, userId, userImage, setActiveScreen}) => {
+export const PlaylistViewPage = ({ playlist, userName, userId, userImage, setActiveScreen, setCurrentSong}) => {
     const [stats, setStats] = useState({
         songCount: 0,
         image_url: ""
@@ -647,14 +650,19 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage, setAct
                         onClick={() => setActiveScreen('edit-playlist', playlist, userId)}
                     >
                         Edit Playlist
-                    </button>
-                )}
+                    </button>)}
+                    
+                    {playlist.playlist_name !== 'Liked Songs' && (
+                    <button className="create-playlist-button" onClick={() => setActiveScreen('delete-playlist',playlist,userId)}>
+                    Delete Playlist
+                    </button>)}
+
                 </div>
             </div>
 
             <div className="songView-section">
                 <div className="songView-header">Songs: </div>
-                <SongViewPlaylistList playlist={playlist} userName={userName} userId={userId}/>
+                <SongViewPlaylistList playlist={playlist} userName={userName} userId={userId} setCurrentSong={setCurrentSong}/>
             </div>
         </section>
     );

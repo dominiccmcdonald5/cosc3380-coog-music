@@ -85,3 +85,22 @@
 .song-form button:hover {
     background-color: #9365ad;
 }
+
+.delete-playlist-button {
+  font-family: "Mantissa", sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: white;
+  background-color: #af7bcd;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+  transition: 0.3s;
+}
+
+.delete-playlist-button:hover {
+  background-color: #9365ad;
+}

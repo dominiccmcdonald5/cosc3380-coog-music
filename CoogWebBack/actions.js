@@ -1419,8 +1419,9 @@ const getPlaylistSongs = async (req, res) => {
             const [songs] = await pool.promise().query(`
                 SELECT 
                     song.song_id, 
-                    song.name AS song_name, 
-                    song.image_url AS song_image, 
+                    song.name AS name, 
+                    song.image_url AS image, 
+                    song.song_url AS song_url,
                     artist.username AS artist_name 
                 FROM 
                     artist 

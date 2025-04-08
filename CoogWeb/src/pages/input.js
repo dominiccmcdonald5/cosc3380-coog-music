@@ -139,9 +139,7 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
                     <button className="create-playlist-button" onClick={() => setActiveScreen('create-playlist')}>
                         Create Playlist
                     </button>
-                    <button className="create-playlist-button" onClick={() => setActiveScreen('delete-playlist')}>
-                        Delete Playlist
-                    </button>
+    
                     <button className="create-playlist-button" onClick={() => setActiveScreen('add-song-playlist')}>
                         Add Song
                     </button>
