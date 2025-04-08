@@ -698,9 +698,9 @@ export const PlaylistFormAdd = ({userName, userId}) => {
     );
 }
 
-export const PlaylistFormEdit = ({userName, userId}) => {
-    const [playlist, setPlaylist] = useState({
-        prevName: "",
+export const PlaylistFormEdit = ({playlist, userId}) => {
+    const [playlisting, setPlaylisting] = useState({
+        prevName: playlist.playlist_name,
         name: "",
         user: userId,
         image: "",
@@ -708,7 +708,28 @@ export const PlaylistFormEdit = ({userName, userId}) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setPlaylist({ ...playlist, [name]: value });
+        setPlaylisting({ ...playlisting, [name]: value });
+    };
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Check if the uploaded file is a valid image
+            if (file.type.startsWith("image/")) {
+                // Create a FileReader to read the image file as a data URL (base64)
+                const reader = new FileReader();
+    
+                // When the file is read, update the state with the base64 data URL
+                reader.onloadend = () => {
+                    const imageBase64 = reader.result; // The base64 data URL
+                    setPlaylisting({ ...playlisting, image: imageBase64 });
+                };
+                // Read the file as a data URL (base64)
+                reader.readAsDataURL(file);
+            } else {
+                alert("Only image files are allowed!");
+            }
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -718,14 +739,14 @@ export const PlaylistFormEdit = ({userName, userId}) => {
           const response = await fetch('https://cosc3380-coog-music-2.onrender.com/editplaylist', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(playlist),
+          body: JSON.stringify(playlisting),
         });
 
         const data = await response.json();
             
             if (response.ok) {
                 alert("Playlist edited successfully!");
-                setPlaylist({ prevName: playlist.prevName, name: "", user: userId, image: ""}); // Reset form
+                setPlaylisting({ prevName: playlisting.prevName, name: "", user: userId, image: ""}); // Reset form
             } else {
                 alert("Failed to edit playlist: " + data.message);
             }
@@ -739,18 +760,19 @@ export const PlaylistFormEdit = ({userName, userId}) => {
         <section className="everything">
         <div className="input-section">
                     <div className="profile-header">
-                        <h2 className="input-username">Edit a Playlist!</h2>
+                        <h2 className="input-username">Edit {playlist.playlist_name}!</h2>
                     </div>
         </div>
         <form className="song-form" onSubmit={handleSubmit}>
-            <label>Enter Playlist Name you want to Edit</label>
-            <input type="text" name="prevName" placeholder="Enter playlist name" value={playlist.prevName} onChange={handleChange} required />
+            <label>Rename Playlist</label>
+            <input type="text" name="name" placeholder="Enter new name" value={playlisting.name} onChange={handleChange}  />
 
-            <label>Playlist Name</label>
-            <input type="text" name="name" placeholder="Enter playlist name" value={playlist.name} onChange={handleChange}  />
-
-            <label>Image Name</label>
-            <input type="text" name="image" placeholder="Enter image name" value={playlist.image} onChange={handleChange}  />
+            <label>New Playlist Image</label>
+            <input type="file" 
+                    name="image" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    />
 
             <button type="submit">Edit</button>
         </form>
