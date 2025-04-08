@@ -1798,45 +1798,37 @@ const editInfo = async (req, res) => {
             const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
 
             let result;
-            if (accountType === 'user') {
-                const [user_check] = await pool.promise().query(
-                    `SELECT user_id, username, image_url FROM user WHERE username = ?`, [username]
-                );
-                if (user_check.length > 0) {
-                    result = await pool.promise().query(
-                        `UPDATE user
-                        SET password = COALESCE(?, password),
-                            image_url = COALESCE(?, image_url)
-                        WHERE username = ?`, [newPassword, imageUrl, username]
-                    );
-                    isWorking = true;
-                }
-            } else if (accountType === 'artist') {
-                const [artist_check] = await pool.promise().query(
-                    `SELECT artist_id, username, image_url FROM artist WHERE username = ?`, [username]
-                );
-                if (artist_check.length > 0) {
-                    result = await pool.promise().query(
-                        `UPDATE artist
-                        SET password = COALESCE(?, password),
-                            image_url = COALESCE(?, image_url)
-                        WHERE username = ?`, [newPassword, imageUrl, username]
-                    );
-                    isWorking = true;
-                }
-            } else if (accountType === 'admin') {
-                const [admin_check] = await pool.promise().query(
-                    `SELECT admin_id, username, image_url FROM admin WHERE username = ?`, [username]
-                );
-                if (admin_check.length > 0) {
-                    result = await pool.promise().query(
-                        `UPDATE admin
-                        SET password = COALESCE(?, password),
-                            image_url = COALESCE(?, image_url)
-                        WHERE username = ?`, [newPassword, imageUrl, username]
-                    );
-                    isWorking = true;
-                }
+            let updateFields = [];
+            let updateValues = [];  
+
+            // Check for newPassword and imageUrl
+            if (newPassword) {
+            updateFields.push('password = ?');
+            updateValues.push(newPassword);
+            }
+
+            if (imageUrl) {
+            updateFields.push('image_url = ?');
+            updateValues.push(imageUrl);
+            }
+
+            if (updateFields.length > 0) {
+            const validAccountTypes = ['user', 'artist', 'admin'];
+
+            if (!validAccountTypes.includes(accountType)) {
+                throw new Error('Invalid account type');
+            }
+
+            const [check] = await pool.promise().query(
+                `SELECT username FROM ${accountType} WHERE username = ?`, [username]
+            );
+
+            if (check.length > 0) {
+                const updateQuery = `UPDATE ${accountType} SET ${updateFields.join(', ')} WHERE username = ?`;
+                updateValues.push(username);
+                await pool.promise().query(updateQuery, updateValues);
+                isWorking = true;
+            }
             }
 
             if (isWorking) {
