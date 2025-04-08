@@ -41,10 +41,28 @@ const handleSignup = async (req, res) => {
             if (!validAccountTypes.includes(accountType)) {
                 throw new Error('Invalid account type');
             }
+            const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+            if (!imageMatches) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image file format'
+                    }));
+            }
+
+            const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
+            const base64DataImage = imageMatches[2];
+            const bufferImage = Buffer.from(base64DataImage, 'base64');
+
+            // Generate filename
+            const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
+
+            // Upload to Azure (or any storage service)
+            const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
 
             const [result] = await pool.promise().query(
                 `INSERT INTO ?? (email, username, password, image_url, created_at) VALUES (?, ?, ?, ?, NOW())`,
-                [accountType, email, username, password, image]
+                [accountType, email, username, password, imageUrl]
             );
 
             if (accountType === 'user') {
@@ -655,13 +673,13 @@ const createSong = async (req, res) => {
 
             // Handle image (image is expected to be Base64 or URL from frontend)
             const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
-if (!imageMatches) {
-    return res.writeHead(400, { 'Content-Type': 'application/json' })
-        .end(JSON.stringify({
-            success: false,
-            message: 'Invalid image file format'
-        }));
-}
+            if (!imageMatches) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image file format'
+                    }));
+            }
 
             const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
             const base64DataImage = imageMatches[2];
