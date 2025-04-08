@@ -46,6 +46,17 @@ const handleSignup = async (req, res) => {
                 `INSERT INTO ?? (email, username, password, image_url, created_at) VALUES (?, ?, ?, ?, NOW())`,
                 [accountType, email, username, password, image]
             );
+
+            if (accountType === 'user') {
+
+            const [findUserId] = await pool.promise().query(
+                `SELECT user_id FROM user WHERE username = ?`, [username]);
+
+
+            const [createLikeAlbum] = await pool.promise().query(
+                `INSERT INTO playlist (name, user_id, image_url, created_at) VALUES (?, ?, ?, NOW())`, [`Liked Songs`, findUserId[0].user_id, `https://musiccontainer.blob.core.windows.net/mp3/liked_image.png`]
+            )
+        }
             
             
                 res.writeHead(201, { "Content-Type": "application/json" });
