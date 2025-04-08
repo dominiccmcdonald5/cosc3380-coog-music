@@ -11,6 +11,11 @@
     
   }
 
+.profile-preview{
+    width: 100px; /* Adjust size as needed */
+    height: 100px;
+}  
+
   .settings-page {
     width: 800px;
     height: 500px;
