@@ -536,7 +536,7 @@ export const SongPlaylistListCard = ({ song }) => {
     );
 };
 
-export const SongViewPlaylistList = ({playlist = {}, userId}) => {
+export const SongViewPlaylistList = ({playlist = {}, userId,setCurrentSong}) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -575,13 +575,13 @@ export const SongViewPlaylistList = ({playlist = {}, userId}) => {
     return (
         <div className="songView-list">
             {songs.map((song, index) => (
-                <SongViewPlaylistCard key={index} song={song} />
+                <SongViewPlaylistCard key={index} song={song} setCurrentSong={setCurrentSong}/>
             ))}
         </div>
     );
 };
 
-export const SongViewPlaylistCard = ({ song }) => {
+export const SongViewPlaylistCard = ({ song, setCurrentSong }) => {
     return (
         <div className="songView-card">
             <img src={song.song_image || purple_image} alt={song.song_name} className="songView-image" />
