@@ -581,7 +581,7 @@ export const PlaylistForm = ({userName, userId}) => {
                 // When the file is read, update the state with the base64 data URL
                 reader.onloadend = () => {
                     const imageBase64 = reader.result; // The base64 data URL
-                    setPlaylist({image:imageBase64});
+                    setPlaylist({ ...playlist, image: imageBase64 });
                 };
     
                 // Read the file as a data URL (base64)
@@ -628,8 +628,8 @@ export const PlaylistForm = ({userName, userId}) => {
             <label>Playlist Name</label>
             <input type="text" name="name" placeholder="Enter playlist name" value={playlist.name} onChange={handleChange} required />
 
-            <label>Image Name</label>
-                    <input type="file" 
+            <label>Image</label>
+            <input type="file" 
                     name="image" 
                     accept="image/*" 
                     onChange={handleImageUpload} 

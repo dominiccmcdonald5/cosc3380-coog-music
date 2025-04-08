@@ -1453,7 +1453,7 @@ const createPlaylist = async (req, res) => {
             const { name, user, image} = parsedBody;
 
             // Validate required fields
-            if (!name || !user ||!image) {
+            if (!name || !user) {
                 throw new Error('Missing required fields');
             }
 
@@ -1482,7 +1482,7 @@ const createPlaylist = async (req, res) => {
             const bufferImage = Buffer.from(base64DataImage, 'base64');
 
             // Generate filename
-            const fileNameImage = `${username}-${Date.now()}.${fileTypeImage}`;
+            const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
 
             // Upload to Azure (or any storage service)
             const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
