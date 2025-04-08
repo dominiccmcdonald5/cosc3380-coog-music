@@ -55,7 +55,7 @@ const handleSignup = async (req, res) => {
             const bufferImage = Buffer.from(base64DataImage, 'base64');
 
             // Generate filename
-            const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
+            const fileNameImage = `${username}-${Date.now()}.${fileTypeImage}`;
 
             // Upload to Azure (or any storage service)
             const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
