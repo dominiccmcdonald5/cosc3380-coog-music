@@ -6,24 +6,53 @@ import './settings.css';
 const SettingsPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { userId, username, accountType, userImage } = location.state || {}; 
+    const { userId, userName, accountType, userImage } = location.state || {}; 
 
     // If location.state is undefined, the variables will default to empty strings
     const [newPassword, setNewPassword] = useState('');
     const [image, setImage] = useState('');
 
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Check if the uploaded file is a valid image
+            if (file.type.startsWith("image/")) {
+                // Create a FileReader to read the image file as a data URL (base64)
+                const reader = new FileReader();
+    
+                // When the file is read, update the state with the base64 data URL
+                reader.onloadend = () => {
+                    const imageBase64 = reader.result; // The base64 data URL
+                    setImage(imageBase64);
+                };
+    
+                // Read the file as a data URL (base64)
+                reader.readAsDataURL(file);
+            } else {
+                alert("Only image files are allowed!");
+            }
+        }
+    };
+
     // Handle saving changes
     const handleSaveChanges = async () => {
-        console.log(accountType, username, newPassword, image);
+        console.log(accountType, userName, newPassword, image);
         try {
             const response = await fetch('https://cosc3380-coog-music-2.onrender.com/editinfo', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ accountType, username, newPassword, image }),
+                body: JSON.stringify({ accountType, userName, newPassword, image }),
             });
     
             const result = await response.json();
             if (result.success) {
+                navigate(location.pathname, {
+                    state: {
+                        ...location.state,
+                        userImage: result.image_url,  // Update userImage in the state
+                    },
+                    replace: true, // Prevents adding a new entry in the browser history
+                });
                 alert('Profile updated successfully!');
             } else {
                 alert('Failed to update profile: ' + result.message);
@@ -43,7 +72,7 @@ const SettingsPage = () => {
             const response = await fetch('https://cosc3380-coog-music-2.onrender.com/deleteaccount', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ accountType, username }),
+                body: JSON.stringify({ accountType, userName }),
             });
 
             const result = await response.json();
@@ -57,6 +86,11 @@ const SettingsPage = () => {
             console.error('Error deleting account:', error);
             alert('An error occurred while deleting account.');
         }
+    };
+
+    const handleGoHome = () => {
+        console.log('Navigating with:', { userId, userName, accountType, userImage });
+        navigate('/home', { state: { userId, userName, accountType, userImage } });
     };
 
     return (
@@ -76,13 +110,11 @@ const SettingsPage = () => {
 
             <div className="settings-section">
                 <h2 className="settings-section-title">Change Profile Picture</h2>
-                <input
-                    type="text"
-                    placeholder="Profile Picture URL"
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
-                    className="settings-input"
-                />
+                <input type="file" 
+                    name="image" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    />
                 {image && <img src={image} alt="Preview" className="profile-preview" />}
             </div>
 
@@ -92,6 +124,10 @@ const SettingsPage = () => {
 
             <button className="delete-account-button" onClick={handleDeleteAccount}>
                 Delete Account
+            </button>
+
+            <button className="go-home-button" onClick={handleGoHome}>
+                Go to Home
             </button>
         </div>
     );
