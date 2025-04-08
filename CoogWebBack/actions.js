@@ -1858,12 +1858,12 @@ const deleteAccount = async (req, res) => {
     req.on('end', async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const { accountType, username } = parsedBody;
-            console.log(accountType, username); 
+            const { accountType, userName } = parsedBody;
+            console.log(accountType, userName); 
             let isWorking = false;
 
-            if (!accountType || !username) {
-                console.log(accountType, username);
+            if (!accountType || !userName) {
+                console.log(accountType, userName);
                 throw new Error('Missing required fields');
             }
 
@@ -1875,32 +1875,32 @@ const deleteAccount = async (req, res) => {
             let result;
             if (accountType === 'user') {
                 const [user_check] = await pool.promise().query(
-                    `SELECT user_id, username FROM user WHERE username = ?`, [username]
+                    `SELECT user_id, username FROM user WHERE username = ?`, [userName]
                 );
                 if (user_check.length > 0) {
                     result = await pool.promise().query(
-                        `DELETE FROM user WHERE username = ?`, [username]
+                        `DELETE FROM user WHERE username = ?`, [userName]
                     );
                     isWorking = true;
                 }
             } else if (accountType === 'artist') {
                 const [artist_check] = await pool.promise().query(
-                    `SELECT artist_id, username FROM artist WHERE username = ?`, [username]
+                    `SELECT artist_id, username FROM artist WHERE username = ?`, [userName]
                 );
                 if (artist_check.length > 0) {
                     result = await pool.promise().query(
-                        `DELETE FROM artist WHERE username = ?`, [newPassword, image, username]
+                        `DELETE FROM artist WHERE username = ?`, [userName]
                     );
                     isWorking = true;
                 }
             } else if (accountType === 'admin') {
                 const [admin_check] = await pool.promise().query(
-                    `SELECT admin_id, username FROM admin WHERE username = ?`, [username]
+                    `SELECT admin_id, username FROM admin WHERE username = ?`, [userName]
                 );
                 if (admin_check.length > 0) {
                     result = await pool.promise().query(
                         `DELETE FROM admin
-                        WHERE username = ?`, [username]
+                        WHERE username = ?`, [userName]
                     );
                     isWorking = true;
                 }

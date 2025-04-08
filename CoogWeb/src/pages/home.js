@@ -14,15 +14,15 @@ import {useNavigate} from 'react-router-dom';
 import {DataReport, UserDataReport, SongDataReport} from './report';
 
 
-const TopBar = ({accountType, username, userId, userImage }) => {
+const TopBar = ({accountType, userName, userId, userImage }) => {
   const navigate = useNavigate();
-  console.log('TopBar props:', { username, userImage });
+  console.log('TopBar props:', { userName, userImage });
 
   return (
     <div className="top-bar">
       <div className="user-infos">
         <img src={userImage} className="user-images" />
-        <span className="username">{username}</span>
+        <span className="username">{userName}</span>
       </div>
       <div className="top-bar-buttons">
         <button className="settings-button" onClick={() => navigate('/settings', {state: { userId, userName, accountType, userImage }})}>Settings</button>
@@ -193,7 +193,7 @@ const Home = () => {
 
   return (
     <div className="Home">
-      <TopBar username={userName} userImage={userImage} accountType={accountType} userId={userId}/>
+      <TopBar userName={userName} userImage={userImage} accountType={accountType} userId={userId}/>
       <div className="content">
         <SideBar onButtonClick={setActiveScreen} accountType={accountType} />
         <div className="main-content">
