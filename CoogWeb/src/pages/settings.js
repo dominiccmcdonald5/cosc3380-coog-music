@@ -12,6 +12,28 @@ const SettingsPage = () => {
     const [newPassword, setNewPassword] = useState('');
     const [image, setImage] = useState('');
 
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Check if the uploaded file is a valid image
+            if (file.type.startsWith("image/")) {
+                // Create a FileReader to read the image file as a data URL (base64)
+                const reader = new FileReader();
+    
+                // When the file is read, update the state with the base64 data URL
+                reader.onloadend = () => {
+                    const imageBase64 = reader.result; // The base64 data URL
+                    setImage(imageBase64);
+                };
+    
+                // Read the file as a data URL (base64)
+                reader.readAsDataURL(file);
+            } else {
+                alert("Only image files are allowed!");
+            }
+        }
+    };
+
     // Handle saving changes
     const handleSaveChanges = async () => {
         console.log(accountType, username, newPassword, image);
@@ -76,13 +98,11 @@ const SettingsPage = () => {
 
             <div className="settings-section">
                 <h2 className="settings-section-title">Change Profile Picture</h2>
-                <input
-                    type="text"
-                    placeholder="Profile Picture URL"
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
-                    className="settings-input"
-                />
+                <input type="file" 
+                    name="image" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    />
                 {image && <img src={image} alt="Preview" className="profile-preview" />}
             </div>
 

@@ -1778,6 +1778,25 @@ const editInfo = async (req, res) => {
                 throw new Error('Invalid account type');
             }
 
+            const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+            if (!imageMatches) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image file format'
+                    }));
+            }
+
+            const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
+            const base64DataImage = imageMatches[2];
+            const bufferImage = Buffer.from(base64DataImage, 'base64');
+
+            // Generate filename
+            const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
+
+            // Upload to Azure (or any storage service)
+            const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
+
             let result;
             if (accountType === 'user') {
                 const [user_check] = await pool.promise().query(
@@ -1788,7 +1807,7 @@ const editInfo = async (req, res) => {
                         `UPDATE user
                         SET password = COALESCE(?, password),
                             image_url = COALESCE(?, image_url)
-                        WHERE username = ?`, [newPassword, image, username]
+                        WHERE username = ?`, [newPassword, imageUrl, username]
                     );
                     isWorking = true;
                 }
@@ -1801,7 +1820,7 @@ const editInfo = async (req, res) => {
                         `UPDATE artist
                         SET password = COALESCE(?, password),
                             image_url = COALESCE(?, image_url)
-                        WHERE username = ?`, [username]
+                        WHERE username = ?`, [newPassword, imageUrl, username]
                     );
                     isWorking = true;
                 }
@@ -1814,7 +1833,7 @@ const editInfo = async (req, res) => {
                         `UPDATE admin
                         SET password = COALESCE(?, password),
                             image_url = COALESCE(?, image_url)
-                        WHERE username = ?`, [username]
+                        WHERE username = ?`, [newPassword, imageUrl, username]
                     );
                     isWorking = true;
                 }
