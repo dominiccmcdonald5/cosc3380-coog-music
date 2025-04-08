@@ -6,7 +6,7 @@ import './settings.css';
 const SettingsPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { userId, username, accountType, userImage } = location.state || {}; 
+    const { userId, userName, accountType, userImage } = location.state || {}; 
 
     // If location.state is undefined, the variables will default to empty strings
     const [newPassword, setNewPassword] = useState('');
@@ -36,16 +36,23 @@ const SettingsPage = () => {
 
     // Handle saving changes
     const handleSaveChanges = async () => {
-        console.log(accountType, username, newPassword, image);
+        console.log(accountType, userName, newPassword, image);
         try {
             const response = await fetch('https://cosc3380-coog-music-2.onrender.com/editinfo', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ accountType, username, newPassword, image }),
+                body: JSON.stringify({ accountType, userName, newPassword, image }),
             });
     
             const result = await response.json();
             if (result.success) {
+                navigate(location.pathname, {
+                    state: {
+                        ...location.state,
+                        userImage: result.image_url,  // Update userImage in the state
+                    },
+                    replace: true, // Prevents adding a new entry in the browser history
+                });
                 alert('Profile updated successfully!');
             } else {
                 alert('Failed to update profile: ' + result.message);
@@ -65,12 +72,11 @@ const SettingsPage = () => {
             const response = await fetch('https://cosc3380-coog-music-2.onrender.com/deleteaccount', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ accountType, username }),
+                body: JSON.stringify({ accountType, userName }),
             });
 
             const result = await response.json();
             if (result.success) {
-                setUserImage(result.image_url)
                 alert('Account deleted successfully');
                 navigate('/');  // Redirect to home page after deletion
             } else {
@@ -80,6 +86,11 @@ const SettingsPage = () => {
             console.error('Error deleting account:', error);
             alert('An error occurred while deleting account.');
         }
+    };
+
+    const handleGoHome = () => {
+        console.log('Navigating with:', { userId, userName, accountType, userImage });
+        navigate('/home', { state: { userId, userName, accountType, userImage } });
     };
 
     return (
@@ -113,6 +124,10 @@ const SettingsPage = () => {
 
             <button className="delete-account-button" onClick={handleDeleteAccount}>
                 Delete Account
+            </button>
+
+            <button className="go-home-button" onClick={handleGoHome}>
+                Go to Home
             </button>
         </div>
     );

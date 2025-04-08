@@ -25,7 +25,7 @@ const TopBar = ({accountType, username, userId, userImage }) => {
         <span className="username">{username}</span>
       </div>
       <div className="top-bar-buttons">
-        <button className="settings-button" onClick={() => navigate('/settings', {state: { userId, username, accountType, userImage }})}>Settings</button>
+        <button className="settings-button" onClick={() => navigate('/settings', {state: { userId, userName, accountType, userImage }})}>Settings</button>
         <button className="main-menu-button" onClick={() => navigate('/')}>Main Menu</button>
       </div>
       <div className="project-name">

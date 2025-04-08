@@ -1764,12 +1764,12 @@ const editInfo = async (req, res) => {
     req.on('end', async () => {
       try {
         const parsedBody = JSON.parse(body);
-        const { accountType, username, newPassword, image } = parsedBody;
-        console.log(accountType, username, newPassword, image);
+        const { accountType, userName, newPassword, image } = parsedBody;
+        console.log(accountType, userName, newPassword, image);
         let isWorking = false;
         let updatedUser = null;
   
-        if (!accountType || !username || (!image && !newPassword)) {
+        if (!accountType || !userName || (!image && !newPassword)) {
           throw new Error('Missing required fields');
         }
   
@@ -1792,7 +1792,7 @@ const editInfo = async (req, res) => {
           const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
           const base64DataImage = imageMatches[2];
           const bufferImage = Buffer.from(base64DataImage, 'base64');
-          const fileNameImage = `${username}-${Date.now()}.${fileTypeImage}`;
+          const fileNameImage = `${userName}-${Date.now()}.${fileTypeImage}`;
   
           // Upload to Azure (or other service)
           imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
@@ -1813,17 +1813,17 @@ const editInfo = async (req, res) => {
   
         if (updateFields.length > 0) {
           const [check] = await pool.promise().query(
-            `SELECT username FROM ${accountType} WHERE username = ?`, [username]
+            `SELECT username FROM ${accountType} WHERE username = ?`, [userName]
           );
   
           if (check.length > 0) {
             const updateQuery = `UPDATE ${accountType} SET ${updateFields.join(', ')} WHERE username = ?`;
-            updateValues.push(username);
+            updateValues.push(userName);
             await pool.promise().query(updateQuery, updateValues);
             isWorking = true;
   
             const [fetchedUser] = await pool.promise().query(
-              `SELECT image_url FROM ${accountType} WHERE username = ?`, [username]
+              `SELECT image_url FROM ${accountType} WHERE username = ?`, [userName]
             );
             updatedUser = fetchedUser[0];
           }
