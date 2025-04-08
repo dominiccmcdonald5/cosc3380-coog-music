@@ -548,7 +548,7 @@ export const SongViewPlaylistList = ({playlist = {}}) => {
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ playlist_name:playlist.playlist_name }), 
+                        body: JSON.stringify({ playlist_name:playlist.playlist_name, playlist_id: playlist.playlist_id }), 
                     })
                     console.log('Backend response:', response); 
 
