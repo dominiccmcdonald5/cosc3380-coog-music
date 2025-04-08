@@ -232,7 +232,7 @@ const renderScreen = (activeScreen, setActiveScreen, onArtistClick, onAlbumClick
     case 'delete-playlist': return <PlaylistFormDelete userName={userName} userId={userId} playlist={selectedPlaylist}/>;
     case 'add-song-playlist': return <PlaylistFormAdd userName={userName} userId={userId}/>;
     case 'remove-song-playlist': return <PlaylistFormRemove userName={userName} userId={userId}/>;
-    case 'playlist-view': return <PlaylistViewPage playlist={selectedPlaylist} userId={userId} userName={userName} userImage={userImage} setActiveScreen={setActiveScreen}/>;
+    case 'playlist-view': return <PlaylistViewPage playlist={selectedPlaylist} userId={userId} userName={userName} userImage={userImage} setActiveScreen={setActiveScreen} setCurrentSong={setCurrentSong}/>;
     case 'data-report': return <DataReport userName={userName}/>
     case 'data-report-user': return <UserDataReport/>
     case 'data-report-song': return <SongDataReport userName={userName}/>

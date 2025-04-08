@@ -593,7 +593,7 @@ export const SongViewPlaylistCard = ({ song, setCurrentSong }) => {
     );
 };
 
-export const PlaylistViewPage = ({ playlist, userName, userId, userImage, setActiveScreen}) => {
+export const PlaylistViewPage = ({ playlist, userName, userId, userImage, setActiveScreen, setCurrentSong}) => {
     const [stats, setStats] = useState({
         songCount: 0,
         image_url: ""
@@ -662,7 +662,7 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage, setAct
 
             <div className="songView-section">
                 <div className="songView-header">Songs: </div>
-                <SongViewPlaylistList playlist={playlist} userName={userName} userId={userId}/>
+                <SongViewPlaylistList playlist={playlist} userName={userName} userId={userId} setCurrentSong={setCurrentSong}/>
             </div>
         </section>
     );

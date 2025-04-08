@@ -1421,7 +1421,7 @@ const getPlaylistSongs = async (req, res) => {
                     song.song_id, 
                     song.name AS song_name, 
                     song.image_url AS song_image, 
-                    artist.username AS artist_name 
+                    artist.username AS artist_name ,
                     song.song_url AS song_url
                 FROM 
                     artist 
