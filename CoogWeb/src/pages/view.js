@@ -647,8 +647,13 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage, setAct
                         onClick={() => setActiveScreen('edit-playlist', playlist, userId)}
                     >
                         Edit Playlist
-                    </button>
-                )}
+                    </button>)}
+                    
+                    {playlist.playlist_name !== 'Liked Songs' && (
+                    <button className="create-playlist-button" onClick={() => setActiveScreen('delete-playlist',playlist,userId)}>
+                    Delete Playlist
+                    </button>)}
+
                 </div>
             </div>
 

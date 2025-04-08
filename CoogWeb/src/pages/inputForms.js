@@ -780,32 +780,27 @@ export const PlaylistFormEdit = ({playlist, userId}) => {
     );
 }
 
-export const PlaylistFormDelete = ({userName, userId}) => {
-    const [playlist, setPlaylist] = useState({
-        name: "",
-        user: userId,
-    });
+export const PlaylistFormDelete = ({ userName, userId, playlist }) => {
+    const handleDelete = async () => {
+        const confirmDelete = window.confirm(`Are you sure you want to delete the playlist "${playlist.playlist_name}"?`);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setPlaylist({ ...playlist, [name]: value });
-    };
+        if (!confirmDelete) return;
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
         try {
-          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/deleteplaylist', {
-            method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(playlist),
-        });
+            const response = await fetch('https://cosc3380-coog-music-2.onrender.com/deleteplaylist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: playlist.playlist_name,
+                    user: userId
+                }),
+            });
 
-        const data = await response.json();
-            
+            const data = await response.json();
+
             if (response.ok) {
                 alert("Playlist deleted successfully!");
-                setPlaylist({name: "", user: userId}); // Reset form
+                // You can redirect or update UI here if needed
             } else {
                 alert("Failed to delete playlist: " + data.message);
             }
@@ -817,20 +812,17 @@ export const PlaylistFormDelete = ({userName, userId}) => {
 
     return (
         <section className="everything">
-        <div className="input-section">
-                    <div className="profile-header">
-                        <h2 className="input-username">Delete a Playlist!</h2>
-                    </div>
-        </div>
-        <form className="song-form" onSubmit={handleSubmit}>
-            <label>Enter Playlist Name you want to Delete</label>
-            <input type="text" name="name" placeholder="Enter playlist name" value={playlist.name} onChange={handleChange} required />
-
-            <button type="submit">Delete</button>
-        </form>
+            <div className="input-section">
+                <div className="profile-header">
+                    <h2 className="input-username">Delete a Playlist</h2>
+                </div>
+                <button type="button" onClick={handleDelete} className="delete-playlist-button">
+                    Delete Playlist
+                </button>
+            </div>
         </section>
     );
-}
+};
 
 export const PlaylistFormRemove = ({userName, userId}) => {
     const [playlist, setPlaylist] = useState({
