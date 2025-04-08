@@ -590,7 +590,7 @@ export const SongViewPlaylistCard = ({ song }) => {
     );
 };
 
-export const PlaylistViewPage = ({ playlist, userName, userId, userImage}) => {
+export const PlaylistViewPage = ({ playlist, userName, userId, userImage, setActiveScreen}) => {
     const [stats, setStats] = useState({
         songCount: 0,
         image_url: ""
@@ -641,6 +641,14 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage}) => {
                 </div>
                 <div className="basic-stats">
                     <p className="basic-stats-text">Songs: {stats.songCount || 0}</p>
+                    {playlist.playlist_name !== 'Liked Songs' && (
+                    <button 
+                        className="create-playlist-button" 
+                        onClick={() => setActiveScreen('edit-playlist', playlist, userId)}
+                    >
+                        Edit Playlist
+                    </button>
+                )}
                 </div>
             </div>
 

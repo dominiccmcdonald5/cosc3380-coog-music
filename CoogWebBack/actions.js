@@ -1516,60 +1516,81 @@ const editPlaylist = async (req, res) => {
             const parsedBody = JSON.parse(body);
             let { prevName, name, user, image } = parsedBody;
 
-            // Validate if at least one field is provided
-            if (!name && !user && !prevName && !image) {
+            if (!prevName || !user || (!name && !image)) {
                 throw new Error('Missing required fields to update');
             }
 
-            // Check if the song exists with the previous name
+            // Check if the playlist exists
             const [playlistExists] = await pool.promise().execute(
                 "SELECT playlist_id FROM playlist WHERE name = ? AND user_id = ?",
                 [prevName, user]
             );
 
             if (playlistExists.length === 0) {
-                res.writeHead(404, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: 'Playlist not found' }));
+                return res.writeHead(404, { 'Content-Type': 'application/json' }).end(JSON.stringify({
+                    success: false,
+                    message: 'Playlist not found'
+                }));
             }
 
-            // Check for duplicates with the new name (within the same artist)
+            // Prevent renaming to a name that already exists
             if (name) {
                 const [duplicatePlaylist] = await pool.promise().execute(
-                    "SELECT playlist_id FROM playlist WHERE name = ? AND user_id = (SELECT user_id FROM playlist WHERE name = ?)",
-                    [name, prevName]
+                    "SELECT playlist_id FROM playlist WHERE name = ? AND user_id = ? AND name != ?",
+                    [name, user, prevName]
                 );
 
                 if (duplicatePlaylist.length > 0) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ success: false, message: 'Duplicate playlist name for this user' }));
+                    return res.writeHead(400, { 'Content-Type': 'application/json' }).end(JSON.stringify({
+                        success: false,
+                        message: 'Another playlist with this name already exists for this user'
+                    }));
                 }
             }
 
-            // Handle undefined fields: if a field is undefined, convert to null
-            name = name || null;
-            user = user || null;
-            image = image || null;
+            let imageUrl = null;
 
-            // Update the song with new data (only the fields that are provided)
+            if (image) {
+                const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+                if (!imageMatches) {
+                    return res.writeHead(400, { 'Content-Type': 'application/json' }).end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image format'
+                    }));
+                }
+
+                const fileType = imageMatches[1];
+                const base64Data = imageMatches[2];
+                const buffer = Buffer.from(base64Data, 'base64');
+
+                const fileName = `${user}-${Date.now()}.${fileType}`;
+                imageUrl = await uploadToAzureBlobFromServer(buffer, fileName);
+            }
+
+            // Update playlist
             await pool.promise().query(
                 `UPDATE playlist 
-                SET 
-                    name = COALESCE(?, name),
-                    user_id = COALESCE(?, user_id),
-                    image_url = COALESCE(?, image_url)
-                WHERE name = ?`,
-                [name, user, image, prevName]
+                 SET 
+                     name = COALESCE(?, name),
+                     image_url = COALESCE(?, image_url)
+                 WHERE name = ? AND user_id = ?`,
+                [name, imageUrl, prevName, user]
             );
 
-            res.writeHead(200, { "Content-Type": "application/json" });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, message: 'Playlist edited successfully' }));
+
         } catch (err) {
-            console.error('Error editing song:', err);
+            console.error('Error editing playlist:', err);
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: err.message || 'Failed to edit playlist' }));
+            res.end(JSON.stringify({
+                success: false,
+                message: err.message || 'Failed to edit playlist'
+            }));
         }
     });
 };
+
 
 const deletePlaylist = async (req, res) => {
     let body = '';
