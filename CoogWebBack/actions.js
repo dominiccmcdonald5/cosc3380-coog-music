@@ -1219,9 +1219,16 @@ const getPlaylistViewInfo = async (req, res) => {
             }
 
             const [songCount] = await pool.promise().query(`
-                SELECT COUNT(*) AS song_count, playlist.image_url 
+                SELECT COUNT(*) AS song_count
                 FROM song_in_playlist 
                 JOIN playlist ON song_in_playlist.playlist_id = playlist.playlist_id
+                JOIN user ON playlist.user_id = user.user_id
+                WHERE user.username = ? AND playlist.name = ?;
+            `, [username, playlist_name]);
+
+            const [image_url] = await pool.promise().query(`
+                SELECT playlist.image_url 
+                FROM playlist
                 JOIN user ON playlist.user_id = user.user_id
                 WHERE user.username = ? AND playlist.name = ?;
             `, [username, playlist_name]);
@@ -1230,6 +1237,7 @@ const getPlaylistViewInfo = async (req, res) => {
             res.end(JSON.stringify({
                 success: true,
                 songCount: songCount[0].song_count,
+                image_url: image_url[0].image_url,
             }));
         } catch (err) {
             console.error('Error fetching playlist info:', err);
