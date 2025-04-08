@@ -44,20 +44,20 @@ export const PlaylistList = ({ onPlaylistClick, userName, userId }) => {
     return (
         <div className="playlist-list">
             {playlists.map((playlist,index) => (
-                <PlaylistCard key={index} playlist={playlist} onPlaylistClick={onPlaylistClick}/>
+                <PlaylistCard key={index} playlist={playlist} onPlaylistClick={onPlaylistClick} userId={userId}/>
             ))}
         </div>
     );
 }
 
-export const PlaylistCard = ({ playlist, onPlaylistClick}) => {
+export const PlaylistCard = ({ playlist, onPlaylistClick, userId}) => {
     return (
         <div className="playlist-card">
             <img src={playlist.playlist_image} alt={playlist.playlist_name} className="playlist-image" />
             <h3 className="playlist-name">{playlist.playlist_name}</h3>
             <button
                 className="forward-button"
-                onClick={() => onPlaylistClick('playlist-view', playlist)} // Pass the full playlist object
+                onClick={() => onPlaylistClick('playlist-view', playlist, userId)} // Pass the full playlist object
             >
                 <img src={forward} alt="forward" className="forward-icon" />
             </button>

@@ -535,7 +535,7 @@ export const SongPlaylistListCard = ({ song }) => {
     );
 };
 
-export const SongViewPlaylistList = ({playlist = {}}) => {
+export const SongViewPlaylistList = ({playlist = {}, userId}) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -548,7 +548,7 @@ export const SongViewPlaylistList = ({playlist = {}}) => {
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ playlist_name:playlist.playlist_name, playlist_id: playlist.playlist_id }), 
+                        body: JSON.stringify({ playlist_name:playlist.playlist_name, user_id: userId }), 
                     })
                     console.log('Backend response:', response); 
 
@@ -644,7 +644,7 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage}) => {
 
             <div className="songView-section">
                 <div className="songView-header">Songs: </div>
-                <SongViewPlaylistList playlist={playlist} userName={userName}/>
+                <SongViewPlaylistList playlist={playlist} userName={userName} userId={userId}/>
             </div>
         </section>
     );

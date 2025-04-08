@@ -1265,7 +1265,7 @@ const getPlaylistViewSong = async (req, res) => {
     req.on('end', async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const { playlist_name,playlist_id } = parsedBody;
+            const { playlist_name,userId } = parsedBody;
 
             if (!playlist_name) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -1279,7 +1279,8 @@ const getPlaylistViewSong = async (req, res) => {
                 JOIN song_in_playlist ON song_in_playlist.song_id = song.song_id
                 JOIN playlist ON song_in_playlist.playlist_id = playlist.playlist_id
                 JOIN artist ON song.artist_id = artist.artist_id
-                WHERE playlist.name = ? AND playlist.playlist.id = ?;`, [playlist_name,playlist_id]);
+                JOIN user ON playlist.user_id = user.user_id
+                WHERE playlist.name = ? AND user.user_id = ?;`, [playlist_name,userId]);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, songList }));
