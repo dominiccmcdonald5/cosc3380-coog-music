@@ -1401,7 +1401,7 @@ const getPlaylistSongs = async (req, res) => {
                 JOIN song ON song.artist_id = artist.artist_id
                 JOIN song_in_playlist ON song_in_playlist.song_id = song.song_id
                 JOIN playlist ON playlist.playlist_id = song_in_playlist.playlist_id
-                WHERE playlist.name = ?`, [playlist_name]);
+                WHERE playlist.name = ? AND user.user_id = ?`, [playlist_name, user_id]);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, songs }));
