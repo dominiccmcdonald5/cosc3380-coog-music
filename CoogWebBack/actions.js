@@ -41,11 +41,40 @@ const handleSignup = async (req, res) => {
             if (!validAccountTypes.includes(accountType)) {
                 throw new Error('Invalid account type');
             }
+            const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+            if (!imageMatches) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image file format'
+                    }));
+            }
+
+            const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
+            const base64DataImage = imageMatches[2];
+            const bufferImage = Buffer.from(base64DataImage, 'base64');
+
+            // Generate filename
+            const fileNameImage = `${username}-${Date.now()}.${fileTypeImage}`;
+
+            // Upload to Azure (or any storage service)
+            const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
 
             const [result] = await pool.promise().query(
                 `INSERT INTO ?? (email, username, password, image_url, created_at) VALUES (?, ?, ?, ?, NOW())`,
-                [accountType, email, username, password, image]
+                [accountType, email, username, password, imageUrl]
             );
+
+            if (accountType === 'user') {
+
+            const [findUserId] = await pool.promise().query(
+                `SELECT user_id FROM user WHERE username = ?`, [username]);
+
+
+            const [createLikeAlbum] = await pool.promise().query(
+                `INSERT INTO playlist (name, user_id, image_url, created_at) VALUES (?, ?, ?, NOW())`, [`Liked Songs`, findUserId[0].user_id, `https://musiccontainer.blob.core.windows.net/mp3/liked_image.png`]
+            )
+        }
             
             
                 res.writeHead(201, { "Content-Type": "application/json" });
@@ -644,13 +673,13 @@ const createSong = async (req, res) => {
 
             // Handle image (image is expected to be Base64 or URL from frontend)
             const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
-if (!imageMatches) {
-    return res.writeHead(400, { 'Content-Type': 'application/json' })
-        .end(JSON.stringify({
-            success: false,
-            message: 'Invalid image file format'
-        }));
-}
+            if (!imageMatches) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image file format'
+                    }));
+            }
 
             const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
             const base64DataImage = imageMatches[2];
@@ -1190,9 +1219,16 @@ const getPlaylistViewInfo = async (req, res) => {
             }
 
             const [songCount] = await pool.promise().query(`
-                SELECT COUNT(*) AS song_count 
+                SELECT COUNT(*) AS song_count
                 FROM song_in_playlist 
                 JOIN playlist ON song_in_playlist.playlist_id = playlist.playlist_id
+                JOIN user ON playlist.user_id = user.user_id
+                WHERE user.username = ? AND playlist.name = ?;
+            `, [username, playlist_name]);
+
+            const [image_url] = await pool.promise().query(`
+                SELECT playlist.image_url 
+                FROM playlist
                 JOIN user ON playlist.user_id = user.user_id
                 WHERE user.username = ? AND playlist.name = ?;
             `, [username, playlist_name]);
@@ -1201,6 +1237,7 @@ const getPlaylistViewInfo = async (req, res) => {
             res.end(JSON.stringify({
                 success: true,
                 songCount: songCount[0].song_count,
+                image_url: image_url[0].image_url,
             }));
         } catch (err) {
             console.error('Error fetching playlist info:', err);
@@ -1254,7 +1291,7 @@ const getPlaylistViewSong = async (req, res) => {
     req.on('end', async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const { playlist_name } = parsedBody;
+            const { playlist_name,userId } = parsedBody;
 
             if (!playlist_name) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -1268,7 +1305,8 @@ const getPlaylistViewSong = async (req, res) => {
                 JOIN song_in_playlist ON song_in_playlist.song_id = song.song_id
                 JOIN playlist ON song_in_playlist.playlist_id = playlist.playlist_id
                 JOIN artist ON song.artist_id = artist.artist_id
-                WHERE playlist.name = ?;`, [playlist_name]);
+                JOIN user ON playlist.user_id = user.user_id
+                WHERE playlist.name = ? AND user.user_id = ?;`, [playlist_name,userId]);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, songList }));
@@ -1370,7 +1408,7 @@ const getPlaylistSongs = async (req, res) => {
     req.on('end', async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const { playlist_name } = parsedBody;
+            const { playlist_name,user_id } = parsedBody;
 
             if (!playlist_name) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -1389,7 +1427,8 @@ const getPlaylistSongs = async (req, res) => {
                 JOIN song ON song.artist_id = artist.artist_id
                 JOIN song_in_playlist ON song_in_playlist.song_id = song.song_id
                 JOIN playlist ON playlist.playlist_id = song_in_playlist.playlist_id
-                WHERE playlist.name = ?`, [playlist_name]);
+                JOIN user ON playlist.user_id = user.user_id
+                WHERE playlist.name = ? AND user.user_id = ?`, [playlist_name, user_id]);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, songs }));
@@ -2270,6 +2309,13 @@ const likeSong = async (req, res) => {
                 [userId, song_id]
             );
 
+            const [findPlaylistId] = await pool.promise().query(
+                `SELECT playlist_id FROM playlist WHERE user_id = ? AND playlist.name = 'Liked Songs'`, [userId]);
+
+            await pool.promise().query(
+                `INSERT INTO song_in_playlist (song_id, playlist_id, added_at) VALUES (?, ?, NOW());`, [song_id, findPlaylistId[0].playlist_id]
+            );
+
 
             // Send response with the correct status
             res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -2307,6 +2353,13 @@ const unlikeSong = async (req, res) => {
             await pool.promise().query(
                 `DELETE FROM liked_song WHERE user_id = ? AND song_id = ?;`,
                 [userId, song_id]
+            );
+
+            const [findPlaylistId] = await pool.promise().query(
+                `SELECT playlist_id FROM playlist WHERE user_id = ? AND playlist.name = 'Liked Songs'`, [userId]);
+
+            await pool.promise().query(
+                `DELETE FROM song_in_playlist WHERE song_id = ? AND playlist_id = ?;`, [song_id, findPlaylistId[0].playlist_id]
             );
 
 

@@ -20,6 +20,28 @@ function Signup() {
         }
     };
 
+    const handleImageUpload = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+          // Check if the uploaded file is a valid image
+          if (file.type.startsWith("image/")) {
+              // Create a FileReader to read the image file as a data URL (base64)
+              const reader = new FileReader();
+  
+              // When the file is read, update the state with the base64 data URL
+              reader.onloadend = () => {
+                  const imageBase64 = reader.result; // The base64 data URL
+                  setImage(imageBase64);
+              };
+  
+              // Read the file as a data URL (base64)
+              reader.readAsDataURL(file);
+          } else {
+              alert("Only image files are allowed!");
+          }
+      }
+  };
+
     const handleSubmit = async (event) => {
         event.preventDefault(); // Prevents page reload
         console.log({accountType, email, username, password, image});
@@ -93,11 +115,10 @@ function Signup() {
                     <div className="Input-Type">
                     <label>Profile Picture:</label>
                     </div>
-                    <input className= "Input-Box"
-                    type="url" 
-                    value={image} 
-                    onChange={(e) => setImage(e.target.value)} 
-                    
+                    <input type="file" 
+                    name="image" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
                     />
                     
 
