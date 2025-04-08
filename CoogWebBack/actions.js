@@ -1520,7 +1520,6 @@ const editPlaylist = async (req, res) => {
                 throw new Error('Missing required fields to update');
             }
 
-            // Check if the playlist exists
             const [playlistExists] = await pool.promise().execute(
                 "SELECT playlist_id FROM playlist WHERE name = ? AND user_id = ?",
                 [prevName, user]
@@ -1533,7 +1532,6 @@ const editPlaylist = async (req, res) => {
                 }));
             }
 
-            // Prevent renaming to a name that already exists
             if (name) {
                 const [duplicatePlaylist] = await pool.promise().execute(
                     "SELECT playlist_id FROM playlist WHERE name = ? AND user_id = ? AND name != ?",
@@ -1548,8 +1546,7 @@ const editPlaylist = async (req, res) => {
                 }
             }
 
-            let imageUrl = null;
-
+            let imageUrl;
             if (image) {
                 const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
                 if (!imageMatches) {
@@ -1562,20 +1559,29 @@ const editPlaylist = async (req, res) => {
                 const fileType = imageMatches[1];
                 const base64Data = imageMatches[2];
                 const buffer = Buffer.from(base64Data, 'base64');
-
-                const fileName = `${user}-${Date.now()}.${fileType}`;
+                const fileName = `${name}-${Date.now()}.${fileType}`;
                 imageUrl = await uploadToAzureBlobFromServer(buffer, fileName);
             }
 
-            // Update playlist
-            await pool.promise().query(
-                `UPDATE playlist 
-                 SET 
-                     name = COALESCE(?, name),
-                     image_url = COALESCE(?, image_url)
-                 WHERE name = ? AND user_id = ?`,
-                [name, imageUrl, prevName, user]
-            );
+            let query = `UPDATE playlist SET `;
+            const params = [];
+            const updates = [];
+
+            if (name) {
+                updates.push("name = ?");
+                params.push(name);
+            }
+
+            if (imageUrl) {
+                updates.push("image_url = ?");
+                params.push(imageUrl);
+            }
+
+            // Join the SET clause
+            query += updates.join(", ") + " WHERE name = ? AND user_id = ?";
+            params.push(prevName, user);
+
+            await pool.promise().query(query, params);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, message: 'Playlist edited successfully' }));
