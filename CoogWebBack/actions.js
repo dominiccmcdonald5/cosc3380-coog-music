@@ -2327,6 +2327,13 @@ const unlikeSong = async (req, res) => {
                 [userId, song_id]
             );
 
+            const [findPlaylistId] = await pool.promise().query(
+                `SELECT playlist_id FROM playlist WHERE user_id = ? AND playlist.name = 'Liked Songs'`, [userId]);
+
+            await pool.promise().query(
+                `DELETE FROM song_in_playlist WHERE song_id = ? AND playlist_id = ?;`, [song_id, findPlaylistId[0].playlist_id]
+            );
+
 
             // Send response with the correct status
             res.writeHead(200, { 'Content-Type': 'application/json' });
