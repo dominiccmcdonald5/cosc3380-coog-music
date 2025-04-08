@@ -592,7 +592,8 @@ export const SongViewPlaylistCard = ({ song }) => {
 
 export const PlaylistViewPage = ({ playlist, userName, userId, userImage}) => {
     const [stats, setStats] = useState({
-        songCount: 0
+        songCount: 0,
+        image_url: ""
     });
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -634,7 +635,7 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage}) => {
         <section className="everything">
             <div className="profile-section">
                 <div className="profile-header">
-                    <img src={userImage || purple_image} alt="Playlist Cover" className="profile-image" />
+                    <img src={playlist.image_url || purple_image} alt="Playlist Cover" className="profile-image" />
                     <h2 className="profile-username">{playlist.playlist_name}</h2>
                 </div>
                 <div className="basic-stats">

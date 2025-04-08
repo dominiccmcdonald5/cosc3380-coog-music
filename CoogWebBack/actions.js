@@ -1219,7 +1219,7 @@ const getPlaylistViewInfo = async (req, res) => {
             }
 
             const [songCount] = await pool.promise().query(`
-                SELECT COUNT(*) AS song_count 
+                SELECT COUNT(*) AS song_count, playlist.image_url 
                 FROM song_in_playlist 
                 JOIN playlist ON song_in_playlist.playlist_id = playlist.playlist_id
                 JOIN user ON playlist.user_id = user.user_id
