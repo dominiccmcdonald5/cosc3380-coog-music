@@ -5,6 +5,7 @@ import './view.css';
 import play_button from './play.png';
 import verified from './isverifiedlogo.png';
 
+
 export const AlbumViewList = ({artist = {}}) => {
     const [albums, setAlbums] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
@@ -585,7 +586,9 @@ export const SongViewPlaylistCard = ({ song }) => {
         <div className="songView-card">
             <img src={song.song_image || purple_image} alt={song.song_name} className="songView-image" />
             <h3 className="songView-name">{song.song_name}</h3>
-            <h3 className="songView-album">{song.album_name}</h3>
+            <button onClick={() => setCurrentSong(song)} className="play-button">
+                <img src={play_button} alt="Play" className="play" />
+            </button>
         </div>
     );
 };

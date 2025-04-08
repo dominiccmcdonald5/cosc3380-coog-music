@@ -1422,6 +1422,7 @@ const getPlaylistSongs = async (req, res) => {
                     song.name AS song_name, 
                     song.image_url AS song_image, 
                     artist.username AS artist_name 
+                    song.song_url AS song_url
                 FROM 
                     artist 
                 JOIN song ON song.artist_id = artist.artist_id
