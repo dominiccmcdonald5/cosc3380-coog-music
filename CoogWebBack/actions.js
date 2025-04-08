@@ -1756,103 +1756,97 @@ const removePlaylistSong = async (req, res) => {
 
 const editInfo = async (req, res) => {
     let body = '';
-
+  
     req.on('data', (chunk) => {
-        body += chunk.toString();
+      body += chunk.toString();
     });
-
+  
     req.on('end', async () => {
-        try {
-            const parsedBody = JSON.parse(body);
-            const { accountType, username, newPassword, image } = parsedBody;
-            console.log(accountType, username, newPassword, image); 
-            let isWorking = false;
-
-            if (!accountType || !username || (!image && !newPassword)) {
-                console.log(accountType, username, newPassword, image);
-                throw new Error('Missing required fields');
-            }
-
-            const validAccountTypes = ['user', 'artist', 'admin'];
-            if (!validAccountTypes.includes(accountType)) {
-                throw new Error('Invalid account type');
-            }
-
-            const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
-            if (!imageMatches) {
-                return res.writeHead(400, { 'Content-Type': 'application/json' })
-                    .end(JSON.stringify({
-                        success: false,
-                        message: 'Invalid image file format'
-                    }));
-            }
-
-            const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
-            const base64DataImage = imageMatches[2];
-            const bufferImage = Buffer.from(base64DataImage, 'base64');
-
-            // Generate filename
-            const fileNameImage = `${username}-${Date.now()}.${fileTypeImage}`;
-
-            // Upload to Azure (or any storage service)
-            const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
-
-            let result;
-            let updateFields = [];
-            let updateValues = [];  
-
-            // Check for newPassword and imageUrl
-            if (newPassword) {
-            updateFields.push('password = ?');
-            updateValues.push(newPassword);
-            }
-
-            if (imageUrl) {
-            updateFields.push('image_url = ?');
-            updateValues.push(imageUrl);
-            }
-
-            if (updateFields.length > 0) {
-            const validAccountTypes = ['user', 'artist', 'admin'];
-
-            if (!validAccountTypes.includes(accountType)) {
-                throw new Error('Invalid account type');
-            }
-
-            const [check] = await pool.promise().query(
-                `SELECT username FROM ${accountType} WHERE username = ?`, [username]
-            );
-
-            if (check.length > 0) {
-                const updateQuery = `UPDATE ${accountType} SET ${updateFields.join(', ')} WHERE username = ?`;
-                updateValues.push(username);
-                await pool.promise().query(updateQuery, updateValues);
-                isWorking = true;
-
-                const [updatedUser] = await pool.promise().query(
-                    `SELECT image_url FROM ${accountType} WHERE username = ?`, [username]
-                  );
-            }
-            }
-
-            if (isWorking) {
-                res.writeHead(201, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({
-                    success: true,
-                    image_url: updatedUser[0]?.image_url || null,
-                  }));
-            } else {
-                res.writeHead(400, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ success: false, message: "No changes were made." }));
-            }
-
-        } catch (err) {
-            console.error('Error during editInfo:', err);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: err.message || 'Edit Failed' }));
+      try {
+        const parsedBody = JSON.parse(body);
+        const { accountType, username, newPassword, image } = parsedBody;
+        console.log(accountType, username, newPassword, image);
+        let isWorking = false;
+        let updatedUser = null;
+  
+        if (!accountType || !username || (!image && !newPassword)) {
+          throw new Error('Missing required fields');
         }
+  
+        const validAccountTypes = ['user', 'artist', 'admin'];
+        if (!validAccountTypes.includes(accountType)) {
+          throw new Error('Invalid account type');
+        }
+  
+        let imageUrl = null;
+        if (image) {
+          const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+          if (!imageMatches) {
+            return res.writeHead(400, { 'Content-Type': 'application/json' })
+              .end(JSON.stringify({
+                success: false,
+                message: 'Invalid image file format'
+              }));
+          }
+  
+          const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
+          const base64DataImage = imageMatches[2];
+          const bufferImage = Buffer.from(base64DataImage, 'base64');
+          const fileNameImage = `${username}-${Date.now()}.${fileTypeImage}`;
+  
+          // Upload to Azure (or other service)
+          imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
+        }
+  
+        let updateFields = [];
+        let updateValues = [];
+  
+        if (newPassword) {
+          updateFields.push('password = ?');
+          updateValues.push(newPassword);
+        }
+  
+        if (imageUrl) {
+          updateFields.push('image_url = ?');
+          updateValues.push(imageUrl);
+        }
+  
+        if (updateFields.length > 0) {
+          const [check] = await pool.promise().query(
+            `SELECT username FROM ${accountType} WHERE username = ?`, [username]
+          );
+  
+          if (check.length > 0) {
+            const updateQuery = `UPDATE ${accountType} SET ${updateFields.join(', ')} WHERE username = ?`;
+            updateValues.push(username);
+            await pool.promise().query(updateQuery, updateValues);
+            isWorking = true;
+  
+            const [fetchedUser] = await pool.promise().query(
+              `SELECT image_url FROM ${accountType} WHERE username = ?`, [username]
+            );
+            updatedUser = fetchedUser[0];
+          }
+        }
+  
+        if (isWorking) {
+          res.writeHead(201, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({
+            success: true,
+            image_url: updatedUser?.image_url || null,
+          }));
+        } else {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ success: false, message: "No changes were made." }));
+        }
+  
+      } catch (err) {
+        console.error('Error during editInfo:', err);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: err.message || 'Edit Failed' }));
+      }
     });
-};
+  };
 
 const deleteAccount = async (req, res) => {
     let body = '';
