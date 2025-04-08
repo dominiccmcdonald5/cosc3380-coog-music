@@ -1382,7 +1382,7 @@ const getPlaylistSongs = async (req, res) => {
     req.on('end', async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const { playlist_name } = parsedBody;
+            const { playlist_name,user_id } = parsedBody;
 
             if (!playlist_name) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
