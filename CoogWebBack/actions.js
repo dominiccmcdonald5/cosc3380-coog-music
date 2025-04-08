@@ -362,7 +362,7 @@ const getAlbumViewSong = async (req, res) => {
             const [songList] = await pool.promise().query(`
                 SELECT song_id, song.name AS song_name, song.image_url AS song_image, album.name AS album_name 
                 FROM song, album 
-                WHERE album.album_id = song.song_id AND album.name = ?;`, [album_name]);
+                WHERE album.album_id = song.album_id AND album.name = ?;`, [album_name]);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, songList }));
