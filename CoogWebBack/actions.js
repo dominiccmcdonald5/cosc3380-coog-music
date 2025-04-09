@@ -1001,6 +1001,11 @@ const editAlbum = async (req, res) => {
                 params.push(name);
             }
 
+            if (genre) {
+                updates.push("genre = ?");
+                params.push(genre);
+            }
+
             if (imageUrl) {
                 updates.push("image_url = ?");
                 params.push(imageUrl);

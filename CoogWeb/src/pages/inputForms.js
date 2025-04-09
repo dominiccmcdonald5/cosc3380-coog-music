@@ -463,7 +463,7 @@ export const AlbumFormEdit = ({userName,userId, album}) => {
             
             if (response.ok) {
                 alert("Album edited successfully!");
-                setAlbum({ prevName: "", name: "", artist: userId,genre: "", image: ""}); // Reset form
+                setAlbuming({ prevName: "", name: "", artist: userId,genre: "", image: ""}); // Reset form
             } else {
                 alert("Failed to edit album: " + data.message);
             }
@@ -477,7 +477,7 @@ export const AlbumFormEdit = ({userName,userId, album}) => {
         <section className="everything">
         <div className="input-section">
                     <div className="profile-header">
-                        <h2 className="input-username">Edit an Album!</h2>
+                        <h2 className="input-username">Edit {album.album_name}!</h2>
                     </div>
         </div>
         <form className="song-form" onSubmit={handleSubmit}>
