@@ -111,8 +111,8 @@ function routes(req, res) {
     if (URL.startsWith('/deleteplaylist') && method === 'POST') {
         return actions.deletePlaylist(req, res);
     }
-    if (URL.startsWith('/addsongtoplaylist') && method === 'POST') {
-        return actions.addPlaylistSong(req, res);
+    if (URL.startsWith('/addsong') && method === 'POST') {
+        return actions.addSong(req, res);
     }
     if (URL.startsWith('/removeplaylistsong') && method === 'POST') {
         return actions.removePlaylistSong(req, res);
@@ -185,6 +185,9 @@ function routes(req, res) {
     }
     if (URL.startsWith('/streamsong') && method === 'POST') {
         return actions.streamSong(req, res);
+    }
+    if (URL.startsWith('/optionsongs') && method === 'POST') {
+        return actions.getSongOptionList(req, res);
     }
 
 

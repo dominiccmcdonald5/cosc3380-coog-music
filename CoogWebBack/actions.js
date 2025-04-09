@@ -7,6 +7,7 @@ const {uploadToAzureBlobFromServer} = require('./azure.js');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const { get } = require('http');
 
 const getUsers = (req, res) => {
     pool.query(queries.getUsers, (error, results) => {
@@ -360,7 +361,7 @@ const getAlbumViewSong = async (req, res) => {
             }
 
             const [songList] = await pool.promise().query(`
-                SELECT song_id, song.name AS song_name, song.image_url AS song_image, album.name AS album_name 
+                SELECT song_id, song.name AS name, song.image_url AS image, song.song_url AS song_url, song.artist_id AS artist_id, album.name AS album_name 
                 FROM song, album 
                 WHERE album.album_id = song.album_id AND album.name = ?;`, [album_name]);
 
@@ -624,137 +625,121 @@ const getArtistProfileAlbum = async (req, res) => {
 const createSong = async (req, res) => {
     let body = "";
 
-    // Listen for incoming data
     req.on('data', chunk => {
-        body += chunk.toString(); // Append received chunks
+        body += chunk.toString();
     });
 
-    req.on('end', async () => {  // Ensure data is fully received before parsing
+    req.on('end', async () => {
         try {
-            // Get the form fields (these will be populated by formData sent from the frontend)
             const parsedBody = JSON.parse(body);
             const { name, artist, genre, album, image, songFile } = parsedBody;
 
-            // Check if any required fields are missing
-            if (!name || !artist || !genre || !songFile) {
-                return res.writeHead(400, { 'Content-Type': 'application/json' })
-                    .end(JSON.stringify({
-                        success: false,
-                        message: 'Missing required fields (name, artist, genre, album, song file)',
-                    }));
+            if (!name || !artist || !songFile) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({
+                    success: false,
+                    message: 'Missing required fields (name, artist, genre, album, song file)',
+                }));
             }
 
-            // Validate length of fields
-            if (name.length > 255 || artist.length > 255 || genre.length > 255) {
-                return res.writeHead(400, { 'Content-Type': 'application/json' })
-                    .end(JSON.stringify({
-                        success: false,
-                        message: 'One or more fields are too long',
-                    }));
-            }
-
-            
-                // Verify album belongs to artist (assuming album check logic exists in the DB)
-                const [albumCheck] = await pool.promise().query(
+            let albumCheck = null;
+            if (album) {
+                [albumCheck] = await pool.promise().query(
                     "SELECT album_id, artist_id FROM album WHERE name = ?",
                     [album]
                 );
-                
-                if (albumCheck.length === 0) {
-                    albumCheck[0].album_id = null; // Set album to null if not found
-                } else {
-                    // Verify the album belongs to the specified artist
-                    if (albumCheck[0].artist_id !== Number(artist)) {
-                        return res.writeHead(400, { 'Content-Type': 'application/json' })
-                            .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
-                    }
+            }
+
+            if (albumCheck && albumCheck.length > 0) {
+                if (albumCheck[0].artist_id !== Number(artist)) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({
+                        success: false,
+                        message: 'Album does not belong to this artist',
+                    }));
                 }
-            
-
-            // Handle image (image is expected to be Base64 or URL from frontend)
-            const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
-            if (!imageMatches) {
-                return res.writeHead(400, { 'Content-Type': 'application/json' })
-                    .end(JSON.stringify({
-                        success: false,
-                        message: 'Invalid image file format'
-                    }));
+            } else {
+                albumCheck = null;
             }
 
-            const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
-            const base64DataImage = imageMatches[2];
-            const bufferImage = Buffer.from(base64DataImage, 'base64');
+            let imageUrl = null;
+            if (image) {
+                const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+                if (!imageMatches) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image file format',
+                    }));
+                }
 
-            // Generate filename
-            const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
+                const fileTypeImage = imageMatches[1];
+                const base64DataImage = imageMatches[2];
+                const bufferImage = Buffer.from(base64DataImage, 'base64');
 
-            // Upload to Azure (or any storage service)
-            const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
+                const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
+                imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
+            }
 
-            // Ensure songFile is a base64 string before proceeding
             if (typeof songFile !== 'string' || !songFile.startsWith('data:audio/')) {
-                return res.writeHead(400, { 'Content-Type': 'application/json' })
-                    .end(JSON.stringify({
-                        success: false,
-                        message: 'Invalid audio file format'
-                    }));
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({
+                    success: false,
+                    message: 'Invalid audio file format',
+                }));
             }
 
-            // Extract file type and base64 data from songFile
             const audioMatches = songFile.match(/^data:audio\/(\w+);base64,(.+)$/);
             if (!audioMatches) {
-                return res.writeHead(400, { 'Content-Type': 'application/json' })
-                    .end(JSON.stringify({
-                        success: false,
-                        message: 'Invalid audio file format'
-                    }));
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({
+                    success: false,
+                    message: 'Invalid audio file format',
+                }));
             }
 
-            const fileType = audioMatches[1]; // mp3, wav, etc.
+            const fileType = audioMatches[1];
             const base64Data = audioMatches[2];
             const buffer = Buffer.from(base64Data, 'base64');
 
-            // Generate filename
-            const fileName = `${name}-${artist}-${Date.now()}.${fileType}`; 
-            // Upload to Azure
+            const fileName = `${name}-${artist}-${Date.now()}.${fileType}`;
             const songUrl = await uploadToAzureBlobFromServer(buffer, fileName);
+            const albumId = albumCheck && albumCheck.length > 0 ? albumCheck[0].album_id : null;
 
-            // Insert the song into the database
             const [result] = await pool.promise().query(
                 `INSERT INTO song 
                 (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
                 VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
-                [name, artist, albumCheck[0].abum_id, genre, imageUrl || null, songUrl]
+                [name, artist, albumId, genre, imageUrl || null, songUrl]
             );
 
-            return res.writeHead(201, { 'Content-Type': 'application/json' })
-                .end(JSON.stringify({
-                    success: true,
-                    message: 'Song created successfully',
-                    song: {
-                        song_id: result.insertId,
-                        name,
-                        artist_id: artist,
-                        album_id: albumCheck[0].abum_id,
-                        genre,
-                        image_url: imageUrl || null,
-                        song_url: songUrl,
-                        length: 0,
-                    },
-                }));
+            res.writeHead(201, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                message: 'Song created successfully',
+                song: {
+                    song_id: result.insertId,
+                    name,
+                    artist_id: artist,
+                    album_id: albumCheck ? albumCheck[0].album_id : null,
+                    genre,
+                    image_url: imageUrl || null,
+                    song_url: songUrl,
+                    length: 0,
+                },
+            }));
         } catch (error) {
             console.error('Error creating song:', error);
-            return res.writeHead(500, { 'Content-Type': 'application/json' })
-                .end(JSON.stringify({
+            if (!res.headersSent) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
                     success: false,
                     message: error.message || 'Failed to create song',
                 }));
+            }
         }
     });
 };
-
-
-
 
 
 const editSong = async (req, res) => {
@@ -770,14 +755,14 @@ const editSong = async (req, res) => {
             let { prevName, name, artist, genre, image } = parsedBody;
 
             // Validate if at least one field is provided
-            if (!name && !artist && !genre && !image) {
+            if (!prevName || !artist || (!name && !image && !genre)) {
                 throw new Error('Missing required fields to update');
             }
 
             // Check if the song exists with the previous name
             const [songExists] = await pool.promise().execute(
-                "SELECT song_id FROM song WHERE name = ?",
-                [prevName]
+                "SELECT song_id FROM song WHERE name = ? AND artist_id = ?",
+                [prevName, artist]
             );
 
             if (songExists.length === 0) {
@@ -788,8 +773,8 @@ const editSong = async (req, res) => {
             // Check for duplicates with the new name (within the same artist)
             if (name) {
                 const [duplicateSong] = await pool.promise().execute(
-                    "SELECT song_id FROM song WHERE name = ? AND artist_id = (SELECT artist_id FROM song WHERE name = ?)",
-                    [name, prevName]
+                    "SELECT song_id FROM song WHERE name = ? AND artist_id = ? AND name != ?",
+                    [name, artist, prevName]
                 );
 
                 if (duplicateSong.length > 0) {
@@ -798,23 +783,44 @@ const editSong = async (req, res) => {
                 }
             }
 
-            // Handle undefined fields: if a field is undefined, convert to null
-            name = name || null;
-            artist = artist || null;
-            genre = genre || null;
-            image = image || null;
+            let imageUrl;
+            if (image) {
+                const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+                if (!imageMatches) {
+                    return res.writeHead(400, { 'Content-Type': 'application/json' }).end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image format'
+                    }));
+                }
 
-            // Update the song with new data (only the fields that are provided)
-            await pool.promise().query(
-                `UPDATE song 
-                SET 
-                    name = COALESCE(?, name),
-                    artist_id = COALESCE(?, artist_id),
-                    genre = COALESCE(?, genre),
-                    image_url = COALESCE(?, image_url)
-                WHERE name = ?`,
-                [name, artist, genre, image, prevName]
-            );
+                const fileType = imageMatches[1];
+                const base64Data = imageMatches[2];
+                const buffer = Buffer.from(base64Data, 'base64');
+                const fileName = `${name}-${Date.now()}.${fileType}`;
+                imageUrl = await uploadToAzureBlobFromServer(buffer, fileName);
+            }
+
+            let query = `UPDATE song SET `;
+            const params = [];
+            const updates = [];
+
+            if (name) {
+                updates.push("name = ?");
+                params.push(name);
+            }
+            if (genre) {
+                updates.push("genre = ?");
+                params.push(genre);
+            }
+            if (imageUrl) {
+                updates.push("image_url = ?");
+                params.push(imageUrl);
+            }
+
+            query += updates.join(", ") + " WHERE song_id = ? AND artist_id = ?";
+            params.push(songExists[0].song_id, artist);
+
+            await pool.promise().execute(query, params);
 
             res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ success: true, message: 'Song edited successfully' }));
@@ -883,14 +889,14 @@ const createAlbum = async (req, res) => {
             const { name, artist, genre, image} = parsedBody;
 
             // Validate required fields
-            if (!name || !artist || !genre ||!image) {
+            if (!name || !artist) {
                 throw new Error('Missing required fields');
             }
 
             // Check if the album exists and belongs to the artist
             const [albumExists] = await pool.promise().execute(
-                "SELECT album_id, artist_id FROM album WHERE name = ?",
-                [name]
+                "SELECT album_id, artist_id FROM album WHERE name = ? AND artist_id = ?",
+                [name, artist]
             );
 
             if (albumExists.length !== 0) {
@@ -898,11 +904,32 @@ const createAlbum = async (req, res) => {
                 return res.end(JSON.stringify({ success: false, message: 'Album already exist' }));
             }
 
+            let imageUrl = null;
+            if (image) {
+            const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+            if (!imageMatches) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image file format'
+                    }));
+            }
+
+            const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
+            const base64DataImage = imageMatches[2];
+            const bufferImage = Buffer.from(base64DataImage, 'base64');
+
+            // Generate filename
+            const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
+
+            // Upload to Azure (or any storage service)
+            imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
+        }
             // Insert the song
             await pool.promise().query(
                 `INSERT INTO album (name, artist_id, genre, image_url,likes,created_at)
                  VALUES (?, ?, ?, ?, 0, NOW())`,
-                [name, artist, genre, image]
+                [name, artist, genre, imageUrl]
             );
 
             res.writeHead(201, { "Content-Type": "application/json" });
@@ -928,14 +955,14 @@ const editAlbum = async (req, res) => {
             let { prevName, name, artist, genre, image } = parsedBody;
 
             // Validate if at least one field is provided
-            if (!name && !artist && !genre && !image) {
+            if (!prevName && !artist && (!genre && !image && !name)) {
                 throw new Error('Missing required fields to update');
             }
 
             // Check if the song exists with the previous name
             const [albumExists] = await pool.promise().execute(
-                "SELECT album_id FROM album WHERE name = ?",
-                [prevName]
+                "SELECT album_id FROM album WHERE name = ? AND artist_id = ?",
+                [prevName,artist]
             );
 
             if (albumExists.length === 0) {
@@ -946,8 +973,8 @@ const editAlbum = async (req, res) => {
             // Check for duplicates with the new name (within the same artist)
             if (name) {
                 const [duplicateAlbum] = await pool.promise().execute(
-                    "SELECT album_id FROM album WHERE name = ? AND artist_id = (SELECT artist_id FROM album WHERE name = ?)",
-                    [name, prevName]
+                    "SELECT album_id FROM album WHERE name = ? AND name != ? AND artist_id = ?",
+                    [name, prevName, artist]
                 );
 
                 if (duplicateAlbum.length > 0) {
@@ -956,30 +983,58 @@ const editAlbum = async (req, res) => {
                 }
             }
 
-            // Handle undefined fields: if a field is undefined, convert to null
-            name = name || null;
-            artist = artist || null;
-            genre = genre || null;
-            image = image || null;
+            let imageUrl;
+            if (image) {
+                const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+                if (!imageMatches) {
+                    return res.writeHead(400, { 'Content-Type': 'application/json' }).end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image format'
+                    }));
+                }
 
-            // Update the song with new data (only the fields that are provided)
-            await pool.promise().query(
-                `UPDATE album 
-                SET 
-                    name = COALESCE(?, name),
-                    artist_id = COALESCE(?, artist_id),
-                    genre = COALESCE(?, genre),
-                    image_url = COALESCE(?, image_url)
-                WHERE name = ?`,
-                [name, artist, genre, image, prevName]
-            );
+                const fileType = imageMatches[1];
+                const base64Data = imageMatches[2];
+                const buffer = Buffer.from(base64Data, 'base64');
+                const fileName = `${name}-${Date.now()}.${fileType}`;
+                imageUrl = await uploadToAzureBlobFromServer(buffer, fileName);
+            }
 
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true, message: 'Album edited successfully' }));
+            let query = `UPDATE album SET `;
+            const params = [];
+            const updates = [];
+
+            if (name) {
+                updates.push("name = ?");
+                params.push(name);
+            }
+
+            if (genre) {
+                updates.push("genre = ?");
+                params.push(genre);
+            }
+
+            if (imageUrl) {
+                updates.push("image_url = ?");
+                params.push(imageUrl);
+            }
+
+            // Join the SET clause
+            query += updates.join(", ") + " WHERE name = ? AND artist_id = ?";
+            params.push(prevName, artist);
+
+            await pool.promise().query(query, params);
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, message: 'Playlist edited successfully' }));
+
         } catch (err) {
-            console.error('Error editing song:', err);
+            console.error('Error editing playlist:', err);
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: err.message || 'Failed to edit album' }));
+            res.end(JSON.stringify({
+                success: false,
+                message: err.message || 'Failed to edit playlist'
+            }));
         }
     });
 };
@@ -1108,10 +1163,10 @@ const removeAlbumSong = async (req, res) => {
         try {
             const parsedBody = JSON.parse(body);
             console.log('Parsed Body:', parsedBody);
-            const { name, artist, song_name } = parsedBody;
+            const { name, artistId, song_name } = parsedBody;
 
             // Validate required fields
-            if (!name || !artist || !song_name) {
+            if (!name || !artistId || !song_name) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ success: false, message: 'Missing required fields' }));
             }
@@ -1119,7 +1174,7 @@ const removeAlbumSong = async (req, res) => {
             // Check if the album exists and belongs to the artist
             const [albumExists] = await pool.promise().execute(
                 "SELECT album_id FROM album WHERE name = ? AND artist_id = ?",
-                [name, artist]
+                [name, artistId]
             );
 
             if (albumExists.length === 0) {
@@ -1132,7 +1187,7 @@ const removeAlbumSong = async (req, res) => {
             // Check if the song exists
             const [songExists] = await pool.promise().execute(
                 "SELECT song_id, album_id FROM song WHERE name = ? AND artist_id = ?",
-                [song_name, artist]
+                [song_name, artistId]
             );
 
             if (songExists.length === 0) {
@@ -1186,7 +1241,7 @@ const getArtistProfileSong = async (req, res) => {
             }
 
             const [songs] = await pool.promise().query(`
-                SELECT song_id, song.name AS song_name, song.image_url AS song_image, artist.username AS artist_name 
+                SELECT song_id, song.name AS name, song.image_url AS image, song.song_url AS song_url, artist.username AS artist_name 
                 FROM artist
                 JOIN song ON song.artist_id = artist.artist_id
                 WHERE artist.username = ?;`, [userName]);
@@ -1643,7 +1698,7 @@ const deletePlaylist = async (req, res) => {
     });
 };
 
-const addPlaylistSong = async (req, res) => {
+const addSong = async (req, res) => {
     let body = '';
 
     req.on('data', (chunk) => {
@@ -1654,48 +1709,68 @@ const addPlaylistSong = async (req, res) => {
         try {
             const parsedBody = JSON.parse(body);
             console.log('Parsed Body:', parsedBody);
-            const { name, user, song_name } = parsedBody;
+            const { accountType, songId, userId, playlist_name, album_name } = parsedBody;
 
             // Validate required fields
-            if (!name || !user || !song_name) {
+            if (!accountType || !songId || !userId || (!playlist_name && !album_name)) {
                 throw new Error('Missing required fields');
             }
 
-            // Check if the album exists and belongs to the artist
-            const [playlistExists] = await pool.promise().execute(
-                "SELECT playlist_id FROM playlist WHERE name = ? AND user_id = ?",
-                [name, user]
-            );
+            if (accountType === 'user') {
+                // For a user, add the song to the playlist
+                if (playlist_name) {
+                    // Get the playlist_id for the provided playlist_name
+                    const [playlistRows] = await pool.promise().execute(
+                        `SELECT playlist_id FROM playlist WHERE name = ? AND user_id = ?`, 
+                        [playlist_name, userId]
+                    );
 
-            if (playlistExists.length === 0) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: 'Playlist does not exist or does not belong to the user' }));
+                    if (playlistRows.length === 0) {
+                        throw new Error('Playlist not found or user does not have access to this playlist');
+                    }
+
+                    const playlistId = playlistRows[0].playlist_id;
+
+                    // Insert the song into the song_in_playlist table
+                    await pool.promise().execute(
+                        `INSERT INTO song_in_playlist (song_id, playlist_id, added_at) VALUES (?, ?, NOW())`, 
+                        [songId, playlistId]
+                    );
+
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ success: true, message: 'Song added to playlist successfully' }));
+                } else {
+                    throw new Error('Playlist name is required for user account');
+                }
+            } else if (accountType === 'artist') {
+                // For an artist, update the album_id of the song
+                if (album_name) {
+                    // Get the album_id for the provided album_name
+                    const [albumRows] = await pool.promise().execute(
+                        `SELECT album_id FROM album WHERE name = ? AND artist_id = ?`, 
+                        [album_name, userId]
+                    );
+
+                    if (albumRows.length === 0) {
+                        throw new Error('Album not found or artist does not have access to this album');
+                    }
+
+                    const albumId = albumRows[0].album_id;
+
+                    // Update the album_id of the song
+                    await pool.promise().execute(
+                        `UPDATE song SET album_id = ? WHERE song_id = ? AND artist_id = ?`, 
+                        [albumId, songId, userId]
+                    );
+
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ success: true, message: 'Song added to album successfully' }));
+                } else {
+                    throw new Error('Album name is required for artist account');
+                }
+            } else {
+                throw new Error('Invalid account type');
             }
-
-            const playlistId = playlistExists[0].playlist_id;
-
-            // Check if the song exists
-            const [songExists] = await pool.promise().execute(
-                "SELECT song_id FROM song WHERE name = ?",
-                [song_name]
-            );
-
-            if (songExists.length === 0) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: 'Song does not exist' }));
-            }
-
-            const songId = songExists[0].song_id;
-
-
-            // Assign the song to the album
-            await pool.promise().execute(
-                `INSERT song_in_playlist (song_id,playlist_id,added_at) VALUES (?,?,NOW())`,
-                [songId,playlistId]
-            );
-
-            res.writeHead(201, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true, message: 'Song added to album successfully' }));
         } catch (err) {
             console.error('Error adding song:', err);
             res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -2971,6 +3046,89 @@ const streamSong = async (req, res) => {
     });
 };
 
+const getSongOptionList = async (req, res) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+        try {
+            const parsedBody = JSON.parse(body);
+            const { accountType, userId, album_name, playlist_name } = parsedBody;
+            console.log(accountType,userId,album_name,playlist_name);
+            
+            if (!accountType || !userId || (!album_name && !playlist_name)) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ 
+                    success: false, 
+                    message: 'Missing Required Fields' 
+                }));
+            }
+
+            let query = `
+                SELECT 
+                    song.song_id, 
+                    song.name, 
+                    song.image_url AS image, 
+                    artist.username AS artist_username, 
+                    song.song_url AS song_url 
+                FROM song 
+                JOIN artist ON song.artist_id = artist.artist_id
+            `;
+
+            let params = [];
+
+            if (accountType === "artist" && album_name) {
+                query += ` 
+                    WHERE artist.artist_id = ? AND song.album_id IS NULL
+                `;
+                params = [userId];
+            } else if (accountType === "user" && playlist_name) {
+                query += ` 
+                    WHERE song.song_id NOT IN (
+                        SELECT song_id FROM song_in_playlist 
+                        WHERE playlist_id = (
+                            SELECT playlist_id FROM playlist 
+                            WHERE name = ? AND user_id = ?
+                        )
+                    )
+                `;
+                params = [playlist_name, userId];
+            }
+
+            // Get a connection from the pool
+            const connection = await pool.promise().getConnection();
+            
+            try {
+                // Execute the query with proper parameter handling
+                const [rows] = await connection.execute(query, params);
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    message: "Songs fetched successfully",
+                    songs: rows
+                }));
+            } finally {
+                // Always release the connection back to the pool
+                connection.release();
+            }
+
+        } catch (err) {
+            console.error('Error fetching songs:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                success: false, 
+                message: 'Failed to fetch songs',
+                error: err.message 
+            }));
+        }
+    });
+};
+
+
 
 module.exports = {
     getUsers,
@@ -3009,7 +3167,7 @@ module.exports = {
     createPlaylist,
     editPlaylist,
     deletePlaylist,
-    addPlaylistSong,
+    addSong,
     removePlaylistSong,
     editInfo,
     deleteAccount,
@@ -3033,6 +3191,7 @@ module.exports = {
     adminArtistReport,
     adminUserReport,
     artistSongReport,
-    streamSong
+    streamSong,
+    getSongOptionList
 };
 

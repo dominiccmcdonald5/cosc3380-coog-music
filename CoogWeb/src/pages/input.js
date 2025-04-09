@@ -1,10 +1,12 @@
 import React, {useState, useEffect} from 'react';
+import play_button from './play.png';
 import purple_image from './purple_image.png';
 import './input.css';
-import {SongForm, SongFormDelete, SongFormEdit} from './inputForms.js';
+import {SongForm, SongFormDelete, SongFormEdit, ChooseSongList} from './inputForms.js';
 import {PlaylistViewPage} from './view.js';
 import forward from './forward.png';
 import verified from './isverifiedlogo.png';
+
 export const PlaylistList = ({ onPlaylistClick, userName, userId }) => {
     const [playlists, setPlaylists] = useState([]);
         const [loading, setLoading] = useState(true);  // To track loading state
@@ -139,7 +141,6 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
                     <button className="create-playlist-button" onClick={() => setActiveScreen('create-playlist')}>
                         Create Playlist
                     </button>
-    
                     <button className="create-playlist-button" onClick={() => setActiveScreen('add-song-playlist')}>
                         Add Song
                     </button>
@@ -153,7 +154,7 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
     );
 };
 
-export const AlbumProfileList = ({userName}) => {
+export const AlbumProfileList = ({onAlbumClick, userName, userId}) => {
     const [albums, setAlbums] = useState([]);
         const [loading, setLoading] = useState(true);  // To track loading state
         const [error, setError] = useState(null);
@@ -192,22 +193,25 @@ export const AlbumProfileList = ({userName}) => {
     return (
         <div className="albumProfile-list">
             {albums.map((album,index) => (
-                <AlbumProfileCard key={index} album={album} />
+                <AlbumProfileCard key={index} album={album} onAlbumClick={onAlbumClick} userName={userName} userId={userId}/>
             ))}
         </div>
     );
 }
 
-export const AlbumProfileCard = ({ album }) => {
+export const AlbumProfileCard = ({ album,onAlbumClick, userName, userId }) => {
     return (
         <div className="albumProfile-card">
-            <img src={album.album_image} alt={album.album_name} className="albumProfile-image" />
+            <img src={album.album_image || purple_image} alt={album.album_name} className="albumProfile-image" />
             <h3 className="albumProfile-name">{album.album_name}</h3>
+            <button onClick={() => onAlbumClick('album-view-page', album, userName, userId)} className="forward-button">
+                            <img src={forward} alt="forward" className="forward-icon" />
+                        </button>
         </div>
     );
 };
 
-export const SongProfileList = ({userName}) => {
+export const SongProfileList = ({userName, setCurrentSong, onSongClick, userId}) => {
     const [songs, setSongs] = useState([]);
         const [loading, setLoading] = useState(true);  // To track loading state
         const [error, setError] = useState(null);
@@ -246,23 +250,72 @@ export const SongProfileList = ({userName}) => {
     return (
         <div className="songProfile-list">
             {songs.map((song,index) => (
-                <SongProfileCard key={index} song={song} />
+                <SongProfileCard key={index} song={song} setCurrentSong={setCurrentSong} onSongClick={onSongClick} userId={userId} />
             ))}
         </div>
     );
 };
 
-export const SongProfileCard = ({ song }) => {
+export const SongProfileCard = ({ song , setCurrentSong, onSongClick, userId}) => {
+    const [deleteError, setDeleteError] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDelete = async () => {
+        const isConfirmed = window.confirm('Are you sure you want to delete this song?');
+        try {
+            setIsDeleting(true);
+            setDeleteError(null);
+
+            const response = await fetch('https://cosc3380-coog-music-2.onrender.com/deletesong', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: song.name,
+                    artist: userId, 
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('Song deleted successfully!');
+            } else {
+                setDeleteError(data.message || 'Failed to delete song');
+            }
+        } catch (error) {
+            console.error('Error deleting song:', error);
+            setDeleteError('Error connecting to the server.');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
     return (
         <div className="songProfile-card">
-            <img src={song.song_image} alt={song.song_name} className="songProfile-image" />
-            <h3 className="songProfile-name">{song.song_name}</h3>
+            <img src={song.image || purple_image} alt={song.name} className="songProfile-image" />
+            <h3 className="songProfile-name">{song.name}</h3>
             <h3 className="songProfile-album">{song.artist_name}</h3>
+            <button
+                className="delete-song-button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+            >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+            </button>
+
+            {deleteError && <div className="error-message">{deleteError}</div>}
+            <button
+                        className="edit-song-button"
+                        onClick={() => onSongClick('edit-song',song,userId)}>
+                        Edit
+                    </button>
+            <button onClick={() => setCurrentSong(song)} className="play-button">
+                    <img src={play_button} alt="Play" className="play" />
+            </button>
         </div>
     );
 };
 
-export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
+export const ArtistProfile = ({setActiveScreen, userName, userImage, onAlbumClick, userId, setCurrentSong, onSongClick}) => {
     const [stats, setStats] = useState({
         follow: 0,
         streams: 0,
@@ -338,16 +391,6 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
                     </button>
                 <button
                         className="create-album-button"
-                        onClick={() => setActiveScreen('edit-album')}>
-                        Edit Album
-                    </button>
-                <button
-                        className="create-album-button"
-                        onClick={() => setActiveScreen('delete-album')}>
-                        Delete Album
-                    </button>
-                <button
-                        className="create-album-button"
                         onClick={() => setActiveScreen('add-song-album')}>
                         Add Song
                     </button>
@@ -357,7 +400,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
                         Remove Song
                     </button>
                 </div>
-            <AlbumProfileList userName={userName}/>
+            <AlbumProfileList userName={userName} onAlbumClick={onAlbumClick} userId={userId}/>
             </div>
 
             <div className="songProfile-section">
@@ -367,18 +410,8 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
                         onClick={() => setActiveScreen('create-song')}>
                         Create Song
                     </button>
-                <button
-                        className="create-song-button"
-                        onClick={() => setActiveScreen('edit-song')}>
-                        Edit Song
-                    </button>
-                <button
-                        className="create-song-button"
-                        onClick={() => setActiveScreen('delete-song')}>
-                        Delete Song
-                    </button>
                 </div>
-            <SongProfileList userName={userName}/>
+            <SongProfileList userName={userName} setCurrentSong={setCurrentSong} onSongClick={onSongClick} userId={userId}/>
             </div>
            
         </section>

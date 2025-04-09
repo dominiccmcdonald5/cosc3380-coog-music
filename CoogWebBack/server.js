@@ -50,7 +50,7 @@ const map_route = {
     '/createplaylist',
     '/editplaylist',
     '/deleteplaylist',
-    '/addsongtoplaylist',
+    '/addsong',
     '/removeplaylistsong',
     '/editinfo',
     '/deleteaccount',
@@ -71,7 +71,8 @@ const map_route = {
     '/adminartistreport',
     '/adminuserreport',
     '/artistreport',
-    '/streamsong'],
+    '/streamsong',
+    '/optionsongs'],
     'PUT': [],
     'DELETE': [],
 };

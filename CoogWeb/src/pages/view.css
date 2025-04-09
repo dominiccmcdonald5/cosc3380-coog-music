@@ -25,6 +25,28 @@
     margin-right: 20px; /* Add spacing between the image and username */
   }
 
+  .editt-song-button {
+    background-color: #303030;
+  color: white;
+  font-size: 15px;
+  font-family: 'Montserrat';
+  font-weight: bold;
+  border: none;
+  padding: 5px 5px;
+  cursor: pointer;
+  width: 100px;
+  height: 50px; /* Set a fixed height */
+  position: relative;
+  border-radius: 20px;
+  align-items: center;
+  text-align: center;
+  }
+  
+  .editt-song-button:hover {
+  background-color: #1F1426;
+  box-shadow: 0 0 15px #B200FF;
+  }
+
   .verified-icon {
     width: 30px; /* Adjust size as needed */
     height: 30px; /* Adjust size as needed */
@@ -203,39 +225,38 @@
     direction: rtl;
   }
 
-  .songView-section {
-    flex: 1;
-    background-color: #000000;
-    padding: 0; /* Remove padding to allow full-width header */
-    border-radius: 10px;
-    margin-top: 20px;
-    height: 400px;
-    overflow: hidden; /* Prevents the header from being affected by padding */
-    display: flex;
-    flex-direction: column;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-  }
-  
-  .songView-header {
-    background-color: #303030;
-    height: 40px;
-    padding: 10px;
+  .songView-header-container {
+    display: flex; /* Aligns the text and button horizontally */
+    align-items: center; /* Vertically centers the text and button */
+    background-color: #303030; /* Grey background for the header */
+    gap: 20px;
+    padding: 10px; /* Padding inside the container */
+    border-top-left-radius: 10px; /* Rounded top left corner */
+    border-top-right-radius: 10px; /* Rounded top right corner */
+    width: 100%; /* Ensures it takes up the full width */
+}
+
+.songView-header {
     color: white;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    
-    /* Make it take up the full width */
-    width: 100%;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    color: #ffffff;
     font-family: 'Montserrat';
     font-weight: bold;
-    gap: 100px;
     font-size: 24px;
-  }
-  
+}
+
+.add-playlist-button {
+    padding: 5px 10px; /* Make button smaller */
+    font-size: 14px;   /* Adjust font size of button */
+    background-color: #4CAF50; /* Adjust button color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-playlist-button:hover {
+    background-color: #45a049; /* Slightly darker shade on hover */
+}
   .songView-list {
     display: flex;
     overflow-y: auto; 

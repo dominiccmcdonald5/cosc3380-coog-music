@@ -282,8 +282,8 @@
 }
 
 .albumProfile-image {
-  width: 125px; 
-  height: 125px; 
+  width: 100px; 
+  height: 100px; 
   object-fit: cover;
   border-radius: 10%; 
   margin-top: 5px; 
@@ -382,6 +382,48 @@ border-radius: 20px;
 }
 
 .create-song-button:hover {
+background-color: #1F1426;
+box-shadow: 0 0 15px #B200FF;
+}
+
+.edit-song-button {
+  background-color: #303030;
+color: white;
+font-size: 15px;
+font-family: 'Montserrat';
+font-weight: bold;
+border: none;
+padding: 5px 5px;
+cursor: pointer;
+width: 50px;
+height: 40px; /* Set a fixed height */
+position: relative;
+border-radius: 20px;
+align-items: center;
+}
+
+.edit-song-button:hover {
+background-color: #1F1426;
+box-shadow: 0 0 15px #B200FF;
+}
+
+.delete-song-button {
+  background-color: #303030;
+color: white;
+font-size: 15px;
+font-family: 'Montserrat';
+font-weight: bold;
+border: none;
+padding: 5px 5px;
+cursor: pointer;
+width: 75px;
+height: 40px; /* Set a fixed height */
+position: relative;
+border-radius: 20px;
+align-items: center;
+}
+
+.delete-song-button:hover {
 background-color: #1F1426;
 box-shadow: 0 0 15px #B200FF;
 }
