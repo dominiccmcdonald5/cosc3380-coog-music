@@ -360,7 +360,7 @@ const getAlbumViewSong = async (req, res) => {
             }
 
             const [songList] = await pool.promise().query(`
-                SELECT song_id, song.name AS name, song.image_url AS image, album.name AS album_name 
+                SELECT song_id, song.name AS name, song.image_url AS image, song.song_url AS song_url, album.name AS album_name 
                 FROM song, album 
                 WHERE album.album_id = song.album_id AND album.name = ?;`, [album_name]);
 
