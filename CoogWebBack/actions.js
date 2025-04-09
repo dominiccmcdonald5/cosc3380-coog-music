@@ -3037,6 +3037,7 @@ const getSongOptionList = async (req, res) => {
         try {
             const parsedBody = JSON.parse(body);
             const { accountType, userId, album_name, playlist_name } = parsedBody;
+            console.log(accountType,userId,album_name,playlist_name);
             
             if (!accountType || !userId || (!album_name && !playlist_name)) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
