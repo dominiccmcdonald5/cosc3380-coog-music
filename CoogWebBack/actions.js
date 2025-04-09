@@ -664,6 +664,9 @@ const createSong = async (req, res) => {
             
 
             // Handle image (image is expected to be Base64 or URL from frontend)
+            let imageUrl = null;
+                if (image) {
+
             const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
             if (!imageMatches) {
                 return res.writeHead(400, { 'Content-Type': 'application/json' })
@@ -681,7 +684,7 @@ const createSong = async (req, res) => {
             const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
 
             // Upload to Azure (or any storage service)
-            const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
+            imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);}
 
             // Ensure songFile is a base64 string before proceeding
             if (typeof songFile !== 'string' || !songFile.startsWith('data:audio/')) {
