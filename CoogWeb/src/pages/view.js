@@ -418,6 +418,12 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
                         onClick={() => setActiveScreen('edit-album',album, userId, userName)}>
                         Edit Album
                     </button>)}
+
+                    {accountType !== 'admin' && accountType !== 'user' && album.artist_username === userName && (<button
+                        className="create-album-button"
+                        onClick={() => setActiveScreen('delete-album', album, userId, userName)}>
+                        Delete Album
+                    </button>)}
                 </div>
             </div>
 

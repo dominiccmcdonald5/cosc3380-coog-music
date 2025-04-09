@@ -898,6 +898,8 @@ const createAlbum = async (req, res) => {
                 return res.end(JSON.stringify({ success: false, message: 'Album already exist' }));
             }
 
+            let imageUrl = null;
+            if (image) {
             const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
             if (!imageMatches) {
                 return res.writeHead(400, { 'Content-Type': 'application/json' })
@@ -915,8 +917,8 @@ const createAlbum = async (req, res) => {
             const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
 
             // Upload to Azure (or any storage service)
-            const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
-
+            imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
+        }
             // Insert the song
             await pool.promise().query(
                 `INSERT INTO album (name, artist_id, genre, image_url,likes,created_at)

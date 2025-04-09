@@ -340,11 +340,6 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage, onAlbumClic
                     </button>
                 <button
                         className="create-album-button"
-                        onClick={() => setActiveScreen('delete-album')}>
-                        Delete Album
-                    </button>
-                <button
-                        className="create-album-button"
                         onClick={() => setActiveScreen('add-song-album')}>
                         Add Song
                     </button>
