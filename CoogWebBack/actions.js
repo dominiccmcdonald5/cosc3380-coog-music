@@ -740,11 +740,12 @@ const createSong = async (req, res) => {
                 }));
         } catch (error) {
             console.error('Error creating song:', error);
-            return res.writeHead(500, { 'Content-Type': 'application/json' })
+             res.writeHead(500, { 'Content-Type': 'application/json' })
                 .end(JSON.stringify({
                     success: false,
                     message: error.message || 'Failed to create song',
                 }));
+                
         }
     });
 };
