@@ -624,26 +624,23 @@ const getArtistProfileAlbum = async (req, res) => {
 const createSong = async (req, res) => {
     let body = "";
 
-    // Listen for incoming data
     req.on('data', chunk => {
-        body += chunk.toString(); // Append received chunks
+        body += chunk.toString();
     });
 
-    req.on('end', async () => {  // Ensure data is fully received before parsing
+    req.on('end', async () => {
         try {
-            // Get the form fields (these will be populated by formData sent from the frontend)
             const parsedBody = JSON.parse(body);
             const { name, artist, genre, album, image, songFile } = parsedBody;
 
-            // Check if any required fields are missing
             if (!name || !artist || !songFile) {
-                return res.status(400).json({
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({
                     success: false,
                     message: 'Missing required fields (name, artist, genre, album, song file)',
-                });
+                }));
             }
 
-            // Verify album belongs to artist (assuming album check logic exists in the DB)
             let albumCheck = null;
             if (album) {
                 [albumCheck] = await pool.promise().query(
@@ -652,68 +649,63 @@ const createSong = async (req, res) => {
                 );
             }
 
-            // If album exists, check if it belongs to the artist
             if (albumCheck && albumCheck.length > 0) {
                 if (albumCheck[0].artist_id !== Number(artist)) {
-                    return res.status(400).json({
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({
                         success: false,
                         message: 'Album does not belong to this artist',
-                    });
+                    }));
                 }
             } else {
-                albumCheck = null;  // Set album to null if not found
+                albumCheck = null;
             }
 
-            // Handle image (image is expected to be Base64 or URL from frontend)
             let imageUrl = null;
             if (image) {
                 const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
                 if (!imageMatches) {
-                    return res.status(400).json({
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({
                         success: false,
                         message: 'Invalid image file format',
-                    });
+                    }));
                 }
 
-                const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
+                const fileTypeImage = imageMatches[1];
                 const base64DataImage = imageMatches[2];
                 const bufferImage = Buffer.from(base64DataImage, 'base64');
 
-                // Generate filename
                 const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
 
-                // Upload to Azure (or any storage service)
                 imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
             }
 
-            // Ensure songFile is a base64 string before proceeding
             if (typeof songFile !== 'string' || !songFile.startsWith('data:audio/')) {
-                return res.status(400).json({
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({
                     success: false,
                     message: 'Invalid audio file format',
-                });
+                }));
             }
 
-            // Extract file type and base64 data from songFile
             const audioMatches = songFile.match(/^data:audio\/(\w+);base64,(.+)$/);
             if (!audioMatches) {
-                return res.status(400).json({
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({
                     success: false,
                     message: 'Invalid audio file format',
-                });
+                }));
             }
 
-            const fileType = audioMatches[1]; // mp3, wav, etc.
+            const fileType = audioMatches[1];
             const base64Data = audioMatches[2];
             const buffer = Buffer.from(base64Data, 'base64');
 
-            // Generate filename
-            const fileName = `${name}-${artist}-${Date.now()}.${fileType}`; 
-            // Upload to Azure
+            const fileName = `${name}-${artist}-${Date.now()}.${fileType}`;
             const songUrl = await uploadToAzureBlobFromServer(buffer, fileName);
-            const albumId = albumCheck ? albumCheck[0].album_id : null;
+            const albumId = (Array.isArray(albumCheck) && albumCheck.length > 0) ? albumCheck[0].album_id : null;
 
-            // Insert the song into the database
             const [result] = await pool.promise().query(
                 `INSERT INTO song 
                 (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
@@ -721,34 +713,31 @@ const createSong = async (req, res) => {
                 [name, artist, albumId, genre, imageUrl || null, songUrl]
             );
 
-            // Return success response
-            return res.status(201).json({
-                success: true,
-                message: 'Song created successfully',
-                song: {
-                    song_id: result.insertId,
-                    name,
-                    artist_id: artist,
-                    album_id: albumCheck ? albumCheck[0].album_id : null,
-                    genre,
-                    image_url: imageUrl || null,
-                    song_url: songUrl,
-                    length: 0,
-                },
-            });
+            return res.writeHead(201, { 'Content-Type': 'application/json' })
+                .end(JSON.stringify({
+                    success: true,
+                    message: 'Song created successfully',
+                    song: {
+                        song_id: result.insertId,
+                        name,
+                        artist_id: artist,
+                        album_id: albumCheck[0].album_id,
+                        genre,
+                        image_url: imageUrl || null,
+                        song_url: songUrl,
+                        length: 0,
+                    },
+                }));
         } catch (error) {
             console.error('Error creating song:', error);
-            return res.status(500).json({
-                success: false,
-                message: error.message || 'Failed to create song',
-            });
+            res.writeHead(500, { 'Content-Type': 'application/json' })
+                .end(JSON.stringify({
+                    success: false,
+                    message: error.message || 'Failed to create song',
+                }));
         }
     });
 };
-
-
-
-
 
 
 const editSong = async (req, res) => {
