@@ -3044,23 +3044,26 @@ const getSongOptionList = async (req, res) => {
                 return;
             }
 
-            let query = `SELECT song_id, name, song.image_url AS image, artist.username AS artist_username, song.song_url AS song_url FROM artist, song`;
+            let query = `SELECT song_id, name, song.image_url AS image, artist.username AS artist_username, song.song_url AS song_url FROM song JOIN artist ON song.artist_id = artist.artist_id`;
 
-            if (accountType === "artist") {
-                query += ` WHERE song.artist_id = artist.artist_id AND artist.artist_id = ?`;
-            } else if (accountType === "user") {
-                query += ` WHERE song.artist_id = artist.artist_id`;
+            // Artist specific query: Add any song made by the artist that is not in the album
+            if (accountType === "artist" && album_name) {
+                query += ` WHERE artist.artist_id = ? AND song.album_id != (SELECT album_id FROM album WHERE name = ?)`;
+            } 
+            // Playlist specific query: Add any song not already in the playlist
+            else if (accountType === "playlist" && playlist_name) {
+                query += ` WHERE song.song_id NOT IN (SELECT song_id FROM song_in_playlist WHERE playlist_id = (SELECT playlist_id FROM playlist WHERE name = ?))`;
             }
-
-            // Append conditions based on album or playlist name
-            if (album_name) {
-                query += ` AND song.album_id != (SELECT album_id FROM album WHERE name = ?)`;
-            } else if (playlist_name) {
-                query += ` AND song.song_id IN (SELECT song_id FROM song_in_playlist WHERE playlist_id != (SELECT playlist_id FROM playlist WHERE name = ?))`;
-            }
-
+            
             // Execute the query with appropriate parameters
-            const [rows] = await pool.promise().execute(query, album_name ? [userId, album_name] : playlist_name ? [userId, playlist_name] : [userId]);
+            let params = [];
+            if (accountType === "artist" && album_name) {
+                params = [userId, album_name];
+            } else if (accountType === "playlist" && playlist_name) {
+                params = [playlist_name];
+            }
+
+            const [rows] = await pool.promise().execute(query, params);
 
             // Send response with the song data
             res.writeHead(200, { 'Content-Type': 'application/json' });
