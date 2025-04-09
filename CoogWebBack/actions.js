@@ -3067,7 +3067,7 @@ const getSongOptionList = async (req, res) => {
                     ))
                 `;
                 params = [userId, album_name, userId];
-            } else if (accountType === "playlist" && playlist_name) {
+            } else if (accountType === "user" && playlist_name) {
                 query += ` 
                     WHERE song.song_id NOT IN (
                         SELECT song_id FROM song_in_playlist 
