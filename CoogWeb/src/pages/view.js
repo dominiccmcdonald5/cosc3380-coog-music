@@ -290,7 +290,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
     );
   };
 
-  export const AlbumViewPage = ({ album = {}, accountType, userId }) => {
+  export const AlbumViewPage = ({ album = {}, accountType, userId, setCurrentSong}) => {
     const [isLiked, setIsLiked] = useState(false); // State to track if the heart is "liked"
     const [info, setInfo] = useState({
         songCount: 0,
@@ -417,13 +417,13 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
 
             <div className="songView-section">
                 <div className="songView-header">Songs: </div>
-                <SongAlbumList album={album} /> 
+                <SongAlbumList album={album} setCurrentSong={setCurrentSong}/> 
             </div>
         </section>
     );
 };
 
-export const SongAlbumList = ({album = {}}) => {
+export const SongAlbumList = ({album = {}, setCurrentSong}) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -462,18 +462,21 @@ export const SongAlbumList = ({album = {}}) => {
     return (
         <div className="songView-list">
             {songs.map((song, index) => (
-                <SongViewAlbumCard key={index} song={song} />
+                <SongViewAlbumCard key={index} song={song} setCurrentSong={setCurrentSong}/>
             ))}
         </div>
     );
 };
 
-export const SongViewAlbumCard = ({ song }) => {
+export const SongViewAlbumCard = ({ song, setCurrentSong}) => {
     return (
         <div className="songView-card">
-            <img src={song.song_image} alt={song.song_name} className="songView-image" />
-            <h3 className="songView-name">{song.song_name}</h3>
+            <img src={song.image} alt={song.name} className="songView-image" />
+            <h3 className="songView-name">{song.name}</h3>
             <h3 className="songView-album">{song.album_name}</h3>
+            <button onClick={() => setCurrentSong(song)} className="play-button">
+                <img src={play_button} alt="Play" className="play" />
+            </button>
         </div>
     );
 };

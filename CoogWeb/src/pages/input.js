@@ -139,7 +139,6 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
                     <button className="create-playlist-button" onClick={() => setActiveScreen('create-playlist')}>
                         Create Playlist
                     </button>
-    
                     <button className="create-playlist-button" onClick={() => setActiveScreen('add-song-playlist')}>
                         Add Song
                     </button>
@@ -153,7 +152,7 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
     );
 };
 
-export const AlbumProfileList = ({userName}) => {
+export const AlbumProfileList = ({userName,onAlbumClick}) => {
     const [albums, setAlbums] = useState([]);
         const [loading, setLoading] = useState(true);  // To track loading state
         const [error, setError] = useState(null);
@@ -192,17 +191,20 @@ export const AlbumProfileList = ({userName}) => {
     return (
         <div className="albumProfile-list">
             {albums.map((album,index) => (
-                <AlbumProfileCard key={index} album={album} />
+                <AlbumProfileCard key={index} album={album} onAlbumClick={onAlbumClick}/>
             ))}
         </div>
     );
 }
 
-export const AlbumProfileCard = ({ album }) => {
+export const AlbumProfileCard = ({ album,onAlbumClick }) => {
     return (
         <div className="albumProfile-card">
             <img src={album.album_image} alt={album.album_name} className="albumProfile-image" />
             <h3 className="albumProfile-name">{album.album_name}</h3>
+            <button onClick={() => onAlbumClick('album-view-page', album)} className="forward-button">
+                            <img src={forward} alt="forward" className="forward-icon" />
+                        </button>
         </div>
     );
 };
@@ -262,7 +264,7 @@ export const SongProfileCard = ({ song }) => {
     );
 };
 
-export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
+export const ArtistProfile = ({setActiveScreen, userName, userImage, onAlbumClick}) => {
     const [stats, setStats] = useState({
         follow: 0,
         streams: 0,
@@ -357,7 +359,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage}) => {
                         Remove Song
                     </button>
                 </div>
-            <AlbumProfileList userName={userName}/>
+            <AlbumProfileList userName={userName} onAlbumClick={onAlbumClick}/>
             </div>
 
             <div className="songProfile-section">
