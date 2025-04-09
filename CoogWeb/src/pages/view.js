@@ -436,14 +436,14 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
                 </button>)}
                 
             </div>
-                <SongAlbumList album={album} setCurrentSong={setCurrentSong}/> 
+                <SongAlbumList album={album} setCurrentSong={setCurrentSong} userId={userId} userName={userName}/> 
                 </div>
             
         </section>
     );
 };
 
-export const SongAlbumList = ({album = {}, setCurrentSong}) => {
+export const SongAlbumList = ({album = {}, setCurrentSong}, userId, userName) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -482,18 +482,56 @@ export const SongAlbumList = ({album = {}, setCurrentSong}) => {
     return (
         <div className="songView-list">
             {songs.map((song, index) => (
-                <SongViewAlbumCard key={index} song={song} setCurrentSong={setCurrentSong}/>
+                <SongViewAlbumCard key={index} song={song} setCurrentSong={setCurrentSong} userId={userId} userName={userName}/>
             ))}
         </div>
     );
 };
 
-export const SongViewAlbumCard = ({ song, setCurrentSong}) => {
+export const SongViewAlbumCard = ({ song, setCurrentSong, userId, userName}) => {
+    const handleRemoveSong = async () => {
+        const payload = {
+            name: playlist.playlist_name,
+            artist: userId,
+            song_name: song.name,
+        };
+
+        try {
+            const response = await fetch('https://cosc3380-coog-music-2.onrender.com/removesongfromalbum', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("Song removed successfully!");
+            } else {
+                alert("Failed to remove song: " + data.message);
+            }
+        } catch (error) {
+            console.error("Error removing song:", error);
+            alert("Error connecting to the server.");
+        }
+    };
     return (
         <div className="songView-card">
             <img src={song.image} alt={song.name} className="songView-image" />
             <h3 className="songView-name">{song.name}</h3>
             <h3 className="songView-album">{song.album_name}</h3>
+            {song.artist_id !== userName && (
+                <>
+                
+
+                    <button
+                        className="editt-song-button"
+                        onClick={handleRemoveSong}
+                    >
+                        Remove Song
+                    </button>
+                </>
+            )}
             <button onClick={() => setCurrentSong(song)} className="play-button">
                 <img src={play_button} alt="Play" className="play" />
             </button>
