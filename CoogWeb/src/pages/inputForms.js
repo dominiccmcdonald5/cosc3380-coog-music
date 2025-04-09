@@ -500,56 +500,59 @@ export const AlbumFormEdit = ({userName,userId, album}) => {
     );
 }
 
-export const AlbumFormDelete = ({userName, userId}) => {
-    const [album, setAlbum] = useState({
+export const AlbumFormDelete = ({ userName, userId, album }) => {
+    console.log(album);
+
+    const [albuming, setAlbuming] = useState({
         name: "",
         artist: userId
     });
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setAlbum({ ...album, [name]: value });
-    };
-        const handleSubmit = async (e) => {
-            e.preventDefault();
-            
-            try {
-              const response = await fetch('https://cosc3380-coog-music-2.onrender.com/deletealbum', {
+    const handleDelete = async () => {
+        const confirmed = window.confirm(`Are you sure you want to delete "${album.album_name}"?`);
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch('https://cosc3380-coog-music-2.onrender.com/deletealbum', {
                 method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify(album),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: album.album_name,
+                    artist: userId
+                }),
             });
-    
+
             const data = await response.json();
-                
-                if (response.ok) {
-                    alert("Album deleted successfully!");
-                    setAlbum({name: "", artist: userId}); // Reset form
-                } else {
-                    alert("Failed to delete album: " + data.message);
-                }
-            } catch (error) {
-                console.error("Error deleting album:", error);
-                alert("Error connecting to the server.");
+
+            if (response.ok) {
+                alert("Album deleted successfully!");
+                setAlbuming({ name: "", artist: userId }); // Reset form
+            } else {
+                alert("Failed to delete album: " + data.message);
             }
-        };
+        } catch (error) {
+            console.error("Error deleting album:", error);
+            alert("Error connecting to the server.");
+        }
+    };
 
     return (
         <section className="everything">
-        <div className="input-section">
-                    <div className="profile-header">
-                        <h2 className="input-username">Delete an Album!</h2>
-                    </div>
-        </div>
-        <form className="song-form" onSubmit={handleSubmit}>
-            <label>Enter Album Name you want to Delete</label>
-            <input type="text" name="name" placeholder="Enter album name" value={album.name} onChange={handleChange} required />
-
-            <button type="submit">Delete</button>
-        </form>
+            <div className="input-section">
+                <div className="profile-header">
+                    <h2 className="input-username">Delete {album.album_name}!</h2>
+                </div>
+                <button
+                    type="button"
+                    onClick={handleDelete}
+                    className="delete-playlist-button"
+                >
+                    Delete Playlist
+                </button>
+            </div>
         </section>
     );
-}
+};
 
 export const AlbumFormRemove = ({userName, userId}) => {
     const [album, setAlbum] = useState({

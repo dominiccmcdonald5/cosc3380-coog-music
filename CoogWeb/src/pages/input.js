@@ -200,7 +200,7 @@ export const AlbumProfileList = ({onAlbumClick, userName, userId}) => {
 export const AlbumProfileCard = ({ album,onAlbumClick, userName, userId }) => {
     return (
         <div className="albumProfile-card">
-            <img src={album.album_image} alt={album.album_name} className="albumProfile-image" />
+            <img src={album.album_image || purple_image} alt={album.album_name} className="albumProfile-image" />
             <h3 className="albumProfile-name">{album.album_name}</h3>
             <button onClick={() => onAlbumClick('album-view-page', album, userName, userId)} className="forward-button">
                             <img src={forward} alt="forward" className="forward-icon" />
