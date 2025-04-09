@@ -677,7 +677,6 @@ const createSong = async (req, res) => {
                 const bufferImage = Buffer.from(base64DataImage, 'base64');
 
                 const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
-
                 imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
             }
 
@@ -704,7 +703,7 @@ const createSong = async (req, res) => {
 
             const fileName = `${name}-${artist}-${Date.now()}.${fileType}`;
             const songUrl = await uploadToAzureBlobFromServer(buffer, fileName);
-            const albumId = (Array.isArray(albumCheck) && albumCheck.length > 0) ? albumCheck[0].album_id : null;
+            const albumId = albumCheck && albumCheck.length > 0 ? albumCheck[0].album_id : null;
 
             const [result] = await pool.promise().query(
                 `INSERT INTO song 
@@ -713,28 +712,30 @@ const createSong = async (req, res) => {
                 [name, artist, albumId, genre, imageUrl || null, songUrl]
             );
 
-            return res.writeHead(201, { 'Content-Type': 'application/json' })
-                .end(JSON.stringify({
-                    success: true,
-                    message: 'Song created successfully',
-                    song: {
-                        song_id: result.insertId,
-                        name,
-                        artist_id: artist,
-                        album_id: albumCheck[0].album_id,
-                        genre,
-                        image_url: imageUrl || null,
-                        song_url: songUrl,
-                        length: 0,
-                    },
-                }));
+            res.writeHead(201, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                message: 'Song created successfully',
+                song: {
+                    song_id: result.insertId,
+                    name,
+                    artist_id: artist,
+                    album_id: albumCheck ? albumCheck[0].album_id : null,
+                    genre,
+                    image_url: imageUrl || null,
+                    song_url: songUrl,
+                    length: 0,
+                },
+            }));
         } catch (error) {
             console.error('Error creating song:', error);
-            res.writeHead(500, { 'Content-Type': 'application/json' })
-                .end(JSON.stringify({
+            if (!res.headersSent) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
                     success: false,
                     message: error.message || 'Failed to create song',
                 }));
+            }
         }
     });
 };
