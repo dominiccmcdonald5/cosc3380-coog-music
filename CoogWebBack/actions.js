@@ -328,9 +328,9 @@ const getArtistViewSong = async (req, res) => {
             }
 
             const [songs] = await pool.promise().query(`
-                SELECT song_id, song.name AS song_name, song.image_url AS song_image, album.name AS album_name 
+                SELECT song_id, song.name AS name, song.image_url AS image, song.song_url AS song_url, album.name AS album_name 
                 FROM artist, song, album 
-                WHERE song.artist_id = artist.artist_id AND album.album_id = song.song_id AND artist.username = ?;`, [username]);
+                WHERE song.artist_id = artist.artist_id AND album.album_id = song.album_id AND artist.username = ?;`, [username]);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, songs }));
@@ -681,28 +681,30 @@ const createSong = async (req, res) => {
                 imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
             }
 
-            if (typeof songFile !== 'string' || !songFile.startsWith('data:audio/')) {
+            if (typeof songFile !== 'string' || 
+                (!songFile.startsWith('data:audio/') && !songFile.startsWith('data:video/webm'))) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({
                     success: false,
-                    message: 'Invalid audio file format',
+                    message: 'Invalid audio or video file format',
                 }));
             }
-
-            const audioMatches = songFile.match(/^data:audio\/(\w+);base64,(.+)$/);
+            
+            const audioMatches = songFile.match(/^data:(audio\/\w+|video\/webm);base64,(.+)$/);
             if (!audioMatches) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({
                     success: false,
-                    message: 'Invalid audio file format',
+                    message: 'Invalid audio or video file format',
                 }));
             }
-
-            const fileType = audioMatches[1];
+            
+            const fileType = audioMatches[1]; // This can be either audio/mpeg, audio/mp3, video/webm, etc.
             const base64Data = audioMatches[2];
             const buffer = Buffer.from(base64Data, 'base64');
-
-            const fileName = `${name}-${artist}-${Date.now()}.${fileType}`;
+            
+            // Construct the file name based on the artist, song, and file type
+            const fileName = `${name}-${artist}-${Date.now()}.${fileType.split('/')[1]}`; // Get the extension (e.g., mp3, webm)
             const songUrl = await uploadToAzureBlobFromServer(buffer, fileName);
             const albumId = albumCheck && albumCheck.length > 0 ? albumCheck[0].album_id : null;
 

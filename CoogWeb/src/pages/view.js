@@ -4,9 +4,11 @@ import heart from './heart.png';
 import './view.css';
 import play_button from './play.png';
 import verified from './isverifiedlogo.png';
+import forward from './forward.png';
 
 
-export const AlbumViewList = ({artist = {}}) => {
+
+export const AlbumViewList = ({artist = {}, userName, userId, onAlbumClick}) => {
     const [albums, setAlbums] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -45,22 +47,26 @@ export const AlbumViewList = ({artist = {}}) => {
     return (
         <div className="albumView-list">
             {albums.map((album, index) => (
-                <AlbumViewCard key={index} album={album} />
+                <AlbumViewCard key={index} album={album} userId={userId} userName={userName} onAlbumClick={onAlbumClick} />
             ))}
         </div>
     );
 }
 
-export const AlbumViewCard = ({ album }) => {
+export const AlbumViewCard = ({ album, userName, userId, onAlbumClick }) => {
     return (
         <div className="albumView-card">
             <img src={album.album_image} alt={album.album_name} className="albumView-image" />
             <h3 className="albumView-name">{album.album_name}</h3>
+            <button onClick={() => onAlbumClick('album-view-page', album, userName, userId)} className="forward-button">
+                                        <img src={forward} alt="forward" className="forward-icon" />
+                                    </button>
         </div>
+        
     );
 };
 
-export const SongViewList = ({artist = {}}) => {
+export const SongViewList = ({artist = {}, setCurrentSong}) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -99,23 +105,26 @@ export const SongViewList = ({artist = {}}) => {
     return (
         <div className="songView-list">
             {songs.map((song, index) => (
-                <SongViewCard key={index} song={song} />
+                <SongViewCard key={index} song={song} setCurrentSong={setCurrentSong} />
             ))}
         </div>
     );
 };
 
-export const SongViewCard = ({ song }) => {
+export const SongViewCard = ({ song, setCurrentSong }) => {
     return (
         <div className="songView-card">
-            <img src={song.song_image} alt={song.song_name} className="songView-image" />
-            <h3 className="songView-name">{song.song_name}</h3>
+            <img src={song.image} alt={song.name} className="songView-image" />
+            <h3 className="songView-name">{song.name}</h3>
             <h3 className="songView-album">{song.album_name}</h3>
+            <button onClick={() => setCurrentSong(song)} className="play-button">
+                <img src={play_button} alt="Play" className="play" />
+            </button>
         </div>
     );
 };
 
-export const ArtistView = ({ artist = {}, accountType, userId}) => {
+export const ArtistView = ({ artist = {}, accountType, userId, setCurrentSong, userName, onAlbumClick}) => {
     const [isFollowing, setIsFollowing] = useState(false);
 
     const fetchFollowStatus = async () => {
@@ -278,13 +287,14 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
         <div className="albumView-section">
                         <div className="albumView-header">Albums: 
                         </div>
-            <AlbumViewList artist={artist}/>
+            <AlbumViewList artist={artist} userId={userId} userName={userName} onAlbumClick={onAlbumClick}/>
         </div>
 
         <div className="songView-section">
+        <div className="songView-header-container">
                 <div className="songView-header">Songs: 
-                </div>
-            <SongViewList artist={artist}/>
+                </div></div>
+            <SongViewList artist={artist} setCurrentSong={setCurrentSong}/>
         </div>
       </section>
     );

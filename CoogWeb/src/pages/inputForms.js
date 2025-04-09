@@ -44,7 +44,7 @@ export const SongForm = ({ userName, userId }) => {
     const handleSongUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.type.startsWith("audio/")) {
+            if (file.type.startsWith("audio/") || file.type === "video/webm") {
                 // Create a FileReader to read the file as a data URL (base64)
                 const reader = new FileReader();
     

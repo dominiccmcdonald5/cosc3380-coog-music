@@ -136,13 +136,13 @@ export const SongCard = ({ song, accountType, userId, setCurrentSong }) => {
     return (
         <div className="song-card">
             {/* Render Base64 Image */}
-            {song.image && (
+           
             <img
-                src={song.image}
+                src={song.image || purple_image}
                 alt={song.name}
                 className="song-image"
             />
-            )}
+            
 
             <h3 className="song-name">{song.name}</h3>
             <h3 className="song-artist">{song.artist_name}</h3>
