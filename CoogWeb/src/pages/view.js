@@ -60,7 +60,7 @@ export const AlbumViewCard = ({ album }) => {
     );
 };
 
-export const SongViewList = ({artist = {}}) => {
+export const SongViewList = ({artist = {}, setCurrentSong}) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -99,23 +99,26 @@ export const SongViewList = ({artist = {}}) => {
     return (
         <div className="songView-list">
             {songs.map((song, index) => (
-                <SongViewCard key={index} song={song} />
+                <SongViewCard key={index} song={song} setCurrentSong={setCurrentSong} />
             ))}
         </div>
     );
 };
 
-export const SongViewCard = ({ song }) => {
+export const SongViewCard = ({ song, setCurrentSong }) => {
     return (
         <div className="songView-card">
-            <img src={song.song_image} alt={song.song_name} className="songView-image" />
-            <h3 className="songView-name">{song.song_name}</h3>
+            <img src={song.image} alt={song.name} className="songView-image" />
+            <h3 className="songView-name">{song.name}</h3>
             <h3 className="songView-album">{song.album_name}</h3>
+            <button onClick={() => setCurrentSong(song)} className="play-button">
+                <img src={play_button} alt="Play" className="play" />
+            </button>
         </div>
     );
 };
 
-export const ArtistView = ({ artist = {}, accountType, userId}) => {
+export const ArtistView = ({ artist = {}, accountType, userId, setCurrentSong}) => {
     const [isFollowing, setIsFollowing] = useState(false);
 
     const fetchFollowStatus = async () => {
@@ -284,7 +287,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
         <div className="songView-section">
                 <div className="songView-header">Songs: 
                 </div>
-            <SongViewList artist={artist}/>
+            <SongViewList artist={artist} setCurrentSong={setCurrentSong}/>
         </div>
       </section>
     );

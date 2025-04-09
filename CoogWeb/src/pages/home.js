@@ -224,7 +224,7 @@ const renderScreen = (activeScreen, setActiveScreen, onArtistClick, onAlbumClick
     case 'top-trending': return <TopTrending />;
     case 'cougar-wrap-up': return <CougarWrapUp userName={userName} userId={userId} userImage={userImage}/>;
     case 'user-lists': return <UserList />;
-    case 'artist-view': return <ArtistView artist={selectedArtist} accountType={accountType} userId={userId} userName={userName}/>;
+    case 'artist-view': return <ArtistView artist={selectedArtist} accountType={accountType} userId={userId} userName={userName} setCurrentSong={setCurrentSong}/>;
     case 'album-view-page': return <AlbumViewPage setCurrentSong={setCurrentSong} album={selectedAlbum} accountType={accountType} userId={userId} userName={userName} setActiveScreen={setActiveScreen}/>;
     case 'create-song': return <SongForm userName={userName} userId={userId}/>;
     case 'edit-song': return <SongFormEdit userName={userName} userId={userId} song={selectedSong}/>;

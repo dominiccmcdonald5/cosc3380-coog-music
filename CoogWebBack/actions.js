@@ -328,9 +328,9 @@ const getArtistViewSong = async (req, res) => {
             }
 
             const [songs] = await pool.promise().query(`
-                SELECT song_id, song.name AS song_name, song.image_url AS song_image, album.name AS album_name 
+                SELECT song_id, song.name AS name, song.image_url AS image, song.song_url AS song_url, album.name AS album_name 
                 FROM artist, song, album 
-                WHERE song.artist_id = artist.artist_id AND album.album_id = song.song_id AND artist.username = ?;`, [username]);
+                WHERE song.artist_id = artist.artist_id AND album.album_id = song.album_id AND artist.username = ?;`, [username]);
 
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, songs }));
