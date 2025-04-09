@@ -6,7 +6,7 @@ import { Profile, ArtistProfile } from './input';
 import { TopTrending } from './wrap';
 import { CougarWrapUp } from './userWrap';
 import { ArtistView, AlbumViewPage, PlaylistViewPage } from './view';
-import { SongForm, SongFormDelete, SongFormEdit, AlbumForm, AlbumFormAdd, AlbumFormDelete, AlbumFormEdit, AlbumFormRemove, PlaylistForm,PlaylistFormAdd, PlaylistFormDelete, PlaylistFormEdit, PlaylistFormRemove } from './inputForms';
+import { SongForm, SongFormDelete, ChooseSongList, SongFormEdit, AlbumForm, AlbumFormAdd, AlbumFormDelete, AlbumFormEdit, AlbumFormRemove, PlaylistForm,PlaylistFormAdd, PlaylistFormDelete, PlaylistFormEdit, PlaylistFormRemove } from './inputForms';
 import pause_button from './pause_button.png';
 import play_button from './play_button.png';
 import { useLocation } from 'react-router-dom';
@@ -243,6 +243,7 @@ const renderScreen = (activeScreen, setActiveScreen, onArtistClick, onAlbumClick
     case 'data-report': return <DataReport userName={userName}/>
     case 'data-report-user': return <UserDataReport/>
     case 'data-report-song': return <SongDataReport userName={userName}/>
+    case 'choose-song-list': return <ChooseSongList userName={userName} userId={userId} setCurrentSong={setCurrentSong}/>;
     default: return <SongList />;
   }
 };

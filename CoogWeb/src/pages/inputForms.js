@@ -918,7 +918,7 @@ export const PlaylistFormRemove = ({userName, userId}) => {
         console.log("Playlist submitted:", playlist);
         
         try {
-          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/removeplaylistsong', {
+          const response = await fetch('https://cosc3380-coog-music-2.onrender.com/optionsongs', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(playlist),
@@ -996,12 +996,17 @@ export const ChooseSongList = ({accountType, userId, setCurrentSong, album, play
     if (loading) return <div>Loading songs...</div>;
     if (error) return <div>{error}</div>;
 
-    return (
+    return (<>
+        <div className="input-section">
+                    <div className="profile-header">
+                        <h2 className="input-username">Choose a Song to Add!</h2>
+                    </div>
+        </div>
         <div className="song-list">
             {songs.map((song, index) => (
                 <ChooseSongCard key={index} song={song} accountType={accountType} userId={userId} setCurrentSong={setCurrentSong} album={album} playlist={playlist}/>
             ))}
-        </div>
+        </div></>
     );
 };
 

@@ -676,7 +676,10 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage, setAct
             </div>
 
             <div className="songView-section">
-                <div className="songView-header">Songs: </div>
+                <><div className="songView-header">Songs: </div>
+                <button className="create-playlist-button" onClick={() => setActiveScreen('add-song-button')}>
+                        Add Song
+                    </button></>
                 <SongViewPlaylistList playlist={playlist} userName={userName} userId={userId} setCurrentSong={setCurrentSong}/>
             </div>
         </section>

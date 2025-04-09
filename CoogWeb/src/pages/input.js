@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import play_button from './play.png';
 import purple_image from './purple_image.png';
 import './input.css';
-import {SongForm, SongFormDelete, SongFormEdit} from './inputForms.js';
+import {SongForm, SongFormDelete, SongFormEdit, ChooseSongList} from './inputForms.js';
 import {PlaylistViewPage} from './view.js';
 import forward from './forward.png';
 import verified from './isverifiedlogo.png';
