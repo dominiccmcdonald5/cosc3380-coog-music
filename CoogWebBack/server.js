@@ -50,7 +50,7 @@ const map_route = {
     '/createplaylist',
     '/editplaylist',
     '/deleteplaylist',
-    '/addsongtoplaylist',
+    '/addsong',
     '/removeplaylistsong',
     '/editinfo',
     '/deleteaccount',

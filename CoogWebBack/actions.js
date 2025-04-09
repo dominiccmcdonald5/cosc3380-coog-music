@@ -1698,7 +1698,7 @@ const deletePlaylist = async (req, res) => {
     });
 };
 
-const addPlaylistSong = async (req, res) => {
+const addSong = async (req, res) => {
     let body = '';
 
     req.on('data', (chunk) => {
@@ -3170,7 +3170,7 @@ module.exports = {
     createPlaylist,
     editPlaylist,
     deletePlaylist,
-    addPlaylistSong,
+    addSong,
     removePlaylistSong,
     editInfo,
     deleteAccount,
