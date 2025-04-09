@@ -434,7 +434,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
                 <button className="create-playlist-button" onClick={() => setActiveScreen('choose-song-list', album, userId, accountType)}>
                     Add Song
                 </button>)}
-                
+                {console.log(userId)}
             </div>
                 <SongAlbumList album={album} setCurrentSong={setCurrentSong} userId={userId} userName={userName}/> 
                 </div>
@@ -443,7 +443,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
     );
 };
 
-export const SongAlbumList = ({album = {}, setCurrentSong}, userId, userName) => {
+export const SongAlbumList = ({album = {}, setCurrentSong, userId, userName}) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
