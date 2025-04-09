@@ -290,7 +290,7 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
     );
   };
 
-  export const AlbumViewPage = ({ album = {}, accountType, userId, setCurrentSong}) => {
+  export const AlbumViewPage = ({ album = {}, accountType, userId, setCurrentSong, userName, setActiveScreen}) => {
     const [isLiked, setIsLiked] = useState(false); // State to track if the heart is "liked"
     const [info, setInfo] = useState({
         songCount: 0,
@@ -412,6 +412,12 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
                             onClick={handleHeartClick} // Handle click event
                         />
                     )}
+
+                    {accountType !== 'admin' && accountType !== 'user' && album.artist_username === userName && (<button
+                        className="create-album-button"
+                        onClick={() => setActiveScreen('edit-album',album, userId, userName)}>
+                        Edit Album
+                    </button>)}
                 </div>
             </div>
 

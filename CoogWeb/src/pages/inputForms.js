@@ -412,8 +412,9 @@ export const AlbumFormAdd = ({userName, userId}) => {
     );
 }
 
-export const AlbumFormEdit = ({userName,userId}) => {
-    const [album, setAlbum] = useState({
+export const AlbumFormEdit = ({userName,userId, album}) => {
+    console.log(album);
+    const [albuming, setAlbuming] = useState({
         prevName: "",
         name: "",
         artist: userId,
@@ -423,7 +424,7 @@ export const AlbumFormEdit = ({userName,userId}) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setAlbum({ ...album, [name]: value });
+        setAlbuming({ ...albuming, [name]: value });
     };
 
     const handleSubmit = async (e) => {
@@ -433,7 +434,7 @@ export const AlbumFormEdit = ({userName,userId}) => {
           const response = await fetch('https://cosc3380-coog-music-2.onrender.com/editalbum', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(album),
+          body: JSON.stringify(albuming),
         });
 
         const data = await response.json();
@@ -442,7 +443,7 @@ export const AlbumFormEdit = ({userName,userId}) => {
                 alert("Album edited successfully!");
                 setAlbum({ prevName: "", name: "", artist: userId,genre: "", image: ""}); // Reset form
             } else {
-                alert("Failed to edit song: " + data.message);
+                alert("Failed to edit album: " + data.message);
             }
         } catch (error) {
             console.error("Error editing song:", error);
@@ -459,16 +460,16 @@ export const AlbumFormEdit = ({userName,userId}) => {
         </div>
         <form className="song-form" onSubmit={handleSubmit}>
             <label>Enter Album Name you want to Edit</label>
-            <input type="text" name="prevName" placeholder="Enter album name" value={album.prevName} onChange={handleChange} required />
+            <input type="text" name="prevName" placeholder="Enter album name" value={albuming.prevName} onChange={handleChange} required />
 
             <label>Album Name</label>
-            <input type="text" name="name" placeholder="Enter album name" value={album.name} onChange={handleChange}  />
+            <input type="text" name="name" placeholder="Enter album name" value={albuming.name} onChange={handleChange}  />
 
             <label>Genre Name</label>
-            <input type="text" name="genre" placeholder="Enter genre" value={album.genre} onChange={handleChange}  />
+            <input type="text" name="genre" placeholder="Enter genre" value={albuming.genre} onChange={handleChange}  />
 
             <label>Image Name</label>
-            <input type="text" name="image" placeholder="Enter image name" value={album.image} onChange={handleChange}  />
+            <input type="text" name="image" placeholder="Enter image name" value={albuming.image} onChange={handleChange}  />
 
             <button type="submit">Edit</button>
         </form>
