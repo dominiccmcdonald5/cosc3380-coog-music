@@ -209,7 +209,7 @@ export const AlbumProfileCard = ({ album,onAlbumClick, userName, userId }) => {
     );
 };
 
-export const SongProfileList = ({userName}) => {
+export const SongProfileList = ({userName, setCurrentSong}) => {
     const [songs, setSongs] = useState([]);
         const [loading, setLoading] = useState(true);  // To track loading state
         const [error, setError] = useState(null);
@@ -248,23 +248,26 @@ export const SongProfileList = ({userName}) => {
     return (
         <div className="songProfile-list">
             {songs.map((song,index) => (
-                <SongProfileCard key={index} song={song} />
+                <SongProfileCard key={index} song={song} setCurrentSong={setCurrentSong} />
             ))}
         </div>
     );
 };
 
-export const SongProfileCard = ({ song }) => {
+export const SongProfileCard = ({ song , setCurrentSong}) => {
     return (
         <div className="songProfile-card">
-            <img src={song.song_image} alt={song.song_name} className="songProfile-image" />
-            <h3 className="songProfile-name">{song.song_name}</h3>
+            <img src={song.image || purple_image} alt={song.name} className="songProfile-image" />
+            <h3 className="songProfile-name">{song.name}</h3>
             <h3 className="songProfile-album">{song.artist_name}</h3>
+            <button onClick={() => setCurrentSong(song)} className="play-button">
+                            <img src={play_button} alt="Play" className="play" />
+                        </button>
         </div>
     );
 };
 
-export const ArtistProfile = ({setActiveScreen, userName, userImage, onAlbumClick, userId}) => {
+export const ArtistProfile = ({setActiveScreen, userName, userImage, onAlbumClick, userId, setCurrentSong}) => {
     const [stats, setStats] = useState({
         follow: 0,
         streams: 0,
@@ -370,7 +373,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage, onAlbumClic
                         Delete Song
                     </button>
                 </div>
-            <SongProfileList userName={userName}/>
+            <SongProfileList userName={userName} setCurrentSong={setCurrentSong}/>
             </div>
            
         </section>

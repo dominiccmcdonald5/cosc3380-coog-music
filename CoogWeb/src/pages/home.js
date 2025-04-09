@@ -213,7 +213,7 @@ const renderScreen = (activeScreen, setActiveScreen, onArtistClick, onAlbumClick
     case 'artist-list': return <ArtistList onArtistClick={onArtistClick} />;
     case 'album-list': return <AlbumList onAlbumClick={onAlbumClick} accountType={accountType} userId={userId}/>;
     case 'profile': return <Profile setActiveScreen={setActiveScreen} onPlaylistClick={onPlaylistClick} userName={userName} userId={userId} userImage={userImage} />;
-    case 'artist-profile': return <ArtistProfile onAlbumClick={onAlbumClick} setActiveScreen={onArtistClick} userName={userName} userImage={userImage} userId={userId}/>;
+    case 'artist-profile': return <ArtistProfile onAlbumClick={onAlbumClick} setActiveScreen={onArtistClick} userName={userName} userImage={userImage} userId={userId} setCurrentSong={setCurrentSong}/>;
     case 'top-trending': return <TopTrending />;
     case 'cougar-wrap-up': return <CougarWrapUp userName={userName} userId={userId} userImage={userImage}/>;
     case 'user-lists': return <UserList />;
