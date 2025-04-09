@@ -1219,7 +1219,7 @@ const getArtistProfileSong = async (req, res) => {
             }
 
             const [songs] = await pool.promise().query(`
-                SELECT song_id, song.name AS name, song.image_url AS image, song.song_url AS song_url artist.username AS artist_name 
+                SELECT song_id, song.name AS name, song.image_url AS image, song.song_url AS song_url, artist.username AS artist_name 
                 FROM artist
                 JOIN song ON song.artist_id = artist.artist_id
                 WHERE artist.username = ?;`, [userName]);
