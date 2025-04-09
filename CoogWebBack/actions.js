@@ -921,7 +921,7 @@ const createAlbum = async (req, res) => {
             await pool.promise().query(
                 `INSERT INTO album (name, artist_id, genre, image_url,likes,created_at)
                  VALUES (?, ?, ?, ?, 0, NOW())`,
-                [name, artist, genre, imageURL]
+                [name, artist, genre, imageUrl]
             );
 
             res.writeHead(201, { "Content-Type": "application/json" });
