@@ -3051,7 +3051,7 @@ const getSongOptionList = async (req, res) => {
                 query += ` WHERE artist.artist_id = ? AND song.album_id != (SELECT album_id FROM album WHERE name = ?)`;
             } 
             // Playlist specific query: Add any song not already in the playlist
-            else if (accountType === "playlist" && playlist_name) {
+            else if (accountType === "user" && playlist_name) {
                 query += ` WHERE song.song_id NOT IN (SELECT song_id FROM song_in_playlist WHERE playlist_id = (SELECT playlist_id FROM playlist WHERE name = ?))`;
             }
             

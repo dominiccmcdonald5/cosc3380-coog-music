@@ -965,6 +965,7 @@ export const ChooseSongList = ({accountType, userId, setCurrentSong, album, play
 
     useEffect(() => {
         const fetchChooseSongs = async () => {
+            console.log(accountType, userId, album.album_name, playlist.playlist_name);
             try {
                 const response = await fetch('https://cosc3380-coog-music-2.onrender.com/optionsongs', {
                     method: 'POST',
