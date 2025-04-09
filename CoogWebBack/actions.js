@@ -3027,9 +3027,9 @@ const streamSong = async (req, res) => {
 };
 
 const getSongOptionList = async (req, res) => {
-    let body = "";
+    let body = '';
 
-    req.on("data", (chunk) => {
+    req.on('data', (chunk) => {
         body += chunk.toString();
     });
 
@@ -3040,39 +3040,72 @@ const getSongOptionList = async (req, res) => {
             
             if (!accountType || !userId || (!album_name && !playlist_name)) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: 'Missing Required Fields' }));
-                return;
+                return res.end(JSON.stringify({ 
+                    success: false, 
+                    message: 'Missing Required Fields' 
+                }));
             }
 
-            let query = `SELECT song_id, name, song.image_url AS image, artist.username AS artist_username, song.song_url AS song_url FROM song JOIN artist ON song.artist_id = artist.artist_id`;
+            let query = `
+                SELECT 
+                    song.song_id, 
+                    song.name, 
+                    song.image_url AS image, 
+                    artist.username AS artist_username, 
+                    song.song_url AS song_url 
+                FROM song 
+                JOIN artist ON song.artist_id = artist.artist_id
+            `;
 
             let params = [];
 
             if (accountType === "artist" && album_name) {
-                // For the artist, we want to get songs not already in the album
-                query += ` WHERE artist.artist_id = ? AND song.album_id != (SELECT album_id FROM album WHERE name = ?)`;
-                params = [userId, album_name];
+                query += ` 
+                    WHERE artist.artist_id = ? 
+                    AND (song.album_id IS NULL OR song.album_id != (
+                        SELECT album_id FROM album WHERE name = ? AND artist_id = ?
+                    ))
+                `;
+                params = [userId, album_name, userId];
             } else if (accountType === "playlist" && playlist_name) {
-                // For playlist, we want to get songs not already in the playlist
-                query += ` WHERE song.song_id NOT IN (SELECT song_id FROM song_in_playlist WHERE playlist_id = (SELECT playlist_id FROM playlist WHERE name = ?))`;
-                params = [playlist_name];
+                query += ` 
+                    WHERE song.song_id NOT IN (
+                        SELECT song_id FROM song_in_playlist 
+                        WHERE playlist_id = (
+                            SELECT playlist_id FROM playlist 
+                            WHERE name = ? AND user_id = ?
+                        )
+                    )
+                `;
+                params = [playlist_name, userId];
             }
 
-            // Execute the query with the appropriate parameters
-            const [rows] = await pool.promise().execute(query, params);
-
-            // Send response with the song data
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                success: true,
-                message: "Songs fetched successfully",
-                songs: rows
-            }));
+            // Get a connection from the pool
+            const connection = await pool.promise().getConnection();
+            
+            try {
+                // Execute the query with proper parameter handling
+                const [rows] = await connection.execute(query, params);
+                
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    message: "Songs fetched successfully",
+                    songs: rows
+                }));
+            } finally {
+                // Always release the connection back to the pool
+                connection.release();
+            }
 
         } catch (err) {
-            console.error('Error streaming songs:', err);
+            console.error('Error fetching songs:', err);
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: 'Failed to fetch songs' }));
+            res.end(JSON.stringify({ 
+                success: false, 
+                message: 'Failed to fetch songs',
+                error: err.message 
+            }));
         }
     });
 };
