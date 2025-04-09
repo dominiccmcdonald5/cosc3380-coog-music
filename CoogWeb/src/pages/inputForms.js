@@ -212,7 +212,7 @@ export const SongFormEdit = ({userName,userId, song}) => {
         <section className="everything">
         <div className="input-section">
                     <div className="profile-header">
-                        <h2 className="input-username">Edit a Song!</h2>
+                        <h2 className="input-username">Edit {song.name}!</h2>
                     </div>
         </div>
         <form className="song-form" onSubmit={handleSubmit}>

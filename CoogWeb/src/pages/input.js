@@ -257,11 +257,52 @@ export const SongProfileList = ({userName, setCurrentSong, onSongClick, userId})
 };
 
 export const SongProfileCard = ({ song , setCurrentSong, onSongClick, userId}) => {
+    const [deleteError, setDeleteError] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDelete = async () => {
+        const isConfirmed = window.confirm('Are you sure you want to delete this song?');
+        try {
+            setIsDeleting(true);
+            setDeleteError(null);
+
+            const response = await fetch('https://cosc3380-coog-music-2.onrender.com/deletesong', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: song.name,
+                    artist: userId, 
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('Song deleted successfully!');
+            } else {
+                setDeleteError(data.message || 'Failed to delete song');
+            }
+        } catch (error) {
+            console.error('Error deleting song:', error);
+            setDeleteError('Error connecting to the server.');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
     return (
         <div className="songProfile-card">
             <img src={song.image || purple_image} alt={song.name} className="songProfile-image" />
             <h3 className="songProfile-name">{song.name}</h3>
             <h3 className="songProfile-album">{song.artist_name}</h3>
+            <button
+                className="delete-song-button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+            >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+            </button>
+
+            {deleteError && <div className="error-message">{deleteError}</div>}
             <button
                         className="edit-song-button"
                         onClick={() => onSongClick('edit-song',song,userId)}>
@@ -368,11 +409,6 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage, onAlbumClic
                         className="create-song-button"
                         onClick={() => setActiveScreen('create-song')}>
                         Create Song
-                    </button>
-                <button
-                        className="create-song-button"
-                        onClick={() => setActiveScreen('delete-song')}>
-                        Delete Song
                     </button>
                 </div>
             <SongProfileList userName={userName} setCurrentSong={setCurrentSong} onSongClick={onSongClick} userId={userId}/>
