@@ -281,6 +281,28 @@ export const AlbumForm = ({userId, userName}) => {
         setAlbum({ ...album, [name]: value });
     };
 
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Check if the uploaded file is a valid image
+            if (file.type.startsWith("image/")) {
+                // Create a FileReader to read the image file as a data URL (base64)
+                const reader = new FileReader();
+    
+                // When the file is read, update the state with the base64 data URL
+                reader.onloadend = () => {
+                    const imageBase64 = reader.result; // The base64 data URL
+                    setAlbum({ ...album, image: imageBase64 });
+                };
+    
+                // Read the file as a data URL (base64)
+                reader.readAsDataURL(file);
+            } else {
+                alert("Only image files are allowed!");
+            }
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Album submitted:", album);
@@ -317,11 +339,15 @@ export const AlbumForm = ({userId, userName}) => {
             <label>Album Name</label>
             <input type="text" name="name" placeholder="Enter album name" value={album.name} onChange={handleChange} required />
 
-            <label>Genre Name</label>
+            <label>Album Genre</label>
             <input type="text" name="genre" placeholder="Enter genre" value={album.genre} onChange={handleChange} required />
 
-            <label>Image Name</label>
-            <input type="text" name="image" placeholder="Enter image name" value={album.image} onChange={handleChange} required />
+            <label>Album Image</label>
+            <input type="file" 
+                    name="image" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    />
 
             <button type="submit">Create</button>
         </form>

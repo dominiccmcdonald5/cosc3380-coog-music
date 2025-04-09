@@ -883,14 +883,14 @@ const createAlbum = async (req, res) => {
             const { name, artist, genre, image} = parsedBody;
 
             // Validate required fields
-            if (!name || !artist || !genre ||!image) {
+            if (!name || !artist) {
                 throw new Error('Missing required fields');
             }
 
             // Check if the album exists and belongs to the artist
             const [albumExists] = await pool.promise().execute(
-                "SELECT album_id, artist_id FROM album WHERE name = ?",
-                [name]
+                "SELECT album_id, artist_id FROM album WHERE name = ? AND artist_id = ?",
+                [name, artist]
             );
 
             if (albumExists.length !== 0) {
@@ -898,11 +898,30 @@ const createAlbum = async (req, res) => {
                 return res.end(JSON.stringify({ success: false, message: 'Album already exist' }));
             }
 
+            const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+            if (!imageMatches) {
+                return res.writeHead(400, { 'Content-Type': 'application/json' })
+                    .end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image file format'
+                    }));
+            }
+
+            const fileTypeImage = imageMatches[1]; // jpeg, png, etc.
+            const base64DataImage = imageMatches[2];
+            const bufferImage = Buffer.from(base64DataImage, 'base64');
+
+            // Generate filename
+            const fileNameImage = `${name}-${Date.now()}.${fileTypeImage}`;
+
+            // Upload to Azure (or any storage service)
+            const imageUrl = await uploadToAzureBlobFromServer(bufferImage, fileNameImage);
+
             // Insert the song
             await pool.promise().query(
                 `INSERT INTO album (name, artist_id, genre, image_url,likes,created_at)
                  VALUES (?, ?, ?, ?, 0, NOW())`,
-                [name, artist, genre, image]
+                [name, artist, genre, imageURL]
             );
 
             res.writeHead(201, { "Content-Type": "application/json" });
