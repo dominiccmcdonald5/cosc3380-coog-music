@@ -428,9 +428,17 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
             </div>
 
             <div className="songView-section">
-                <div className="songView-header">Songs: </div>
-                <SongAlbumList album={album} setCurrentSong={setCurrentSong}/> 
+            <div className="songView-header-container">
+                <div className="songView-header">Songs:</div>
+                {album.artist_username === userName && (
+                <button className="create-playlist-button" onClick={() => setActiveScreen('choose-song-list', album, userId, accountType)}>
+                    Add Song
+                </button>)}
+                
             </div>
+                <SongAlbumList album={album} setCurrentSong={setCurrentSong}/> 
+                </div>
+            
         </section>
     );
 };

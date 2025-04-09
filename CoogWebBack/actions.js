@@ -3082,10 +3082,7 @@ const getSongOptionList = async (req, res) => {
 
             if (accountType === "artist" && album_name) {
                 query += ` 
-                    WHERE artist.artist_id = ? 
-                    AND (song.album_id IS NULL OR song.album_id != (
-                        SELECT album_id FROM album WHERE name = ? AND artist_id = ?
-                    ))
+                    WHERE artist.artist_id = ? AND song.album_id IS NULL
                 `;
                 params = [userId, album_name, userId];
             } else if (accountType === "user" && playlist_name) {

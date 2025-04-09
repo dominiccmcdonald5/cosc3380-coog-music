@@ -1043,7 +1043,7 @@ export const ChooseSongCard = ({ song, accountType, userId, setCurrentSong, albu
             {/* Render Base64 Image */}
             {song.image && (
                 <img
-                    src={song.image}
+                    src={song.image || purple_image}
                     alt={song.name}
                     className="song-image"
                 />
