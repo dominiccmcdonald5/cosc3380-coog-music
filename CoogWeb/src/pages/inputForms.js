@@ -111,8 +111,7 @@ export const SongForm = ({ userName, userId }) => {
                     name="genre" 
                     placeholder="Enter genre" 
                     value={song.genre} 
-                    onChange={handleChange} 
-                    required 
+                    onChange={handleChange}  
                 />
 
                 <label>Album Name</label>
@@ -121,8 +120,7 @@ export const SongForm = ({ userName, userId }) => {
                     name="album" 
                     placeholder="Enter album name" 
                     value={song.album} 
-                    onChange={handleChange} 
-                    required 
+                    onChange={handleChange}  
                 />
 
                 <label>Image File</label>

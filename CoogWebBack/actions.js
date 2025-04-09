@@ -636,29 +636,21 @@ const createSong = async (req, res) => {
             const { name, artist, genre, album, image, songFile } = parsedBody;
 
             // Check if any required fields are missing
-            if (!name || !artist || !genre || !songFile) {
+            if (!name || !artist || !songFile) {
                 return res.writeHead(400, { 'Content-Type': 'application/json' })
                     .end(JSON.stringify({
                         success: false,
                         message: 'Missing required fields (name, artist, genre, album, song file)',
                     }));
             }
-
-            // Validate length of fields
-            if (name.length > 255 || artist.length > 255 || genre.length > 255) {
-                return res.writeHead(400, { 'Content-Type': 'application/json' })
-                    .end(JSON.stringify({
-                        success: false,
-                        message: 'One or more fields are too long',
-                    }));
-            }
-
-            
                 // Verify album belongs to artist (assuming album check logic exists in the DB)
-                const [albumCheck] = await pool.promise().query(
+                let albumCheck = null;
+                if (album) {
+                 [albumCheck] = await pool.promise().query(
                     "SELECT album_id, artist_id FROM album WHERE name = ?",
                     [album]
                 );
+            }
                 
                 if (albumCheck.length === 0) {
                     albumCheck[0].album_id = null; // Set album to null if not found
@@ -724,7 +716,7 @@ const createSong = async (req, res) => {
                 `INSERT INTO song 
                 (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
                 VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
-                [name, artist, albumCheck[0].abum_id, genre, imageUrl || null, songUrl]
+                [name, artist, albumCheck[0].album_id, genre, imageUrl || null, songUrl]
             );
 
             return res.writeHead(201, { 'Content-Type': 'application/json' })
