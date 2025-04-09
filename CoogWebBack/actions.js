@@ -621,7 +621,7 @@ const getArtistProfileAlbum = async (req, res) => {
     });
 };
 
-(req, res) => {
+const createSong = async (req, res) => {
     let body = "";
 
     // Listen for incoming data
@@ -745,6 +745,7 @@ const getArtistProfileAlbum = async (req, res) => {
         }
     });
 };
+
 
 
 
