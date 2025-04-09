@@ -713,13 +713,14 @@ const createSong = async (req, res) => {
             const fileName = `${name}-${artist}-${Date.now()}.${fileType}`; 
             // Upload to Azure
             const songUrl = await uploadToAzureBlobFromServer(buffer, fileName);
+            const albumId = (Array.isArray(albumCheck) && albumCheck.length > 0) ? albumCheck[0].album_id : null;
 
             // Insert the song into the database
             const [result] = await pool.promise().query(
                 `INSERT INTO song 
                 (name, artist_id, album_id, genre, image_url, play_count, likes, length, song_url, created_at)
                 VALUES (?, ?, ?, ?, ?, 0, 0, 0, ?, NOW())`,
-                [name, artist, albumCheck[0].album_id, genre, imageUrl || null, songUrl]
+                [name, artist, albumId, genre, imageUrl || null, songUrl]
             );
 
             return res.writeHead(201, { 'Content-Type': 'application/json' })
