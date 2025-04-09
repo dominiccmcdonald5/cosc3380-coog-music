@@ -3036,7 +3036,7 @@ const getSongOptionList = async (req, res) => {
     req.on('end', async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const { accountType,userId, album_name, playlist_name } = parsedBody;
+            const { accountType, userId, album_name, playlist_name } = parsedBody;
             
             if (!accountType || !userId || (!album_name && !playlist_name)) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -3044,34 +3044,36 @@ const getSongOptionList = async (req, res) => {
                 return;
             }
 
-            let query = `SELECT song_id, name, song.image_url AS image, artist.username AS artist_username, song.song_url AS song_url`;
+            let query = `SELECT song_id, name, song.image_url AS image, artist.username AS artist_username, song.song_url AS song_url FROM artist, song`;
 
             if (accountType === "artist") {
-                query += `FROM artist, song WHERE song.artist_id = artist.artist_id AND artist.artist_id = ?`
+                query += ` WHERE song.artist_id = artist.artist_id AND artist.artist_id = ?`;
+            } else if (accountType === "user") {
+                query += ` WHERE song.artist_id = artist.artist_id`;
             }
-            else if (accountType === "user") {
-                query += `FROM artist, song where song.artist_id = artist.artist_id`;
-            }
+
+            // Append conditions based on album or playlist name
             if (album_name) {
                 query += ` AND song.album_id = (SELECT album_id FROM album WHERE name = ?)`;
-
-                await pool.promise().execute(query, [album_name]);
             } else if (playlist_name) {
                 query += ` AND song.song_id IN (SELECT song_id FROM song_in_playlist WHERE playlist_id = (SELECT playlist_id FROM playlist WHERE name = ?))`;
-                await pool.promise().execute(query, [playlist_name]);
             }
 
-            // Send response with the correct status
+            // Execute the query with appropriate parameters
+            const [rows] = await pool.promise().execute(query, album_name ? [userId, album_name] : playlist_name ? [userId, playlist_name] : [userId]);
+
+            // Send response with the song data
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ 
-                success: true, 
-                message: "song streamed successfully" 
+            res.end(JSON.stringify({
+                success: true,
+                message: "Songs fetched successfully",
+                songs: rows
             }));
 
         } catch (err) {
-            console.error('Error following artist:', err);
+            console.error('Error streaming songs:', err);
             res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: 'Failed to stream song' }));
+            res.end(JSON.stringify({ success: false, message: 'Failed to fetch songs' }));
         }
     });
 };
