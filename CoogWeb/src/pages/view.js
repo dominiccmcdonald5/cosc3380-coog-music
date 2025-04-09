@@ -4,9 +4,11 @@ import heart from './heart.png';
 import './view.css';
 import play_button from './play.png';
 import verified from './isverifiedlogo.png';
+import forward from './forward.png';
 
 
-export const AlbumViewList = ({artist = {}}) => {
+
+export const AlbumViewList = ({artist = {}, userName, userId, onAlbumClick}) => {
     const [albums, setAlbums] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -45,18 +47,22 @@ export const AlbumViewList = ({artist = {}}) => {
     return (
         <div className="albumView-list">
             {albums.map((album, index) => (
-                <AlbumViewCard key={index} album={album} />
+                <AlbumViewCard key={index} album={album} userId={userId} userName={userName} onAlbumClick={onAlbumClick} />
             ))}
         </div>
     );
 }
 
-export const AlbumViewCard = ({ album }) => {
+export const AlbumViewCard = ({ album, userName, userId, onAlbumClick }) => {
     return (
         <div className="albumView-card">
             <img src={album.album_image} alt={album.album_name} className="albumView-image" />
             <h3 className="albumView-name">{album.album_name}</h3>
+            <button onClick={() => onAlbumClick('album-view-page', album, userName, userId)} className="forward-button">
+                                        <img src={forward} alt="forward" className="forward-icon" />
+                                    </button>
         </div>
+        
     );
 };
 
@@ -118,7 +124,7 @@ export const SongViewCard = ({ song, setCurrentSong }) => {
     );
 };
 
-export const ArtistView = ({ artist = {}, accountType, userId, setCurrentSong}) => {
+export const ArtistView = ({ artist = {}, accountType, userId, setCurrentSong, userName, onAlbumClick}) => {
     const [isFollowing, setIsFollowing] = useState(false);
 
     const fetchFollowStatus = async () => {
@@ -281,12 +287,13 @@ export const ArtistView = ({ artist = {}, accountType, userId, setCurrentSong}) 
         <div className="albumView-section">
                         <div className="albumView-header">Albums: 
                         </div>
-            <AlbumViewList artist={artist}/>
+            <AlbumViewList artist={artist} userId={userId} userName={userName} onAlbumClick={onAlbumClick}/>
         </div>
 
         <div className="songView-section">
+        <div className="songView-header-container">
                 <div className="songView-header">Songs: 
-                </div>
+                </div></div>
             <SongViewList artist={artist} setCurrentSong={setCurrentSong}/>
         </div>
       </section>
