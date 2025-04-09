@@ -482,16 +482,16 @@ export const SongAlbumList = ({album = {}, setCurrentSong}, userId, userName) =>
     return (
         <div className="songView-list">
             {songs.map((song, index) => (
-                <SongViewAlbumCard key={index} song={song} setCurrentSong={setCurrentSong} userId={userId} userName={userName}/>
+                <SongViewAlbumCard key={index} song={song} setCurrentSong={setCurrentSong} userId={userId} userName={userName} album={album}/>
             ))}
         </div>
     );
 };
 
-export const SongViewAlbumCard = ({ song, setCurrentSong, userId, userName}) => {
+export const SongViewAlbumCard = ({ song, setCurrentSong, userId, userName, album}) => {
     const handleRemoveSong = async () => {
         const payload = {
-            name: playlist.playlist_name,
+            name: album.album_name,
             artist: userId,
             song_name: song.name,
         };
