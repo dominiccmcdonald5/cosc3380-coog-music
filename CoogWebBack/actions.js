@@ -992,7 +992,7 @@ const editAlbum = async (req, res) => {
                 imageUrl = await uploadToAzureBlobFromServer(buffer, fileName);
             }
 
-            let query = `UPDATE playlist SET `;
+            let query = `UPDATE album SET `;
             const params = [];
             const updates = [];
 
@@ -1007,8 +1007,8 @@ const editAlbum = async (req, res) => {
             }
 
             // Join the SET clause
-            query += updates.join(", ") + " WHERE name = ? AND user_id = ?";
-            params.push(prevName, user);
+            query += updates.join(", ") + " WHERE name = ? AND artist_id = ?";
+            params.push(prevName, artist);
 
             await pool.promise().query(query, params);
 
@@ -1022,28 +1022,6 @@ const editAlbum = async (req, res) => {
                 success: false,
                 message: err.message || 'Failed to edit playlist'
             }));
-        }
-    });
-};
-
-            // Update the song with new data (only the fields that are provided)
-            await pool.promise().query(
-                `UPDATE album 
-                SET 
-                    name = COALESCE(?, name),
-                    artist_id = COALESCE(?, artist_id),
-                    genre = COALESCE(?, genre),
-                    image_url = COALESCE(?, image_url)
-                WHERE name = ?`,
-                [name, artist, genre, image, prevName]
-            );
-
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true, message: 'Album edited successfully' }));
-        } catch (err) {
-            console.error('Error editing song:', err);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: err.message || 'Failed to edit album' }));
         }
     });
 };
