@@ -7,6 +7,7 @@ const {uploadToAzureBlobFromServer} = require('./azure.js');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const { get } = require('http');
 
 const getUsers = (req, res) => {
     pool.query(queries.getUsers, (error, results) => {
@@ -3025,6 +3026,57 @@ const streamSong = async (req, res) => {
     });
 };
 
+const getSongOptionList = async (req, res) => {
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+        try {
+            const parsedBody = JSON.parse(body);
+            const { accountType,userId, album_name, playlist_name } = parsedBody;
+            
+            if (!accountType || !userId || (!album_name && !playlist_name)) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: 'Missing Required Fields' }));
+                return;
+            }
+
+            let query = `SELECT song_id, name, song.image_url AS image, artist.username AS artist_username, song.song_url AS song_url`;
+
+            if (accountType === "artist") {
+                query += `FROM artist, song WHERE song.artist_id = artist.artist_id AND artist.artist_id = ?`
+            }
+            else if (accountType === "user") {
+                query += `FROM artist, song where song.artist_id = artist.artist_id`;
+            }
+            if (album_name) {
+                query += ` AND song.album_id = (SELECT album_id FROM album WHERE name = ?)`;
+
+                await pool.promise().execute(query, [album_name]);
+            } else if (playlist_name) {
+                query += ` AND song.song_id IN (SELECT song_id FROM song_in_playlist WHERE playlist_id = (SELECT playlist_id FROM playlist WHERE name = ?))`;
+                await pool.promise().execute(query, [playlist_name]);
+            }
+
+            // Send response with the correct status
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                success: true, 
+                message: "song streamed successfully" 
+            }));
+
+        } catch (err) {
+            console.error('Error following artist:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: 'Failed to stream song' }));
+        }
+    });
+};
+
+
 
 module.exports = {
     getUsers,
@@ -3087,6 +3139,7 @@ module.exports = {
     adminArtistReport,
     adminUserReport,
     artistSongReport,
-    streamSong
+    streamSong,
+    getSongOptionList
 };
 
