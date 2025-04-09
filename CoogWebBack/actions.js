@@ -3054,9 +3054,9 @@ const getSongOptionList = async (req, res) => {
 
             // Append conditions based on album or playlist name
             if (album_name) {
-                query += ` AND song.album_id = (SELECT album_id FROM album WHERE name = ?)`;
+                query += ` AND song.album_id != (SELECT album_id FROM album WHERE name = ?)`;
             } else if (playlist_name) {
-                query += ` AND song.song_id IN (SELECT song_id FROM song_in_playlist WHERE playlist_id = (SELECT playlist_id FROM playlist WHERE name = ?))`;
+                query += ` AND song.song_id IN (SELECT song_id FROM song_in_playlist WHERE playlist_id != (SELECT playlist_id FROM playlist WHERE name = ?))`;
             }
 
             // Execute the query with appropriate parameters

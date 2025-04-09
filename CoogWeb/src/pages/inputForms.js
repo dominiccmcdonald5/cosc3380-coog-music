@@ -1,4 +1,5 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import play_button from './play.png';
 import purple_image from './purple_image.png';
 import './inputForms.css';
 
@@ -972,7 +973,7 @@ export const ChooseSongList = ({accountType, userId, setCurrentSong, album, play
                         accountType:accountType,
                         userId:userId,
                         album_name: album.album_name,
-                        playlist_name: playlist_name
+                        playlist_name: playlist.playlist_name
                     }),
                 });
                 const data = await response.json();
@@ -998,7 +999,7 @@ export const ChooseSongList = ({accountType, userId, setCurrentSong, album, play
     return (
         <div className="song-list">
             {songs.map((song, index) => (
-                <SongCard key={index} song={song} accountType={accountType} userId={userId} setCurrentSong={setCurrentSong} album={album} playlist={playlist}/>
+                <ChooseSongCard key={index} song={song} accountType={accountType} userId={userId} setCurrentSong={setCurrentSong} album={album} playlist={playlist}/>
             ))}
         </div>
     );
