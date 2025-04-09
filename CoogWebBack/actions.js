@@ -754,14 +754,14 @@ const editSong = async (req, res) => {
             let { prevName, name, artist, genre, image } = parsedBody;
 
             // Validate if at least one field is provided
-            if (!name && !artist && !genre && !image) {
+            if (!prevName || !artist || (!name && !image && !genre)) {
                 throw new Error('Missing required fields to update');
             }
 
             // Check if the song exists with the previous name
             const [songExists] = await pool.promise().execute(
-                "SELECT song_id FROM song WHERE name = ?",
-                [prevName]
+                "SELECT song_id FROM song WHERE name = ? AND artist_id = ?",
+                [prevName, artist]
             );
 
             if (songExists.length === 0) {
@@ -772,8 +772,8 @@ const editSong = async (req, res) => {
             // Check for duplicates with the new name (within the same artist)
             if (name) {
                 const [duplicateSong] = await pool.promise().execute(
-                    "SELECT song_id FROM song WHERE name = ? AND artist_id = (SELECT artist_id FROM song WHERE name = ?)",
-                    [name, prevName]
+                    "SELECT song_id FROM song WHERE name = ? AND artist_id = ? AND name != ?",
+                    [name, artist, prevName]
                 );
 
                 if (duplicateSong.length > 0) {
@@ -782,23 +782,44 @@ const editSong = async (req, res) => {
                 }
             }
 
-            // Handle undefined fields: if a field is undefined, convert to null
-            name = name || null;
-            artist = artist || null;
-            genre = genre || null;
-            image = image || null;
+            let imageUrl;
+            if (image) {
+                const imageMatches = image.match(/^data:image\/(\w+);base64,(.+)$/);
+                if (!imageMatches) {
+                    return res.writeHead(400, { 'Content-Type': 'application/json' }).end(JSON.stringify({
+                        success: false,
+                        message: 'Invalid image format'
+                    }));
+                }
 
-            // Update the song with new data (only the fields that are provided)
-            await pool.promise().query(
-                `UPDATE song 
-                SET 
-                    name = COALESCE(?, name),
-                    artist_id = COALESCE(?, artist_id),
-                    genre = COALESCE(?, genre),
-                    image_url = COALESCE(?, image_url)
-                WHERE name = ?`,
-                [name, artist, genre, image, prevName]
-            );
+                const fileType = imageMatches[1];
+                const base64Data = imageMatches[2];
+                const buffer = Buffer.from(base64Data, 'base64');
+                const fileName = `${name}-${Date.now()}.${fileType}`;
+                imageUrl = await uploadToAzureBlobFromServer(buffer, fileName);
+            }
+
+            let query = `UPDATE song SET `;
+            const params = [];
+            const updates = [];
+
+            if (name) {
+                updates.push("name = ?");
+                params.push(name);
+            }
+            if (genre) {
+                updates.push("genre = ?");
+                params.push(genre);
+            }
+            if (imageUrl) {
+                updates.push("image_url = ?");
+                params.push(imageUrl);
+            }
+
+            query += updates.join(", ") + " WHERE song_id = ? AND artist_id = ?";
+            params.push(songExists[0].song_id, artist);
+
+            await pool.promise().execute(query, params);
 
             res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ success: true, message: 'Song edited successfully' }));

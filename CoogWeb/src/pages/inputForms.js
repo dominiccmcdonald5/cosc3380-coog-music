@@ -149,7 +149,7 @@ export const SongForm = ({ userName, userId }) => {
 export const SongFormEdit = ({userName,userId, song}) => {
     console.log(song);
     const [songing, setSonging] = useState({
-        prevName: "",
+        prevName: song.name,
         name: "",
         artist: userId,
         genre: "",
@@ -159,6 +159,28 @@ export const SongFormEdit = ({userName,userId, song}) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setSonging({ ...songing, [name]: value });
+    };
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Check if the uploaded file is a valid image
+            if (file.type.startsWith("image/")) {
+                // Create a FileReader to read the image file as a data URL (base64)
+                const reader = new FileReader();
+    
+                // When the file is read, update the state with the base64 data URL
+                reader.onloadend = () => {
+                    const imageBase64 = reader.result; // The base64 data URL
+                    setSonging((prevSong) => ({ ...prevSong, image: imageBase64 }));
+                };
+    
+                // Read the file as a data URL (base64)
+                reader.readAsDataURL(file);
+            } else {
+                alert("Only image files are allowed!");
+            }
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -176,7 +198,7 @@ export const SongFormEdit = ({userName,userId, song}) => {
             
             if (response.ok) {
                 alert("Song edited successfully!");
-                setSonging({ prevName: "", name: "", artist: userId,genre: "", image: ""}); // Reset form
+                setSonging({ prevName: songing.prevName, name: "", artist: userId,genre: "", image: ""}); // Reset form
             } else {
                 alert("Failed to edit song: " + data.message);
             }
@@ -194,17 +216,19 @@ export const SongFormEdit = ({userName,userId, song}) => {
                     </div>
         </div>
         <form className="song-form" onSubmit={handleSubmit}>
-            <label>Enter Song Name you wish to Edit</label>
-            <input type="text" name="prevName" placeholder="Enter song name" value={songing.prevName} onChange={handleChange} required />
-            
-            <label>Song Name</label>
+            <label>New Song Name</label>
             <input type="text" name="name" placeholder="Enter song name" value={songing.name} onChange={handleChange} />
 
-            <label>Genre Name</label>
+            <label>New Song Genre</label>
             <input type="text" name="genre" placeholder="Enter genre" value={songing.genre} onChange={handleChange} />
 
-            <label>Image Name</label>
-            <input type="text" name="image" placeholder="Enter image name" value={songing.image} onChange={handleChange} />
+            <label>New Song Image</label>
+            <input 
+                    type="file" 
+                    name="image" 
+                    accept="image/*" 
+                    onChange={handleImageUpload}  
+                />
 
             <button type="submit">Edit</button>
         </form>
