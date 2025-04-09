@@ -964,7 +964,7 @@ export const ChooseSongList = ({accountType, userId, setCurrentSong, album, play
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchSongs = async () => {
+        const fetchChooseSongs = async () => {
             try {
                 const response = await fetch('https://cosc3380-coog-music-2.onrender.com/optionsongs', {
                     method: 'POST',
@@ -990,8 +990,8 @@ export const ChooseSongList = ({accountType, userId, setCurrentSong, album, play
             }
         };
 
-        fetchSongs();
-    }, []);  
+        fetchChooseSongs();
+    }, [accountType,userId,album,playlist]);  // Dependency array to re-fetch if these change
 
     if (loading) return <div>Loading songs...</div>;
     if (error) return <div>{error}</div>;
