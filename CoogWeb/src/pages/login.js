@@ -32,29 +32,17 @@ function Login () {
                 
                 if (data.accountType === "artist") {
                     alert(
-                        `Login Successful!\n\n` +
-                        `User ID: ${data.userId}\n` +
-                        `Username: ${data.userName}\n` +
-                        `Account Type: ${data.accountType}\n` +
-                        `Image URL: ${data.userImage}`
+                        `Login Successful!`
                     );
                     navigate('/home', { state: { userId: data.userId, userName: data.userName, accountType: data.accountType, userImage: data.userImage } });
                 } else if (data.accountType === "admin") {
                     alert(
-                        `Login Successful!\n\n` +
-                        `User ID: ${data.userId}\n` +
-                        `Username: ${data.userName}\n` +
-                        `Account Type: ${data.accountType}\n` +
-                        `Image URL: ${data.userImage}`
+                        `Login Successful!`
                     );
                     navigate('/home', { state: { userId: data.userId, userName: data.userName, accountType: data.accountType, userImage: data.userImage } });
                 } else {
                     alert(
-                        `Login Successful!\n\n` +
-                        `User ID: ${data.userId}\n` +
-                        `Username: ${data.userName}\n` +
-                        `Account Type: ${data.accountType}\n` +
-                        `Image URL: ${data.userImage}`
+                        `Login Successful!`
                     );
                     navigate('/home', { state: { userId: data.userId, userName: data.userName, accountType: data.accountType, userImage: data.userImage } });
                 }            } 

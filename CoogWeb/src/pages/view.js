@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, act} from 'react';
 import purple_image from './purple_image.png';
 import heart from './heart.png';
 import './view.css';
@@ -436,14 +436,14 @@ export const ArtistView = ({ artist = {}, accountType, userId}) => {
                 </button>)}
                 {console.log(userId)}
             </div>
-                <SongAlbumList album={album} setCurrentSong={setCurrentSong} userId={userId} userName={userName}/> 
+                <SongAlbumList album={album} setCurrentSong={setCurrentSong} userId={userId} userName={userName} accountType={accountType}/> 
                 </div>
             
         </section>
     );
 };
 
-export const SongAlbumList = ({album = {}, setCurrentSong, userId, userName}) => {
+export const SongAlbumList = ({album = {}, setCurrentSong, userId, userName, accountType}) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
@@ -482,13 +482,13 @@ export const SongAlbumList = ({album = {}, setCurrentSong, userId, userName}) =>
     return (
         <div className="songView-list">
             {songs.map((song, index) => (
-                <SongViewAlbumCard key={index} song={song} setCurrentSong={setCurrentSong} userId={userId} userName={userName} album={album}/>
+                <SongViewAlbumCard key={index} song={song} setCurrentSong={setCurrentSong} userId={userId} userName={userName} album={album} accountType={accountType}/>
             ))}
         </div>
     );
 };
 
-export const SongViewAlbumCard = ({ song, setCurrentSong, userId, userName, album}) => {
+export const SongViewAlbumCard = ({ song, setCurrentSong, userId, userName, album, accountType}) => {
     const handleRemoveSong = async () => {
         const payload = {
             name: album.album_name,
@@ -520,7 +520,7 @@ export const SongViewAlbumCard = ({ song, setCurrentSong, userId, userName, albu
             <img src={song.image} alt={song.name} className="songView-image" />
             <h3 className="songView-name">{song.name}</h3>
             <h3 className="songView-album">{song.album_name}</h3>
-            {song.artist_id !== userName && (
+            {song.artist_id === userId && (
                 <>
                 
 
