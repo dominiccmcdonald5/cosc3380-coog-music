@@ -1163,10 +1163,10 @@ const removeAlbumSong = async (req, res) => {
         try {
             const parsedBody = JSON.parse(body);
             console.log('Parsed Body:', parsedBody);
-            const { name, artist, song_name } = parsedBody;
+            const { name, artistId, song_name } = parsedBody;
 
             // Validate required fields
-            if (!name || !artist || !song_name) {
+            if (!name || !artistId || !song_name) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify({ success: false, message: 'Missing required fields' }));
             }
@@ -1174,7 +1174,7 @@ const removeAlbumSong = async (req, res) => {
             // Check if the album exists and belongs to the artist
             const [albumExists] = await pool.promise().execute(
                 "SELECT album_id FROM album WHERE name = ? AND artist_id = ?",
-                [name, artist]
+                [name, artistId]
             );
 
             if (albumExists.length === 0) {
@@ -1187,7 +1187,7 @@ const removeAlbumSong = async (req, res) => {
             // Check if the song exists
             const [songExists] = await pool.promise().execute(
                 "SELECT song_id, album_id FROM song WHERE name = ? AND artist_id = ?",
-                [song_name, artist]
+                [song_name, artistId]
             );
 
             if (songExists.length === 0) {

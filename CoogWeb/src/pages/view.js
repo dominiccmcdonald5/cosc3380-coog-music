@@ -492,7 +492,7 @@ export const SongViewAlbumCard = ({ song, setCurrentSong, userId, userName, albu
     const handleRemoveSong = async () => {
         const payload = {
             name: album.album_name,
-            artist: userId,
+            artistId: userId,
             song_name: song.name,
         };
 
