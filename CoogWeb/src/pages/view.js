@@ -590,17 +590,60 @@ export const SongViewPlaylistList = ({playlist = {}, userId,setCurrentSong}) => 
     return (
         <div className="songView-list">
             {songs.map((song, index) => (
-                <SongViewPlaylistCard key={index} song={song} setCurrentSong={setCurrentSong}/>
+                <SongViewPlaylistCard key={index} song={song} setCurrentSong={setCurrentSong} playlist={playlist} userId={userId} />
             ))}
         </div>
     );
 };
 
-export const SongViewPlaylistCard = ({ song, setCurrentSong }) => {
+export const SongViewPlaylistCard = ({ song, setCurrentSong, playlist, userId, setActiveScreen }) => {
+
+    const handleRemoveSong = async () => {
+        const payload = {
+            name: playlist.playlist_name,
+            user: userId,
+            song_name: song.name,
+        };
+
+        try {
+            const response = await fetch('https://cosc3380-coog-music-2.onrender.com/removeplaylistsong', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("Song removed successfully!");
+            } else {
+                alert("Failed to remove song: " + data.message);
+            }
+        } catch (error) {
+            console.error("Error removing song:", error);
+            alert("Error connecting to the server.");
+        }
+    };
+
     return (
         <div className="songView-card">
             <img src={song.image || purple_image} alt={song.name} className="songView-image" />
             <h3 className="songView-name">{song.name}</h3>
+
+            
+
+            {playlist.playlist_name !== 'Liked Songs' && (
+                <>
+                
+
+                    <button
+                        className="editt-song-button"
+                        onClick={handleRemoveSong}
+                    >
+                        Remove Song
+                    </button>
+                </>
+            )}
             <button onClick={() => setCurrentSong(song)} className="play-button">
                 <img src={play_button} alt="Play" className="play" />
             </button>
@@ -682,6 +725,7 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage, setAct
                 <button className="create-playlist-button" onClick={() => setActiveScreen('choose-song-list', playlist, userId, accountType)}>
                     Add Song
                 </button>)}
+                
             </div>
                 <SongViewPlaylistList playlist={playlist} userName={userName} userId={userId} setCurrentSong={setCurrentSong}/>
             </div>

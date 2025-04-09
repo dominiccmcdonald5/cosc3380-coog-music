@@ -25,6 +25,28 @@
     margin-right: 20px; /* Add spacing between the image and username */
   }
 
+  .editt-song-button {
+    background-color: #303030;
+  color: white;
+  font-size: 15px;
+  font-family: 'Montserrat';
+  font-weight: bold;
+  border: none;
+  padding: 5px 5px;
+  cursor: pointer;
+  width: 100px;
+  height: 50px; /* Set a fixed height */
+  position: relative;
+  border-radius: 20px;
+  align-items: center;
+  text-align: center;
+  }
+  
+  .editt-song-button:hover {
+  background-color: #1F1426;
+  box-shadow: 0 0 15px #B200FF;
+  }
+
   .verified-icon {
     width: 30px; /* Adjust size as needed */
     height: 30px; /* Adjust size as needed */
