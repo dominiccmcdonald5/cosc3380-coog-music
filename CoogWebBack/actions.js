@@ -651,7 +651,7 @@ const createSong = async (req, res) => {
                     [album]
                 );
             }
-                
+                if (albumCheck !== null){
                 if (albumCheck.length === 0) {
                     albumCheck[0].album_id = null; // Set album to null if not found
                 } else {
@@ -660,7 +660,7 @@ const createSong = async (req, res) => {
                         return res.writeHead(400, { 'Content-Type': 'application/json' })
                             .end(JSON.stringify({ success: false, message: 'Album does not belong to this artist' }));
                     }
-                }
+                }}
             
 
             // Handle image (image is expected to be Base64 or URL from frontend)
