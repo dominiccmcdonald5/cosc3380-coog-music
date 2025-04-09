@@ -141,12 +141,6 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
                     <button className="create-playlist-button" onClick={() => setActiveScreen('create-playlist')}>
                         Create Playlist
                     </button>
-                    <button className="create-playlist-button" onClick={() => setActiveScreen('add-song-playlist')}>
-                        Add Song
-                    </button>
-                    <button className="create-playlist-button" onClick={() => setActiveScreen('remove-song-playlist')}>
-                        Remove Song
-                    </button>
                 </div>
                 <PlaylistList onPlaylistClick={onPlaylistClick} userName={userName} userId={userId}/>
             </div>
@@ -389,16 +383,7 @@ export const ArtistProfile = ({setActiveScreen, userName, userImage, onAlbumClic
                         onClick={() => setActiveScreen('create-album')}>
                         Create Album
                     </button>
-                <button
-                        className="create-album-button"
-                        onClick={() => setActiveScreen('add-song-album')}>
-                        Add Song
-                    </button>
-                <button
-                        className="create-album-button"
-                        onClick={() => setActiveScreen('remove-song-album')}>
-                        Remove Song
-                    </button>
+
                 </div>
             <AlbumProfileList userName={userName} onAlbumClick={onAlbumClick} userId={userId}/>
             </div>
