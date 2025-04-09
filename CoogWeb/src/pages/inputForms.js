@@ -415,7 +415,7 @@ export const AlbumFormAdd = ({userName, userId}) => {
 export const AlbumFormEdit = ({userName,userId, album}) => {
     console.log(album);
     const [albuming, setAlbuming] = useState({
-        prevName: "",
+        prevName: album.album_name,
         name: "",
         artist: userId,
         genre: "",
@@ -425,6 +425,28 @@ export const AlbumFormEdit = ({userName,userId, album}) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setAlbuming({ ...albuming, [name]: value });
+    };
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Check if the uploaded file is a valid image
+            if (file.type.startsWith("image/")) {
+                // Create a FileReader to read the image file as a data URL (base64)
+                const reader = new FileReader();
+    
+                // When the file is read, update the state with the base64 data URL
+                reader.onloadend = () => {
+                    const imageBase64 = reader.result; // The base64 data URL
+                    setAlbuming({ ...albuming, image: imageBase64 });
+                };
+    
+                // Read the file as a data URL (base64)
+                reader.readAsDataURL(file);
+            } else {
+                alert("Only image files are allowed!");
+            }
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -459,17 +481,18 @@ export const AlbumFormEdit = ({userName,userId, album}) => {
                     </div>
         </div>
         <form className="song-form" onSubmit={handleSubmit}>
-            <label>Enter Album Name you want to Edit</label>
-            <input type="text" name="prevName" placeholder="Enter album name" value={albuming.prevName} onChange={handleChange} required />
-
-            <label>Album Name</label>
+            <label>New Album Name</label>
             <input type="text" name="name" placeholder="Enter album name" value={albuming.name} onChange={handleChange}  />
 
-            <label>Genre Name</label>
+            <label>New Album Genre</label>
             <input type="text" name="genre" placeholder="Enter genre" value={albuming.genre} onChange={handleChange}  />
 
-            <label>Image Name</label>
-            <input type="text" name="image" placeholder="Enter image name" value={albuming.image} onChange={handleChange}  />
+            <label>New Album Image</label>
+            <input type="file" 
+                    name="image" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    />
 
             <button type="submit">Edit</button>
         </form>
