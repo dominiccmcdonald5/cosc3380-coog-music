@@ -1709,48 +1709,68 @@ const addPlaylistSong = async (req, res) => {
         try {
             const parsedBody = JSON.parse(body);
             console.log('Parsed Body:', parsedBody);
-            const { name, user, song_name } = parsedBody;
+            const { accountType, songId, userId, playlist_name, album_name } = parsedBody;
 
             // Validate required fields
-            if (!name || !user || !song_name) {
+            if (!accountType || !songId || !userId || (!playlist_name && !album_name)) {
                 throw new Error('Missing required fields');
             }
 
-            // Check if the album exists and belongs to the artist
-            const [playlistExists] = await pool.promise().execute(
-                "SELECT playlist_id FROM playlist WHERE name = ? AND user_id = ?",
-                [name, user]
-            );
+            if (accountType === 'user') {
+                // For a user, add the song to the playlist
+                if (playlist_name) {
+                    // Get the playlist_id for the provided playlist_name
+                    const [playlistRows] = await pool.promise().execute(
+                        `SELECT playlist_id FROM playlist WHERE name = ? AND user_id = ?`, 
+                        [playlist_name, userId]
+                    );
 
-            if (playlistExists.length === 0) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: 'Playlist does not exist or does not belong to the user' }));
+                    if (playlistRows.length === 0) {
+                        throw new Error('Playlist not found or user does not have access to this playlist');
+                    }
+
+                    const playlistId = playlistRows[0].playlist_id;
+
+                    // Insert the song into the song_in_playlist table
+                    await pool.promise().execute(
+                        `INSERT INTO song_in_playlist (song_id, playlist_id, added_at) VALUES (?, ?, NOW())`, 
+                        [songId, playlistId]
+                    );
+
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ success: true, message: 'Song added to playlist successfully' }));
+                } else {
+                    throw new Error('Playlist name is required for user account');
+                }
+            } else if (accountType === 'artist') {
+                // For an artist, update the album_id of the song
+                if (album_name) {
+                    // Get the album_id for the provided album_name
+                    const [albumRows] = await pool.promise().execute(
+                        `SELECT album_id FROM album WHERE name = ? AND artist_id = ?`, 
+                        [album_name, userId]
+                    );
+
+                    if (albumRows.length === 0) {
+                        throw new Error('Album not found or artist does not have access to this album');
+                    }
+
+                    const albumId = albumRows[0].album_id;
+
+                    // Update the album_id of the song
+                    await pool.promise().execute(
+                        `UPDATE song SET album_id = ? WHERE song_id = ? AND artist_id = ?`, 
+                        [albumId, songId, userId]
+                    );
+
+                    res.writeHead(201, { "Content-Type": "application/json" });
+                    res.end(JSON.stringify({ success: true, message: 'Song added to album successfully' }));
+                } else {
+                    throw new Error('Album name is required for artist account');
+                }
+            } else {
+                throw new Error('Invalid account type');
             }
-
-            const playlistId = playlistExists[0].playlist_id;
-
-            // Check if the song exists
-            const [songExists] = await pool.promise().execute(
-                "SELECT song_id FROM song WHERE name = ?",
-                [song_name]
-            );
-
-            if (songExists.length === 0) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ success: false, message: 'Song does not exist' }));
-            }
-
-            const songId = songExists[0].song_id;
-
-
-            // Assign the song to the album
-            await pool.promise().execute(
-                `INSERT song_in_playlist (song_id,playlist_id,added_at) VALUES (?,?,NOW())`,
-                [songId,playlistId]
-            );
-
-            res.writeHead(201, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ success: true, message: 'Song added to album successfully' }));
         } catch (err) {
             console.error('Error adding song:', err);
             res.writeHead(500, { 'Content-Type': 'application/json' });

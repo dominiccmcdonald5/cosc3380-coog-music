@@ -104,3 +104,20 @@
 .delete-playlist-button:hover {
   background-color: #9365ad;
 }
+
+.forward-button-option {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out; /* Smooth transition for hover effect */
+}
+
+.forward-button-option img {
+  width: 30px; /* Set the width to 30px */
+  height: 30px; /* Set the height to 30px */
+}
+
+.forward-button-option:hover img {
+  transform: scale(1.1); /* Slightly enlarge the image on hover */
+}

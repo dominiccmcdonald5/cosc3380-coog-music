@@ -676,10 +676,13 @@ export const PlaylistViewPage = ({ playlist, userName, userId, userImage, setAct
             </div>
 
             <div className="songView-section">
-                <><div className="songView-header">Songs: </div>
-                <button className="create-playlist-button" onClick={() => setActiveScreen('choose-song-list',playlist,userId,accountType)}>
-                        Add Song
-                    </button></>
+            <div className="songView-header-container">
+                <div className="songView-header">Songs:</div>
+                {playlist.playlist_name !== 'Liked Songs' && (
+                <button className="create-playlist-button" onClick={() => setActiveScreen('choose-song-list', playlist, userId, accountType)}>
+                    Add Song
+                </button>)}
+            </div>
                 <SongViewPlaylistList playlist={playlist} userName={userName} userId={userId} setCurrentSong={setCurrentSong}/>
             </div>
         </section>

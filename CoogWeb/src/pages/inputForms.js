@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import play_button from './play.png';
 import purple_image from './purple_image.png';
+import forward from './forward.png';
 import './inputForms.css';
 
 export const SongForm = ({ userName, userId }) => {
@@ -1012,29 +1013,60 @@ export const ChooseSongList = ({accountType, userId, setCurrentSong, album, play
 };
 
 export const ChooseSongCard = ({ song, accountType, userId, setCurrentSong, album, playlist }) => {
+    const handleAddSong = async () => {
+        try {
+            const response = await fetch('https://cosc3380-coog-music-2.onrender.com/addsong', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    accountType: accountType,
+                    songId: song.song_id,  // Send the song ID to be inserted
+                    userId: userId,
+                    album_name: album.album_name,  // Pass the album name
+                    playlist_name: playlist.playlist_name // Pass the playlist name
+                }),
+            });
+            const data = await response.json();
 
-
+            if (data.success) {
+                alert('Song added successfully');
+            } else {
+                alert('Failed to add song');
+            }
+        } catch (err) {
+            alert('Error adding song');
+        }
+    };
 
     return (
         <div className="song-card">
             {/* Render Base64 Image */}
             {song.image && (
-            <img
-                src={song.image}
-                alt={song.name}
-                className="song-image"
-            />
+                <img
+                    src={song.image}
+                    alt={song.name}
+                    className="song-image"
+                />
             )}
 
             <h3 className="song-name">{song.name}</h3>
             <h3 className="song-artist">{song.artist_name}</h3>
 
-
             <div className="bottom-section">
                 <button onClick={() => setCurrentSong(song)} className="play-button">
                     <img src={play_button} alt="Play" className="play" />
                 </button>
+            
+
+            {/* Forward Button to add song to the album or playlist */}
+            <button
+                className="forward-button-option"
+                onClick={handleAddSong} // Call the function to add the song to the album or playlist
+            >
+                <img src={forward} alt="Forward" className="forward-image" />
+            </button>
             </div>
+
         </div>
     );
 };
