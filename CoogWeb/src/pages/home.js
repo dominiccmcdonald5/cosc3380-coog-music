@@ -173,6 +173,8 @@ const Home = () => {
 
   const [selectedAlbum, setSelectedAlbum] = useState({});
   const [selectedPlaylist, setSelectedPlaylist] = useState({});
+  const [selectedSong, setSelectedSong] = useState({});
+  
 
   const handleArtistClick = (screen, artist) => {
     setActiveScreen(screen);
@@ -190,6 +192,11 @@ const Home = () => {
     setSelectedPlaylist(playlist);
 };
 
+const handleSongClick = (screen, song) => {
+  setActiveScreen(screen);
+  setSelectedSong(song);
+};
+
 
   return (
     <div className="Home">
@@ -197,7 +204,7 @@ const Home = () => {
       <div className="content">
         <SideBar onButtonClick={setActiveScreen} accountType={accountType} />
         <div className="main-content">
-          {renderScreen(activeScreen, setActiveScreen, handleArtistClick, handleAlbumClick, handlePlaylistClick, accountType, selectedArtist,selectedAlbum, userName, userImage, userId, selectedPlaylist, setCurrentSong)}
+          {renderScreen(activeScreen, setActiveScreen, handleArtistClick, handleAlbumClick, handlePlaylistClick, accountType, selectedArtist,selectedAlbum, userName, userImage, userId, selectedPlaylist, setCurrentSong, handleSongClick, selectedSong)}
         </div>
       </div>
       <BottomBar currentSong={currentSong} userId={userId} accountType={accountType} />
@@ -207,20 +214,20 @@ const Home = () => {
 
 
 // Separate function for rendering screens
-const renderScreen = (activeScreen, setActiveScreen, onArtistClick, onAlbumClick, onPlaylistClick, accountType, selectedArtist, selectedAlbum, userName, userImage, userId, selectedPlaylist, setCurrentSong) => {
+const renderScreen = (activeScreen, setActiveScreen, onArtistClick, onAlbumClick, onPlaylistClick, accountType, selectedArtist, selectedAlbum, userName, userImage, userId, selectedPlaylist, setCurrentSong, onSongClick, selectedSong) => {
   switch (activeScreen) {
     case 'song-list': return <SongList accountType={accountType} userId={userId} setCurrentSong={setCurrentSong}/>;
     case 'artist-list': return <ArtistList onArtistClick={onArtistClick} />;
     case 'album-list': return <AlbumList onAlbumClick={onAlbumClick} accountType={accountType} userId={userId}/>;
     case 'profile': return <Profile setActiveScreen={setActiveScreen} onPlaylistClick={onPlaylistClick} userName={userName} userId={userId} userImage={userImage} />;
-    case 'artist-profile': return <ArtistProfile onAlbumClick={onAlbumClick} setActiveScreen={onArtistClick} userName={userName} userImage={userImage} userId={userId} setCurrentSong={setCurrentSong}/>;
+    case 'artist-profile': return <ArtistProfile onAlbumClick={onAlbumClick} setActiveScreen={onArtistClick} userName={userName} userImage={userImage} userId={userId} setCurrentSong={setCurrentSong} onSongClick={onSongClick}/>;
     case 'top-trending': return <TopTrending />;
     case 'cougar-wrap-up': return <CougarWrapUp userName={userName} userId={userId} userImage={userImage}/>;
     case 'user-lists': return <UserList />;
     case 'artist-view': return <ArtistView artist={selectedArtist} accountType={accountType} userId={userId} userName={userName}/>;
     case 'album-view-page': return <AlbumViewPage setCurrentSong={setCurrentSong} album={selectedAlbum} accountType={accountType} userId={userId} userName={userName} setActiveScreen={setActiveScreen}/>;
     case 'create-song': return <SongForm userName={userName} userId={userId}/>;
-    case 'edit-song': return <SongFormEdit userName={userName} userId={userId}/>;
+    case 'edit-song': return <SongFormEdit userName={userName} userId={userId} song={selectedSong}/>;
     case 'delete-song': return <SongFormDelete userName={userName} userId={userId}/>;
     case 'create-album': return <AlbumForm userName={userName} userId={userId}/>;
     case 'edit-album': return <AlbumFormEdit userName={userName} userId={userId} album={selectedAlbum}/>;

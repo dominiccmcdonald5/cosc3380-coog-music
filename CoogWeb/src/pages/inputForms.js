@@ -146,8 +146,9 @@ export const SongForm = ({ userName, userId }) => {
     );
 };
 
-export const SongFormEdit = ({userName,userId}) => {
-    const [song, setSong] = useState({
+export const SongFormEdit = ({userName,userId, song}) => {
+    console.log(song);
+    const [songing, setSonging] = useState({
         prevName: "",
         name: "",
         artist: userId,
@@ -157,25 +158,25 @@ export const SongFormEdit = ({userName,userId}) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setSong({ ...song, [name]: value });
+        setSonging({ ...songing, [name]: value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Song submitted:", song);
+        console.log("Song submitted:", songing);
         
         try {
           const response = await fetch('https://cosc3380-coog-music-2.onrender.com/editsong', {
             method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(song),
+          body: JSON.stringify(songing),
         });
 
         const data = await response.json();
             
             if (response.ok) {
                 alert("Song edited successfully!");
-                setSong({ prevName: "", name: "", artist: userId,genre: "", image: ""}); // Reset form
+                setSonging({ prevName: "", name: "", artist: userId,genre: "", image: ""}); // Reset form
             } else {
                 alert("Failed to edit song: " + data.message);
             }
@@ -194,16 +195,16 @@ export const SongFormEdit = ({userName,userId}) => {
         </div>
         <form className="song-form" onSubmit={handleSubmit}>
             <label>Enter Song Name you wish to Edit</label>
-            <input type="text" name="prevName" placeholder="Enter song name" value={song.prevName} onChange={handleChange} required />
+            <input type="text" name="prevName" placeholder="Enter song name" value={songing.prevName} onChange={handleChange} required />
             
             <label>Song Name</label>
-            <input type="text" name="name" placeholder="Enter song name" value={song.name} onChange={handleChange} />
+            <input type="text" name="name" placeholder="Enter song name" value={songing.name} onChange={handleChange} />
 
             <label>Genre Name</label>
-            <input type="text" name="genre" placeholder="Enter genre" value={song.genre} onChange={handleChange} />
+            <input type="text" name="genre" placeholder="Enter genre" value={songing.genre} onChange={handleChange} />
 
             <label>Image Name</label>
-            <input type="text" name="image" placeholder="Enter image name" value={song.image} onChange={handleChange} />
+            <input type="text" name="image" placeholder="Enter image name" value={songing.image} onChange={handleChange} />
 
             <button type="submit">Edit</button>
         </form>
