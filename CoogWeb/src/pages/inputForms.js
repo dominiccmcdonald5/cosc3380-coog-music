@@ -463,7 +463,7 @@ export const AlbumFormEdit = ({userName,userId, album}) => {
             
             if (response.ok) {
                 alert("Album edited successfully!");
-                setAlbuming({ prevName: "", name: "", artist: userId,genre: "", image: ""}); // Reset form
+                setAlbuming({ prevName: albuming.prevName, name: "", artist: userId,genre: "", image: ""}); // Reset form
             } else {
                 alert("Failed to edit album: " + data.message);
             }
