@@ -32,6 +32,8 @@ Language/Framework: JavaScript, Node JS
 - server.js: Connecting Back-End Server
 - routes.js: Routing Back-End Functions to APIs
 - actions.js: Back-End Functions
+- azure.js: Connects to Azure Blob for music/image upload
+- database.js: Connects to MySQL database
 
 ## Additional Info:
 - Song Implementation: Azure Blobs
