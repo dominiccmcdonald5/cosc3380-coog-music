@@ -72,7 +72,8 @@ const map_route = {
     '/adminuserreport',
     '/artistreport',
     '/streamsong',
-    '/optionsongs'],
+    '/optionsongs',
+    '/playlistcount'],
     'PUT': [],
     'DELETE': [],
 };

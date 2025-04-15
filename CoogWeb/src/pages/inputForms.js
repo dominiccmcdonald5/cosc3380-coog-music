@@ -14,6 +14,7 @@ export const SongForm = ({ userName, userId }) => {
         songFile: null // Store the song file itself
     });
 
+    const [image, setImage] = useState('');
     const handleChange = (e) => {
         const { name, value } = e.target;
         setSong((prev) => ({ ...prev, [name]: value }));
@@ -31,6 +32,7 @@ export const SongForm = ({ userName, userId }) => {
                 reader.onloadend = () => {
                     const imageBase64 = reader.result; // The base64 data URL
                     setSong((prevSong) => ({ ...prevSong, image: imageBase64 }));
+                    setImage(imageBase64);
                 };
     
                 // Read the file as a data URL (base64)
@@ -141,6 +143,7 @@ export const SongForm = ({ userName, userId }) => {
                     onChange={handleSongUpload} 
                     required 
                 />
+                {image && <img src={image} alt="Preview" className="profile-preview" />}
 
                 <button type="submit">Create</button>
             </form>
@@ -157,6 +160,7 @@ export const SongFormEdit = ({userName,userId, song}) => {
         genre: "",
         image: "",
     });
+    const [image, setImage] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -175,6 +179,7 @@ export const SongFormEdit = ({userName,userId, song}) => {
                 reader.onloadend = () => {
                     const imageBase64 = reader.result; // The base64 data URL
                     setSonging((prevSong) => ({ ...prevSong, image: imageBase64 }));
+                    setImage(imageBase64);
                 };
     
                 // Read the file as a data URL (base64)
@@ -214,6 +219,7 @@ export const SongFormEdit = ({userName,userId, song}) => {
         <section className="everything">
         <div className="input-section">
                     <div className="profile-header">
+                    <img src={song.image} alt="Preview" className="previous-image" />
                         <h2 className="input-username">Edit {song.name}!</h2>
                     </div>
         </div>
@@ -231,6 +237,7 @@ export const SongFormEdit = ({userName,userId, song}) => {
                     accept="image/*" 
                     onChange={handleImageUpload}  
                 />
+            {image && <img src={image} alt="Preview" className="profile-preview" />}
 
             <button type="submit">Edit</button>
         </form>
@@ -300,6 +307,7 @@ export const AlbumForm = ({userId, userName}) => {
         genre: "",
         image: "",
     });
+    const [image,setImage] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -318,6 +326,7 @@ export const AlbumForm = ({userId, userName}) => {
                 reader.onloadend = () => {
                     const imageBase64 = reader.result; // The base64 data URL
                     setAlbum({ ...album, image: imageBase64 });
+                    setImage(imageBase64);
                 };
     
                 // Read the file as a data URL (base64)
@@ -373,6 +382,7 @@ export const AlbumForm = ({userId, userName}) => {
                     accept="image/*" 
                     onChange={handleImageUpload} 
                     />
+            {image && <img src={image} alt="Preview" className="profile-preview" />}
 
             <button type="submit">Create</button>
         </form>
@@ -446,6 +456,7 @@ export const AlbumFormEdit = ({userName,userId, album}) => {
         genre: "",
         image: "",
     });
+    const [image,setImage] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -464,6 +475,7 @@ export const AlbumFormEdit = ({userName,userId, album}) => {
                 reader.onloadend = () => {
                     const imageBase64 = reader.result; // The base64 data URL
                     setAlbuming({ ...albuming, image: imageBase64 });
+                    setImage(imageBase64);
                 };
     
                 // Read the file as a data URL (base64)
@@ -502,6 +514,7 @@ export const AlbumFormEdit = ({userName,userId, album}) => {
         <section className="everything">
         <div className="input-section">
                     <div className="profile-header">
+                    <img src={album.album_image} alt="Preview" className="previous-image" />
                         <h2 className="input-username">Edit {album.album_name}!</h2>
                     </div>
         </div>
@@ -518,6 +531,7 @@ export const AlbumFormEdit = ({userName,userId, album}) => {
                     accept="image/*" 
                     onChange={handleImageUpload} 
                     />
+            {image && <img src={image} alt="Preview" className="profile-preview" />}
 
             <button type="submit">Edit</button>
         </form>
@@ -642,6 +656,7 @@ export const PlaylistForm = ({userName, userId}) => {
         user: userId,
         image: "",
     });
+    const [image,setImage] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -660,6 +675,7 @@ export const PlaylistForm = ({userName, userId}) => {
                 reader.onloadend = () => {
                     const imageBase64 = reader.result; // The base64 data URL
                     setPlaylist({ ...playlist, image: imageBase64 });
+                    setImage(imageBase64);
                 };
     
                 // Read the file as a data URL (base64)
@@ -712,6 +728,7 @@ export const PlaylistForm = ({userName, userId}) => {
                     accept="image/*" 
                     onChange={handleImageUpload} 
                     />
+            {image && <img src={image} alt="Preview" className="profile-preview" />}
 
             <button type="submit">Create</button>
         </form>
@@ -784,6 +801,8 @@ export const PlaylistFormEdit = ({playlist, userId}) => {
         image: "",
     });
 
+    const [image,setImage] = useState('');
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setPlaylisting({ ...playlisting, [name]: value });
@@ -801,6 +820,7 @@ export const PlaylistFormEdit = ({playlist, userId}) => {
                 reader.onloadend = () => {
                     const imageBase64 = reader.result; // The base64 data URL
                     setPlaylisting({ ...playlisting, image: imageBase64 });
+                    setImage(imageBase64);
                 };
                 // Read the file as a data URL (base64)
                 reader.readAsDataURL(file);
@@ -838,6 +858,7 @@ export const PlaylistFormEdit = ({playlist, userId}) => {
         <section className="everything">
         <div className="input-section">
                     <div className="profile-header">
+                    <img src={playlist.playlist_image} alt="Preview" className="previous-image" />
                         <h2 className="input-username">Edit {playlist.playlist_name}!</h2>
                     </div>
         </div>
@@ -851,6 +872,8 @@ export const PlaylistFormEdit = ({playlist, userId}) => {
                     accept="image/*" 
                     onChange={handleImageUpload} 
                     />
+            {image && <img src={image} alt="Preview" className="profile-preview" />}
+            
 
             <button type="submit">Edit</button>
         </form>

@@ -6,6 +6,17 @@
     
   }
 
+  .trigger-section {
+    padding: 20px;
+    background: linear-gradient(to bottom, #6a4a7d, #2D1E33); /* Light gray to lavender gradient */
+    border-radius: 10px;
+    width: 100%;
+    margin-top: 5px;
+    
+  }
+
+  
+
   .verifieddd-icon {
     width: 30px; /* Adjust size as needed */
     height: 30px; /* Adjust size as needed */
@@ -13,6 +24,9 @@
     vertical-align: middle; /* Align icon with text */
   }
   .profile-section:hover {
+    box-shadow: 0 0 15px rgba(226, 160, 239, 0.5); /* Lavender glow effect on hover */
+  }
+  .trigger-section:hover {
     box-shadow: 0 0 15px rgba(226, 160, 239, 0.5); /* Lavender glow effect on hover */
   }
   
@@ -34,6 +48,13 @@
   
   .profile-username {
     font-size: 60px;
+    color: #ffffff;
+    font-family: 'Montserrat';
+    font-weight: bold;
+    text-align: left;
+  }
+
+  .playlist-trigger-message {
     color: #ffffff;
     font-family: 'Montserrat';
     font-weight: bold;
@@ -500,7 +521,6 @@ box-shadow: 0 0 15px #B200FF;
 
 .songProfile-list {
   scrollbar-color: #B200FF #2D1E33; 
-  direction: rtl;
 }
 
 .data-report-section {

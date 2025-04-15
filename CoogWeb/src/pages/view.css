@@ -222,7 +222,6 @@
   
   .albumView-list {
     scrollbar-color: #B200FF #2D1E33; 
-    direction: rtl;
   }
 
   .songView-header-container {
@@ -341,5 +340,4 @@
   
   .songView-list {
     scrollbar-color: #B200FF #2D1E33; 
-    direction: rtl;
   }

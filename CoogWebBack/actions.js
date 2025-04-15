@@ -3130,6 +3130,53 @@ const getSongOptionList = async (req, res) => {
     });
 };
 
+const checkPlaylistCount = async (req, res) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+        try {
+            const parsedBody = JSON.parse(body);
+            const { userId } = parsedBody;
+            console.log(userId);
+            
+            if (!userId) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ 
+                    success: false, 
+                    message: 'Missing Required Fields' 
+                }));
+            }
+
+            const [rows] = await pool.promise().query(
+                `SELECT COUNT(*) AS count FROM playlist WHERE user_id = ?;`,
+                [userId]
+            );
+
+            const playlistCount = rows[0].count;
+
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ 
+                success: true,
+                playlist_count: playlistCount,
+                message: playlistCount === 10 ? 'Playlist limit reached' : 'Playlist count fetched successfully'
+            }));
+
+        } catch (err) {
+            console.error('Error fetching playlists:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                success: false, 
+                message: 'Failed to fetch playlists',
+                error: err.message 
+            }));
+        }
+    });
+};
+
 
 
 module.exports = {
@@ -3194,6 +3241,7 @@ module.exports = {
     adminUserReport,
     artistSongReport,
     streamSong,
-    getSongOptionList
+    getSongOptionList,
+    checkPlaylistCount
 };
 
