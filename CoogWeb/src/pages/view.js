@@ -530,7 +530,7 @@ export const SongViewAlbumCard = ({ song, setCurrentSong, userId, userName, albu
             <img src={song.image} alt={song.name} className="songView-image" />
             <h3 className="songView-name">{song.name}</h3>
             <h3 className="songView-album">{song.album_name}</h3>
-            {song.artist_id === userId && (
+            {song.artist_id === userId && accountType === 'artist' && (
                 <>
                 
 
