@@ -3140,7 +3140,7 @@ const checkPlaylistCount = async (req, res) => {
     req.on('end', async () => {
         try {
             const parsedBody = JSON.parse(body);
-            const {userId} = parsedBody;
+            const { userId } = parsedBody;
             console.log(userId);
             
             if (!userId) {
@@ -3151,28 +3151,26 @@ const checkPlaylistCount = async (req, res) => {
                 }));
             }
 
-            const playlist_count = await pool.promise().query(
-                `SELECT COUNT(*) FROM playlist WHERE user_id = ?;`,
+            const [rows] = await pool.promise().query(
+                `SELECT COUNT(*) AS count FROM playlist WHERE user_id = ?;`,
                 [userId]
             );
 
-            if (playlist_count[0].count >= 10) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ 
-                    success: true, 
-                    message: 'Playlist limit reached',
-                    playlist_count: playlist_count[0].count
-                }));
-            }
+            const playlistCount = rows[0].count;
 
-            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ 
+                success: true,
+                playlist_count: playlistCount,
+                message: playlistCount === 10 ? 'Playlist limit reached' : 'Playlist count fetched successfully'
+            }));
 
         } catch (err) {
-            console.error('Error fetching songs:', err);
+            console.error('Error fetching playlists:', err);
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ 
                 success: false, 
-                message: 'Failed to fetch songs',
+                message: 'Failed to fetch playlists',
                 error: err.message 
             }));
         }

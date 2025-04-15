@@ -133,7 +133,7 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
                         const data = await response.json();
     
                         if (data.success) {
-                            setPlaylistCount({playlistCount: data.playlist_count});  
+                            setPlaylistCount(data.playlist_count);  
                         } else {
                             setError('Failed to fetch playlists');
                         }
@@ -165,12 +165,13 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
                     <p className="basic-stats-text"> Liked Albums: {stats.likedAlbums}</p>
                 </div>
             </div>
-
-            if (playlistCount === 10 && (<div className="profile-section">
-                <div className="profile-header">
-                    You have reached the maximum amount of playlists
+                {playlistCount === 10 && (
+                <div className="profile-section">
+                    <div className="profile-header">
+                        You have reached the maximum amount of playlists
+                    </div>
                 </div>
-            </div>))
+            )}
 
             <div className="playlist-section">
                 <div className="playlist-header">Your Playlists:
