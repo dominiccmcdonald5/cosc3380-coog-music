@@ -149,6 +149,7 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
         
             if (loading) return <div>Loading user...</div>;
             if (error) return <div>{error}</div>;
+            console.log(playlistCount);
 
     return (
         <section className="everything">
@@ -166,9 +167,9 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
                 </div>
             </div>
                 {playlistCount === 10 && (
-                <div className="profile-section">
-                    <div className="profile-header">
-                        You have reached the maximum amount of playlists
+                <div className="trigger-section">
+                    <div className="playlist-trigger-message">
+                        Warning: You have reached the maximum amount of playlists. Please delete a playlist before creating a new one.
                     </div>
                 </div>
             )}
