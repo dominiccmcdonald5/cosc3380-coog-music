@@ -189,6 +189,9 @@ function routes(req, res) {
     if (URL.startsWith('/optionsongs') && method === 'POST') {
         return actions.getSongOptionList(req, res);
     }
+    if (URL.startsWith('/playlistcount') && method === 'POST') {
+        return actions.checkPlaylistCount(req, res);
+    }
 
 
     res.writeHead(404, { "Content-Type": "application/json" });

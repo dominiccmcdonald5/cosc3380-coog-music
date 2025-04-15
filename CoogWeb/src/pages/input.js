@@ -40,6 +40,7 @@ export const PlaylistList = ({ onPlaylistClick, userName, userId }) => {
         
                 fetchProfilePlaylist();
             }, [userName]);
+
             if (loading) return <div>Loading playlists...</div>;
             if (error) return <div>{error}</div>;
             console.log(playlists);
@@ -75,6 +76,8 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
         likedSongs: 0,
         likedAlbums: 0,
     });
+    const [playlistCount, setPlaylistCount] = useState(0);
+
 
     const [loading, setLoading] = useState(true);  // To track loading state
         const [error, setError] = useState(null);
@@ -115,7 +118,34 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
         
                 fetchUserInfo();
             }, [userName]);  
+            useEffect(() => {
+                const fetchPlaylistCount = async () => {
+                    try {
+                        const response = await fetch('https://cosc3380-coog-music-2.onrender.com/playlistcount', {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ userId }), 
+                        })
+                        console.log('Backend response:', response); 
     
+                        const data = await response.json();
+    
+                        if (data.success) {
+                            setPlaylistCount({playlistCount: data.playlist_count});  
+                        } else {
+                            setError('Failed to fetch playlists');
+                        }
+                    } catch (err) {
+                        setError('Error fetching playlists');
+                    } finally {
+                        setLoading(false);  // Data is loaded or error occurred
+                    }
+                };
+        
+                fetchPlaylistCount();
+            }, [userId]);
         
             if (loading) return <div>Loading user...</div>;
             if (error) return <div>{error}</div>;
@@ -135,6 +165,12 @@ export const Profile = ({ setActiveScreen, onPlaylistClick,userName, userId, use
                     <p className="basic-stats-text"> Liked Albums: {stats.likedAlbums}</p>
                 </div>
             </div>
+
+            if (playlistCount === 10 && (<div className="profile-section">
+                <div className="profile-header">
+                    You have reached the maximum amount of playlists
+                </div>
+            </div>))
 
             <div className="playlist-section">
                 <div className="playlist-header">Your Playlists:
