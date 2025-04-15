@@ -121,3 +121,12 @@
 .forward-button-option:hover img {
   transform: scale(1.1); /* Slightly enlarge the image on hover */
 }
+
+.previous-image {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  margin-right: 20px; /* Add spacing between the image and username */
+}

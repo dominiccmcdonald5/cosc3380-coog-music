@@ -120,6 +120,7 @@ function Signup() {
                     accept="image/*" 
                     onChange={handleImageUpload} 
                     />
+                    {image && <img src={image} alt="Preview" className="signup-preview" />}
                     
 
                     <div>

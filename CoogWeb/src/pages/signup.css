@@ -10,6 +10,11 @@
     color: white;
   }
 
+  .signup-preview{
+    width: 50px; /* Adjust size as needed */
+    height: 50px;
+}  
+
   .SignUp-Text {
     width: 800px;
     height: 500px;
@@ -22,7 +27,7 @@
   }
 
   .SignUp-title {
-    font-size: 40px;
+    font-size: 30px;
     font-weight: bold;
     margin: 20px;
     font-family: 'Montserrat';
@@ -30,7 +35,7 @@
   }
 
   .SignUp-description {
-    font-size: 18px;
+    font-size: 15px;
     margin: 14px;
     font-family: 'Montserrat';
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3)
@@ -75,7 +80,7 @@
 }
 
 .Input-Type {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     padding: 5px 15px;
     border-radius: 10px;
