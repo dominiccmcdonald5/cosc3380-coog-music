@@ -299,7 +299,7 @@ export const UserDataReport = () => {
                                 <th>Date Joined</th>
                                 <th>Most Recent Playlist</th>
                                 <th>Songs in Recent Playlist</th>
-                                <th>Favorite Artist</th>
+                                <th>Favorite Artist (By Streams)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -458,7 +458,7 @@ export const SongDataReport = ({ userName }) => {
                             <tr>
                                 <th>Song Name</th>
                                 <th>Album Name</th>
-                                <th>Date Joined</th>
+                                <th>Date Created</th>
                                 <th>Unique Listeners</th>
                                 <th>Streams</th>
                                 <th>Likes</th>
