@@ -22,8 +22,8 @@ Language/Framework: JavaScript, React
 - report.js: Data Report Pages
 - sections.js: Song/Artist/Album/Playlist/User Data Queries
 - settings.js: Setting Page
-- singup: SignUp Page
-- userWrap: Cougar Wrap-Up Page
+- signup.js: SignUp Page
+- userWrap.js: Cougar Wrap-Up Page
 - view: Artist/Playlist/Album View Pages
 - wrap: Top Trending Page
 
