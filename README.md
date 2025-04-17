@@ -27,7 +27,7 @@ Language/Framework: JavaScript, React
 - view: Artist/Playlist/Album View Pages
 - wrap: Top Trending Page
 
-### CoogWeb: Front-End
+### CoogWeb: Back-End
 Language/Framework: JavaScript, Node JS
 - server.js: Connecting Back-End Server
 - routes.js: Routing Back-End Functions to APIs
