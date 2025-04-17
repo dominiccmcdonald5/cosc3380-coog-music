@@ -24,8 +24,8 @@ Language/Framework: JavaScript, React
 - settings.js: Setting Page
 - signup.js: SignUp Page
 - userWrap.js: Cougar Wrap-Up Page
-- view: Artist/Playlist/Album View Pages
-- wrap: Top Trending Page
+- view.js: Artist/Playlist/Album View Pages
+- wrap.js: Top Trending Page
 
 ### CoogWeb: Back-End
 Language/Framework: JavaScript, Node JS
