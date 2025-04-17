@@ -56,7 +56,7 @@ export const PlaylistList = ({ onPlaylistClick, userName, userId }) => {
 export const PlaylistCard = ({ playlist, onPlaylistClick, userId}) => {
     return (
         <div className="playlist-card">
-            <img src={playlist.playlist_image} alt={playlist.playlist_name} className="playlist-image" />
+            <img src={playlist.playlist_image || purple_image} alt={playlist.playlist_name} className="playlist-image" />
             <h3 className="playlist-name">{playlist.playlist_name}</h3>
             <button
                 className="forward-button"
