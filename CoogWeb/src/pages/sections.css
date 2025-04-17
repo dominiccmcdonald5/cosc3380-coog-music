@@ -37,6 +37,14 @@
     height: 200px; 
 }
 
+.search-bar {
+    
+    margin-bottom: 20px; /* Space between search bar and song list */
+    color: grey;
+    font-size: 14px; /* Font size for the placeholder text */
+    font-family: 'Montserrat', sans-serif; /* Font family for the placeholder text */
+}
+
 .song-card:hover {
     transform: scale(1.05);
 }
