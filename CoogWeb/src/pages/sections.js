@@ -22,10 +22,11 @@ const MusicPlayer = () => {
     );
   };
 
-export const SongList = ({accountType, userId, setCurrentSong}) => {
+  export const SongList = ({ accountType, userId, setCurrentSong }) => {
     const [songs, setSongs] = useState([]);
-    const [loading, setLoading] = useState(true);  // To track loading state
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const fetchSongs = async () => {
@@ -36,29 +37,51 @@ export const SongList = ({accountType, userId, setCurrentSong}) => {
                 const data = await response.json();
 
                 if (data.success) {
-                    setSongs(data.songs);  // Assuming the backend returns an array of artists
+                    setSongs(data.songs);
                 } else {
                     setError('Failed to fetch songs');
                 }
             } catch (err) {
                 setError('Error fetching songs');
             } finally {
-                setLoading(false);  // Data is loaded or error occurred
+                setLoading(false);
             }
         };
 
         fetchSongs();
-    }, []);  
+    }, []);
+
+    const filteredSongs = songs.filter(song =>
+        song.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     if (loading) return <div>Loading songs...</div>;
     if (error) return <div>{error}</div>;
 
     return (
-        <div className="song-list">
-            {songs.map((song, index) => (
-                <SongCard key={index} song={song} accountType={accountType} userId={userId} setCurrentSong={setCurrentSong} />
-            ))}
+        <div className="song-list-container">
+    <div className="search-bar-container">
+        <input
+            type="text"
+            placeholder="Search songs..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-bar"
+        />
+    </div>
+
+    <div className="song-list">
+        {filteredSongs.map((song, index) => (
+            <SongCard
+                key={index}
+                song={song}
+                accountType={accountType}
+                userId={userId}
+                setCurrentSong={setCurrentSong}
+            />
+        ))}
         </div>
+    </div>
     );
 };
 
@@ -169,6 +192,8 @@ export const ArtistList = ({onArtistClick}) => {
     const [artists, setArtists] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+
 
     useEffect(() => {
         const fetchArtists = async () => {
@@ -193,15 +218,29 @@ export const ArtistList = ({onArtistClick}) => {
         fetchArtists();
     }, []);  // Empty dependency array to run this only once when the component mounts
 
+    const filteredArtists = artists.filter(artist =>
+        artist.username.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     if (loading) return <div>Loading artists...</div>;
     if (error) return <div>{error}</div>;
 
-    return (
+    return (<>
+        <div className="search-bar-container">
+        <input
+            type="text"
+            placeholder="Search artists..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-bar"
+        />
+        </div>
         <div className="artist-list">
-          {artists.map((artist, index) => (
+          {filteredArtists.map((artist, index) => (
             <ArtistCard key={index} artist={artist} onArtistClick={onArtistClick} />
           ))}
         </div>
+        </>
       );
 }
 
@@ -226,6 +265,7 @@ export const ArtistCard = ({ artist, onArtistClick }) => {
     const [albums, setAlbums] = useState([]);
     const [loading, setLoading] = useState(true);  // To track loading state
     const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const fetchAlbums = async () => {
@@ -250,15 +290,29 @@ export const ArtistCard = ({ artist, onArtistClick }) => {
         fetchAlbums();
     }, []);  // Empty dependency array to run this only once when the component mounts
 
+    const filteredAlbums = albums.filter(album =>
+        album.album_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     if (loading) return <div>Loading albums...</div>;
     if (error) return <div>{error}</div>;
 
-    return (
+    return (<>
+    <div className="search-bar-container">
+        <input
+            type="text"
+            placeholder="Search albums..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-bar"
+        />
+        </div>
         <div className="album-list">
-            {albums.map((album, index) => (
+            {filteredAlbums.map((album, index) => (
                 <AlbumCard key={index} album={album} onAlbumClick={onAlbumClick} accountType={accountType} userId={userId} userName={userName}/>
             ))}
         </div>
+        </>
     );
 };
 
